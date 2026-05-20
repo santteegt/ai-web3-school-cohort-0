@@ -9,7 +9,7 @@
 
 This is my open learning journal for [AI × Web3 School](https://aiweb3.school/en/handbook/), a co-learning program initiated by LXDAO and ETHPanda that bridges AI engineering and Web3 development.
 
-I use an AI Learning Agent (Hermes / Claude) to maintain this repo, draft daily check-ins, and turn learning questions into indexed, reviewable materials.
+I use an AI Learning Agent (Claude / Hermes / Openclaw) to maintain this repo, draft daily check-ins, and turn learning questions into indexed, reviewable materials.
 
 ## Program Links
 
@@ -48,4 +48,4 @@ Secrets belong in `.env.local` (gitignored) or your OS keychain only.
 
 ---
 
-*Maintained with [AI × Web3 School Learning Agent](https://aiweb3.school/learning-agent.en.txt)*
+*Maintained with [AI × Web3 School Learning Agent — Sensei](https://aiweb3.school/learning-agent.en.txt)*
