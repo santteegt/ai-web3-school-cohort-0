@@ -76,6 +76,15 @@ def load_api_key() -> str:
 # HTTP helpers
 # ---------------------------------------------------------------------------
 
+# Cloudflare blocks Python-urllib/* UA with error 1010.
+# Use a neutral agent string that passes CF bot checks.
+_HEADERS_BASE = {
+    "User-Agent": "Mozilla/5.0 (compatible; Sensei-WCB-Client/1.0)",
+    "Accept": "application/json",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+
 def _post(procedure: str, input_data: dict, api_key: str) -> dict:
     """POST a single procedure call to the agent endpoint."""
     payload: dict = {"procedure": procedure}
@@ -87,6 +96,7 @@ def _post(procedure: str, input_data: dict, api_key: str) -> dict:
         AGENT_CALL_URL,
         data=data,
         headers={
+            **_HEADERS_BASE,
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}",
         },
@@ -109,7 +119,10 @@ def _get_catalog(api_key: str) -> dict:
     """GET the live procedure catalog."""
     req = urllib.request.Request(
         AGENT_CATALOG_URL,
-        headers={"Authorization": f"Bearer {api_key}"},
+        headers={
+            **_HEADERS_BASE,
+            "Authorization": f"Bearer {api_key}",
+        },
         method="GET",
     )
     try:
