@@ -79,6 +79,8 @@ submissions/
 templates/
   daily-note.md            ← template for daily/YYYY-MM-DD.md
   task-note.md             ← template for tasks/*.md
+tools/
+  wcb_client.py            ← WCB Agent API CLI (stdlib only, no deps)
 ```
 
 ### Memory Setup (one-time terminal command)
@@ -148,7 +150,58 @@ Never create empty commits. Always describe what learning record or file was upd
 
 ---
 
-## 9. Memory Sync Rule (Cowork → Shared Repo)
+## 9. WCB API Tool (`tools/wcb_client.py`)
+
+Sensei has a CLI tool for interacting with the WCB Agent API programmatically.  
+No external dependencies — stdlib only. All output is clean JSON.
+
+### Usage
+
+```bash
+python tools/wcb_client.py status              # today's tasks + events + check-in status
+python tools/wcb_client.py checkin list        # pending check-ins vs. submitted history
+python tools/wcb_client.py tasks upcoming      # deadlines in the next 3 days
+python tools/wcb_client.py catalog             # dump live procedure catalog
+python tools/wcb_client.py call <procedure> [json_input]  # raw procedure call
+```
+
+### API Key Setup (one of these, in priority order)
+
+1. **Env var** (recommended for terminal sessions):
+   ```bash
+   export WCB_AGENT_SECRET_API_KEY=your_key_here
+   ```
+
+2. **`.claude/settings.local.json`** (gitignored — safe for persistent local config):
+   ```json
+   {
+     "env": {
+       "WCB_AGENT_SECRET_API_KEY": "your_key_here"
+     }
+   }
+   ```
+
+### Program/Track Resolution
+
+The tool auto-discovers `programId` and `trackId` from `users.getProfile`.  
+Override with env vars if needed:
+```bash
+export WCB_PROGRAM_ID=your_program_id
+export WCB_TRACK_ID=your_track_id
+```
+
+### When Sensei should call this tool
+
+| Trigger | Command |
+|---|---|
+| Start of day / kickoff reminder | `status` |
+| Before drafting a check-in | `checkin list` |
+| End-of-day review | `tasks upcoming` |
+| Discovering available API procedures | `catalog` |
+
+---
+
+## 11. Memory Sync Rule (Cowork → Shared Repo)
 
 Cowork's internal memory path (`Library/Application Support/Claude/.../memory/`) and the shared repo memory path (`~/AIxWeb3_School/memory/`) are two separate locations. Claude Code reads the latter via a symlink; Cowork reads the former.
 
@@ -162,7 +215,7 @@ This ensures Claude Code always has fresh context on next use, even if the Cowor
 
 ---
 
-## 10. Agent Rules Summary
+## 12. Agent Rules Summary
 
 | Rule | Behavior |
 |---|---|
@@ -178,7 +231,7 @@ This ensures Claude Code always has fresh context on next use, even if the Cowor
 
 ---
 
-## 11. Program Context
+## 13. Program Context
 
 AI × Web3 School was jointly initiated by **LXDAO** and **ETHPanda**.  
 The program connects: problem definition → co-learning → project practice → public showcase → talent and opportunity accumulation.
@@ -187,4 +240,4 @@ The Handbook is a living document. Questions, blockers, and feedback from Santia
 
 ---
 
-*Last updated: 2026-05-20 | Agent: Sensei (Claude via Cowork) | v1.1 — fixed memory slug, added sync rule*
+*Last updated: 2026-05-20 | Agent: Sensei (Claude via Cowork + Claude Code) | v1.2 — added WCB API tool (tools/wcb_client.py)*

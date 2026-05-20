@@ -1,6 +1,9 @@
 # Agent memory — local only, not for public repos
 memory/
 
+# Claude local settings — may contain env vars/secrets
+.claude/settings.local.json
+
 # Secrets — never commit these
 .env
 .env.local
