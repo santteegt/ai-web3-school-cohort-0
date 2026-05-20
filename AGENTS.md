@@ -61,6 +61,9 @@ AGENTS.md                  ← this file (agent rules)
 CLAUDE.md                  ← symlink → AGENTS.md
 profile.md                 ← learner profile summary
 learning-plan.md           ← personalized learning plan based on handbook
+memory/                    ← shared agent memory (gitignored; symlinked from ~/.claude/projects/<slug>/memory/)
+  MEMORY.md                ← memory index
+  *.md                     ← individual memory files (user, project, feedback, reference)
 daily/
   YYYY-MM-DD.md            ← daily learning notes + check-in drafts
 tasks/
@@ -76,6 +79,15 @@ submissions/
 templates/
   daily-note.md            ← template for daily/YYYY-MM-DD.md
   task-note.md             ← template for tasks/*.md
+```
+
+### Memory Setup (one-time terminal command)
+
+To make Claude Code and Cowork share the same memory, run once:
+
+```bash
+mkdir -p ~/.claude/projects/-Users-santteegt-AIxWeb3-School
+ln -sf ~/AIxWeb3_School/memory ~/.claude/projects/-Users-santteegt-AIxWeb3-School/memory
 ```
 
 ---
@@ -136,7 +148,21 @@ Never create empty commits. Always describe what learning record or file was upd
 
 ---
 
-## 9. Agent Rules Summary
+## 9. Memory Sync Rule (Cowork → Shared Repo)
+
+Cowork's internal memory path (`Library/Application Support/Claude/.../memory/`) and the shared repo memory path (`~/AIxWeb3_School/memory/`) are two separate locations. Claude Code reads the latter via a symlink; Cowork reads the former.
+
+**At the end of every Cowork session, Sensei must:**
+
+1. Write or update all new/changed memory files to `~/AIxWeb3_School/memory/` — this is the canonical shared location.
+2. Keep `~/AIxWeb3_School/memory/MEMORY.md` up to date as the index.
+3. Never commit `memory/` to git (it is gitignored) — it is local-only agent context.
+
+This ensures Claude Code always has fresh context on next use, even if the Cowork session path rotates.
+
+---
+
+## 10. Agent Rules Summary
 
 | Rule | Behavior |
 |---|---|
@@ -148,10 +174,11 @@ Never create empty commits. Always describe what learning record or file was upd
 | Empty commits | Never |
 | Public repo warning | Remind Santiago before any sensitive content |
 | Handbook feedback | Route to `handbook-feedback/`, include page URL + issue + suggestion |
+| Memory sync | At session end, write all memory updates to `~/AIxWeb3_School/memory/` |
 
 ---
 
-## 10. Program Context
+## 11. Program Context
 
 AI × Web3 School was jointly initiated by **LXDAO** and **ETHPanda**.  
 The program connects: problem definition → co-learning → project practice → public showcase → talent and opportunity accumulation.
@@ -160,4 +187,4 @@ The Handbook is a living document. Questions, blockers, and feedback from Santia
 
 ---
 
-*Last updated: 2026-05-20 | Agent: Sensei (Claude via Cowork)*
+*Last updated: 2026-05-20 | Agent: Sensei (Claude via Cowork) | v1.1 — fixed memory slug, added sync rule*

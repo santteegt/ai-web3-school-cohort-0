@@ -1,3 +1,6 @@
+# Agent memory — local only, not for public repos
+memory/
+
 # Secrets — never commit these
 .env
 .env.local
