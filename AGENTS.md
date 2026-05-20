@@ -145,7 +145,7 @@ Never create empty commits. Always describe what learning record or file was upd
 ## 8. Secrets & API Keys
 
 - `WCB_AGENT_SECRET_API_KEY` — store in local environment variables only, never in files
-- If needed, ask Santiago to create a `.env.local` file (gitignored) or use the OS keychain
+- Preferred: add to `.claude/settings.local.json` under `env` key (gitignored, auto-read by `wcb_client.py`)
 - Any `.env` file must be listed in `.gitignore` before it is created
 
 ---
@@ -201,7 +201,7 @@ export WCB_TRACK_ID=your_track_id
 
 ---
 
-## 11. Memory Sync Rule (Cowork → Shared Repo)
+## 10. Memory Sync Rule (Cowork → Shared Repo)
 
 Cowork's internal memory path (`Library/Application Support/Claude/.../memory/`) and the shared repo memory path (`~/AIxWeb3_School/memory/`) are two separate locations. Claude Code reads the latter via a symlink; Cowork reads the former.
 
@@ -215,7 +215,7 @@ This ensures Claude Code always has fresh context on next use, even if the Cowor
 
 ---
 
-## 12. Agent Rules Summary
+## 11. Agent Rules Summary
 
 | Rule | Behavior |
 |---|---|
@@ -231,7 +231,7 @@ This ensures Claude Code always has fresh context on next use, even if the Cowor
 
 ---
 
-## 13. Program Context
+## 12. Program Context
 
 AI × Web3 School was jointly initiated by **LXDAO** and **ETHPanda**.  
 The program connects: problem definition → co-learning → project practice → public showcase → talent and opportunity accumulation.
