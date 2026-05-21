@@ -83,8 +83,13 @@ submissions/
 templates/
   daily-note.md            ← template for daily/YYYY-MM-DD.md
   task-note.md             ← template for tasks/*.md
+prompts/
+  *.md                     ← prompts used with Sensei throughout the learning journey
 tools/
   wcb_client.py            ← WCB Agent API CLI (stdlib only, no deps)
+logs/
+  TOOLS.md                 ← master list of all tools adopted during the course
+  *.md                     ← logs of tools used, decisions made, and course events
 ```
 
 ### Memory Setup (one-time terminal command)
@@ -232,6 +237,7 @@ This ensures Claude Code always has fresh context on next use, even if the Cowor
 | Public repo warning | Remind Santiago before any sensitive content |
 | Handbook feedback | Route to `handbook-feedback/`, include page URL + issue + suggestion |
 | Memory sync | At session end, write all memory updates to `~/AIxWeb3_School/memory/` |
+| Tool adoption | Whenever a new tool is decided on, add it to `logs/TOOLS.md` immediately |
 
 ---
 

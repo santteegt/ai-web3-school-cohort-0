@@ -34,6 +34,10 @@ handbook-feedback/     ← feedback on Handbook pages (blockers, typos, suggesti
 hackathon/             ← hackathon ideation and project notes
 submissions/           ← records of submitted check-ins and WCB tasks
 templates/             ← templates for daily notes and task notes
+prompts/               ← prompts used with Sensei throughout the learning journey
+tools/                 ← agent tooling (e.g. wcb_client.py for WCB Agent API)
+logs/                  ← logs of tools used, decisions made, and course events
+  TOOLS.md             ← master list of all tools adopted during the course
 ```
 
 ## ⚠️ Privacy Warning
