@@ -1,97 +1,133 @@
 # Personalized Learning Plan — Santiago
 
 > Generated: 2026-05-20 | Cohort 0 | AI × Web3 School  
-> Based on: [Handbook](https://aiweb3.school/en/handbook/) + learner profile
+> Based on: [Handbook](https://aiweb3.school/en/handbook/) + program structure + learner profile  
+> Updated: 2026-05-20 (v2 — aligned to official 4-week program structure)
 
 ---
 
 ## Overview
 
-Santiago is strong on Web3 and an independent developer. The plan prioritizes filling AI/Agent gaps first, then moving into bridge topics, with a continuous experiment track.
+Santiago is strong on Web3 and an independent developer. This plan follows the official 4-week program structure: 3 weeks of structured learning + 1 week of hackathon sprint. The emphasis is on filling AI/Agent gaps, then applying them at the AI × Web3 intersection.
 
-Estimated pace: **2–4 hours/day** · Target: complete Cohort 0 in ~8 weeks
+Estimated pace: **2–4 hours/day** · Total: ~4 weeks
 
 ---
 
-## Phase 1 — AI Foundations (Weeks 1–2)
+## Week 1 — Bootcamp: AI and Web3 Foundations
 
-*Goal: Build fluency with LLMs, context, RAG, and Agent primitives*
+*Goal: Build shared language across LLMs, prompts, agents, tool use, wallets, transactions, and smart contracts — connecting everything into one execution chain.*
 
-| # | Topic | Handbook Chapter | Focus |
+| Day | Topic | Handbook Chapter(s) | Deliverable |
 |---|---|---|---|
-| 1 | LLM | LLM | Capabilities, limits, what models can't replace |
-| 2 | Prompt | Prompt | Task goals, boundaries, output formats |
-| 3 | Context | Context | What a model sees, what's trustworthy, what expires |
-| 4 | RAG | RAG | External knowledge, sources, citations |
-| 5 | Agent | Agent | Tool use, multi-step execution, orchestration |
-| 6 | Frameworks | Frameworks | LangChain, LangGraph, Agents SDK tradeoffs |
-| 7 | MCP | MCP | How models, tools, and context connect via protocol |
-| 8 | Evaluation | Evaluation | Testable, replayable, improvable agent behavior |
+| Day 0 (today) | Setup | — | Repo, AGENTS.md, learning-plan, Sensei agent ✅ |
+| Day 1 | LLM + Prompt | [LLM](https://aiweb3.school/en/handbook/llm.html), [Prompt](https://aiweb3.school/en/handbook/prompt.html) | Daily note + first experiment |
+| Day 2 | Context + RAG | [Context](https://aiweb3.school/en/handbook/context.html), [RAG](https://aiweb3.school/en/handbook/rag.html) | Experiment: retrieval over on-chain data |
+| Day 3 | Agent + Frameworks | [Agent](https://aiweb3.school/en/handbook/agent.html), [Frameworks](https://aiweb3.school/en/handbook/frameworks.html) | Vibe-code or Hermes agent practice run |
+| Day 4 | MCP + Tool Use | [MCP](https://aiweb3.school/en/handbook/mcp.html) | Wire up a simple MCP tool call |
+| Day 5 | Wallet + Transaction | [Wallet](https://aiweb3.school/en/handbook/wallet.html) (ref) | Create test wallet, make testnet transaction |
+| Day 6 | Smart Contract basics | [Smart Contract](https://aiweb3.school/en/handbook/smart-contract.html) (ref) | Deploy or call a minimal contract on testnet |
+| Day 7 | Week 1 wrap-up | — | Document successes, failures, human corrections; push to GitHub |
 
-**Daily pattern:** Read chapter → write `daily/YYYY-MM-DD.md` → note one question for `handbook-feedback/` → run a small experiment in `experiments/`
-
----
-
-## Phase 2 — AI × Web3 Bridge (Weeks 3–5)
-
-*Goal: Connect AI/Agent skills to on-chain systems*
-
-| # | Topic | Handbook Chapter | Focus |
-|---|---|---|---|
-| 9 | Chain-aware Context | Chain-aware Context | On-chain state into Agent context |
-| 10 | Web3 Tool Use | Web3 Tool Use | RPC, wallet, contract tools called by Agents |
-| 11 | Agent Workflow | Agent Workflow | Automation vs human-in-the-loop steps |
-| 12 | Agent Wallet | Agent Wallet | Permissions, spending limits, revocation |
-| 13 | Machine Payment | Machine Payment | Micro-payments, service settlement |
-| 14 | Settlement & Escrow | Settlement & Escrow | Automated transaction dispute handling |
-| 15 | Agent Identity | Agent Identity | Agent authorization, responsibility tracking |
-| 16 | Agent Trust | Agent Trust & Reputation | Behavioral records, trustworthy history |
-| 17 | Verifiable AI | Verifiable AI | Verifying outputs, execution, results |
-| 18 | AI Security | AI Security | Prompt injection, tool abuse, permission isolation |
-| 19 | AI Privacy | AI Privacy | User data, on-chain identity, model context |
+**Week 1 milestone:** One end-to-end chain — LLM prompt → agent tool call → wallet sign → testnet transaction → receipt
 
 ---
 
-## Phase 3 — Frontier Exploration + Project (Weeks 6–8)
+## Week 2 — Bootcamp: AI × Web3 Intersection Areas
 
-*Goal: Build a working prototype or hackathon-ready demo*
+*Goal: Enter the real problem space. Choose one track, map the full execution flow, produce a proposal.*
 
-| Track | Handbook Chapter | Project Idea Direction |
+### Tracks (choose one by end of Day 8)
+
+| Track | Core Question | Relevant Handbook Chapters |
 |---|---|---|
-| Agentic Commerce | Agentic Commerce | Agent that discovers services, pays, leaves receipts |
-| Wallet / Permission | Wallet / Permission | Session Key + Policy prototype for Agent spending |
-| AI Security | AI Security (Frontier) | Demonstrable prompt-injection isolation system |
-| Dev Tooling | Dev Tooling | AI contract reviewer or Agent-based dev workflow |
+| **Agentic Commerce / Payment** | Who initiates, executes, pays, verifies, and carries risk? | Machine Payment, Agent Wallet, Settlement & Escrow |
+| **Dev Tooling** | How does AI accelerate on-chain dev workflows? | Agent Workflow, MCP, Evaluation |
+| **AI Security / Privacy** | What breaks when an agent handles assets and private data? | AI Security, AI Privacy, Verifiable AI |
+| **AI × Governance / Coordination** | Can agents propose, vote, and execute governance actions? | Agent Identity, Agent Trust, Verifiable AI |
+| **Open Track** | Your own intersection | Mix as needed |
 
-**Deliverable:** One working prototype in `experiments/` + hackathon notes in `hackathon/`
+| Day | Topic | Handbook Chapter(s) | Deliverable |
+|---|---|---|---|
+| Day 8 | Chain-aware Context | [Chain-aware Context](https://aiweb3.school/en/handbook/chain-aware-context.html) | On-chain state injected into agent context |
+| Day 9 | Web3 Tool Use | [Web3 Tool Use](https://aiweb3.school/en/handbook/web3-tool-use.html) | RPC / wallet / contract called by an agent |
+| Day 10 | Agent Workflow | [Agent Workflow](https://aiweb3.school/en/handbook/agent-workflow.html) | Map automation vs. human-in-the-loop steps |
+| Day 11 | Agent Wallet + Payment | [Agent Wallet](https://aiweb3.school/en/handbook/agent-wallet.html), [Machine Payment](https://aiweb3.school/en/handbook/machine-payment.html) | Spending limit or session key prototype |
+| Day 12 | Agent Identity + Trust | [Agent Identity](https://aiweb3.school/en/handbook/agent-identity.html), [Agent Trust](https://aiweb3.school/en/handbook/agent-trust.html) | Authorization / responsibility tracking note |
+| Day 13 | Track deep dive | Track-specific chapters | Draft project proposal (problem + flow + risk) |
+| Day 14 | Proposal finalization | — | Written proposal ready for Week 3 → push to `hackathon/proposal.md` |
+
+**Week 2 milestone:** One written proposal — who initiates, who executes, who pays, who verifies, who carries the risk
 
 ---
 
-## Web3 Reference Chapters (use as needed, not required reading)
+## Week 3 — Practice Deepening + Hackathon Kickoff
 
-Already strong — return to these when bridge topics reference them:
+*Goal: Fill remaining gaps with targeted exercises, finalize hackathon team + direction, define demo plan.*
+
+| Day | Focus | Exercises / Deliverables |
+|---|---|---|
+| Day 15 | Verifiable AI + AI Security | Verifiable execution record; prompt-injection isolation note |
+| Day 16 | AI Privacy + Evaluation | User data / on-chain identity exercise; testable agent behavior |
+| Day 17 | Gap fill (from Week 1–2 blockers) | Revisit anything unclear; file `handbook-feedback/` entries |
+| Day 18 | Smaller exercises | Agent workflow + wallet confirmation, on-chain receipt, testnet payment, or governance proposal summary |
+| Day 19 | Risk-control strategies | Risk-control write-up for your chosen track |
+| Day 20 | Hackathon prep | Finalize: track, project topic, target users, technical path, roles, demo plan → `hackathon/kickoff.md` |
+| Day 21 | Week 3 wrap-up | All gaps documented, hackathon plan committed and pushed |
+
+**Week 3 milestone:** Hackathon plan committed: track + project topic + target users + technical path + roles + demo outline
+
+---
+
+## Week 4 — Hackathon Sprint + Demo Showcase
+
+*Goal: Build the core implementation, test it, document it, and present it.*
+
+| Day | Focus | Deliverable |
+|---|---|---|
+| Day 22–23 | Core implementation | Working prototype in `experiments/` or dedicated folder |
+| Day 24 | Basic testing + README | README written, demo flow working |
+| Day 25 | On-chain / tool-call records | Relevant contract addresses, testnet tx hashes, or MCP tool logs |
+| Day 26 | Mentor feedback + polish | Incorporate office-hour feedback |
+| Day 27 | Final submission prep | Project name, track, target user, problem def, demo link, repo, video |
+| Day 28 | Demo showcase | Present — celebrate — collect feedback |
+
+**Final submission checklist:**
+- [ ] Project name + track
+- [ ] Target user + problem definition
+- [ ] Demo link
+- [ ] GitHub repository + README
+- [ ] Demo video
+- [ ] Contract addresses / testnet addresses / transaction hashes (if applicable)
+
+---
+
+## Handbook Reference Chapters (use as needed)
+
+Already strong on Web3 — return to these when intersection topics reference them:
+
 Network · Cryptography · Wallet · Smart Contract · Account Abstraction · DeFi · Oracle · Indexing · Security
 
 ---
 
 ## Daily Minimum Path
 
-Each day, even on a short day (< 1 hour):
+Even on a short day (< 1 hour):
 
-1. skim one Handbook chapter
-2. write 3 bullets in `daily/YYYY-MM-DD.md`: what I read, what I didn't understand, what I want to try
-3. submit WCB check-in
+1. Skim one Handbook chapter
+2. Write 3 bullets in `daily/YYYY-MM-DD.md`: what I read, what I didn't understand, what I want to try
+3. Submit WCB check-in
 
 ## Recommended Path (2 hours)
 
-1. read one full chapter + take notes
-2. write `daily/YYYY-MM-DD.md` with check-in draft
-3. run one experiment or code snippet in `experiments/`
-4. file one feedback item in `handbook-feedback/` if anything was unclear
+1. Read one full chapter + take notes
+2. Write `daily/YYYY-MM-DD.md` with check-in draft
+3. Run one experiment or code snippet in `experiments/`
+4. File one feedback item in `handbook-feedback/` if anything was unclear
 
 ## Challenge Path (4 hours)
 
-1. read + annotate chapter(s)
-2. complete a WCB task
-3. build an experiment that touches real RPC / contract / agent
-4. push everything to GitHub
+1. Read + annotate chapter(s)
+2. Complete a WCB task
+3. Build an experiment touching real RPC / contract / agent
+4. Push everything to GitHub
