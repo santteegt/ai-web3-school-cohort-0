@@ -87,9 +87,7 @@ _HEADERS_BASE = {
 
 def _post(procedure: str, input_data: dict, api_key: str) -> dict:
     """POST a single procedure call to the agent endpoint."""
-    payload: dict = {"procedure": procedure}
-    if input_data:
-        payload["input"] = input_data
+    payload: dict = {"procedure": procedure, "input": input_data}
 
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
@@ -139,51 +137,95 @@ def _get_catalog(api_key: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Program / track resolution
+# Program resolution
 # ---------------------------------------------------------------------------
 
-def _resolve_program(api_key: str) -> tuple[str, str]:
+def _resolve_program(api_key: str) -> str:
     """
-    Return (programId, trackId).
+    Return programId.
 
     Sources (first non-empty wins):
-      1. WCB_PROGRAM_ID / WCB_TRACK_ID env vars
-      2. First enrollment from users.getProfile
+      1. WCB_PROGRAM_ID env var
+      2. First ACCEPTED application from users.getProfile
     """
     program_id = os.environ.get("WCB_PROGRAM_ID", "").strip()
-    track_id = os.environ.get("WCB_TRACK_ID", "").strip()
     if program_id:
-        return program_id, track_id
+        return program_id
 
     result = _post("users.getProfile", {}, api_key)
     if result.get("ok"):
-        profile = result.get("result", {})
-        # try common field names for enrollments
-        enrollments = (
-            profile.get("enrollments")
-            or profile.get("programs")
-            or profile.get("programMemberships")
-            or []
+        for app in result.get("result", {}).get("programApplications", []):
+            if app.get("status") == "ACCEPTED":
+                return app.get("programId", "")
+
+    return ""
+
+
+# ---------------------------------------------------------------------------
+# Event + task helpers
+# ---------------------------------------------------------------------------
+
+_TASK_BATCH = 50  # max taskIds per listForLearnerByIds call
+
+
+def _get_events(program_id: str, range_start: str, range_end: str, api_key: str) -> list:
+    """Fetch events for a date range; return list (empty on error)."""
+    res = _post(
+        "events.listForLearner",
+        {"programId": program_id, "rangeStart": range_start, "rangeEnd": range_end},
+        api_key,
+    )
+    return res.get("result", []) if res.get("ok") else []
+
+
+def _get_tasks_for_events(events: list, program_id: str, api_key: str) -> list:
+    """
+    Collect unique taskIds from events, fetch via listForLearnerByIds (batched),
+    return deduplicated task list.
+    """
+    seen: set = set()
+    task_ids: list = []
+    for ev in events:
+        for tid in ev.get("taskIds", []):
+            if tid not in seen:
+                seen.add(tid)
+                task_ids.append(tid)
+
+    if not task_ids:
+        return []
+
+    tasks: list = []
+    for i in range(0, len(task_ids), _TASK_BATCH):
+        batch = task_ids[i : i + _TASK_BATCH]
+        res = _post(
+            "tasks.listForLearnerByIds",
+            {"programId": program_id, "taskIds": batch},
+            api_key,
         )
-        if enrollments:
-            first = enrollments[0]
-            program_id = (
-                first.get("programId")
-                or first.get("id")
-                or ""
-            )
-            track_id = first.get("trackId") or ""
+        if res.get("ok") and isinstance(res.get("result"), list):
+            tasks.extend(res["result"])
 
-    return program_id, track_id
+    return tasks
 
 
-def _tasks_input(program_id: str, track_id: str) -> dict:
-    inp: dict = {}
-    if program_id:
-        inp["programId"] = program_id
-    if track_id:
-        inp["trackId"] = track_id
-    return inp
+def _utc_str(dt: datetime.datetime) -> str:
+    return dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+
+def _parse_deadline(task: dict):
+    raw = task.get("validTo") or task.get("deadline") or task.get("dueAt") or ""
+    if not raw:
+        return None
+    try:
+        return datetime.datetime.fromisoformat(raw.replace("Z", "+00:00")).replace(tzinfo=None)
+    except ValueError:
+        return None
+
+
+def _is_done(task: dict) -> bool:
+    return task.get("status") in {"APPROVED", "COMPLETED", "SUBMITTED"} or bool(
+        task.get("latestSubmission")
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -191,125 +233,119 @@ def _tasks_input(program_id: str, track_id: str) -> dict:
 # ---------------------------------------------------------------------------
 
 def cmd_status(api_key: str) -> None:
-    """Today's tasks, events, and check-in status."""
-    program_id, track_id = _resolve_program(api_key)
-
-    today = datetime.date.today().isoformat()
+    """Today's events + linked tasks with their current submission status."""
+    program_id = _resolve_program(api_key)
     now_utc = datetime.datetime.utcnow()
-    day_start = now_utc.replace(hour=0, minute=0, second=0, microsecond=0).strftime(
-        "%Y-%m-%dT%H:%M:%S.000Z"
-    )
-    day_end = now_utc.replace(hour=23, minute=59, second=59, microsecond=0).strftime(
-        "%Y-%m-%dT%H:%M:%S.000Z"
-    )
 
-    tasks_res = _post("tasks.listForLearner", _tasks_input(program_id, track_id), api_key)
-    history_res = _post("tasks.myTaskHistory", _tasks_input(program_id, track_id), api_key)
+    today_start = _utc_str(now_utc.replace(hour=0, minute=0, second=0, microsecond=0))
+    today_end = _utc_str(now_utc.replace(hour=23, minute=59, second=59, microsecond=0))
 
-    events_inp: dict = {"rangeStart": day_start, "rangeEnd": day_end}
-    if program_id:
-        events_inp["programId"] = program_id
-    events_res = _post("events.listForLearner", events_inp, api_key)
+    events_today = _get_events(program_id, today_start, today_end, api_key)
+    tasks = _get_tasks_for_events(events_today, program_id, api_key)
 
-    # Identify today's check-in from task list
-    all_tasks = tasks_res.get("result", []) if tasks_res.get("ok") else []
-    checkin_today = None
-    if isinstance(all_tasks, list):
-        for t in all_tasks:
-            name = (t.get("title") or t.get("name") or "").lower()
-            if "check-in" in name or "checkin" in name or "check in" in name:
-                checkin_today = t
-                break
+    pending = [t for t in tasks if not _is_done(t)]
+    done = [t for t in tasks if _is_done(t)]
 
     output = {
-        "date": today,
+        "date": now_utc.date().isoformat(),
         "program_id": program_id or None,
-        "track_id": track_id or None,
-        "checkin_today": checkin_today,
-        "tasks": tasks_res.get("result", tasks_res),
-        "task_history": history_res.get("result", history_res),
-        "events_today": events_res.get("result", events_res),
+        "events_today": [
+            {
+                "title": e.get("title"),
+                "startAt": e.get("startAt"),
+                "endAt": e.get("endAt"),
+                "meetingUrl": e.get("meetingUrlPrimary"),
+                "replayUrl": e.get("replayUrl"),
+                "taskIds": e.get("taskIds", []),
+            }
+            for e in events_today
+        ],
+        "tasks_pending": pending,
+        "tasks_done": done,
     }
     print(json.dumps(output, indent=2, default=str))
 
 
 def cmd_checkin_list(api_key: str) -> None:
-    """List pending check-ins and submission history."""
-    program_id, track_id = _resolve_program(api_key)
+    """
+    Pending vs. submitted tasks across a rolling 14-day window (past week + next week).
+    Tasks carry status and latestSubmission directly — no separate history call needed.
+    """
+    program_id = _resolve_program(api_key)
+    now_utc = datetime.datetime.utcnow()
 
-    tasks_res = _post("tasks.listForLearner", _tasks_input(program_id, track_id), api_key)
-    history_res = _post("tasks.myTaskHistory", _tasks_input(program_id, track_id), api_key)
+    window_start = _utc_str(now_utc - datetime.timedelta(days=7))
+    window_end = _utc_str(now_utc + datetime.timedelta(days=7))
 
-    all_tasks = tasks_res.get("result", []) if tasks_res.get("ok") else []
-    checkins: list = []
-    if isinstance(all_tasks, list):
-        for t in all_tasks:
-            name = (t.get("title") or t.get("name") or t.get("type") or "").lower()
-            if "check" in name:
-                checkins.append(t)
+    events = _get_events(program_id, window_start, window_end, api_key)
+    tasks = _get_tasks_for_events(events, program_id, api_key)
 
-    # Determine submitted vs pending
-    history = history_res.get("result", []) if history_res.get("ok") else []
-    submitted_ids: set = set()
-    if isinstance(history, list):
-        for h in history:
-            tid = h.get("taskId") or h.get("id") or ""
-            if tid:
-                submitted_ids.add(tid)
-
-    pending = [c for c in checkins if (c.get("id") or c.get("taskId")) not in submitted_ids]
+    pending = [t for t in tasks if not _is_done(t) and t.get("available")]
+    submitted = [t for t in tasks if _is_done(t)]
 
     output = {
-        "total_checkins": len(checkins),
-        "pending": pending,
-        "submitted_count": len(submitted_ids),
-        "history": history,
+        "window": {"from": window_start, "to": window_end},
+        "total_tasks_in_window": len(tasks),
+        "pending": [
+            {
+                "id": t.get("id"),
+                "title": t.get("title"),
+                "status": t.get("status"),
+                "points": t.get("points"),
+                "validTo": t.get("validTo"),
+                "available": t.get("available"),
+            }
+            for t in pending
+        ],
+        "submitted": [
+            {
+                "id": t.get("id"),
+                "title": t.get("title"),
+                "status": t.get("status"),
+                "points": t.get("points"),
+                "latestSubmission": t.get("latestSubmission"),
+            }
+            for t in submitted
+        ],
     }
     print(json.dumps(output, indent=2, default=str))
 
 
 def cmd_tasks_upcoming(api_key: str) -> None:
-    """Tasks with deadlines in the next 3 days (or unsubmitted tasks without a deadline)."""
-    program_id, track_id = _resolve_program(api_key)
-
-    tasks_res = _post("tasks.listForLearner", _tasks_input(program_id, track_id), api_key)
-
+    """Tasks with deadlines in the next 3 days that are not yet completed."""
+    program_id = _resolve_program(api_key)
     now_utc = datetime.datetime.utcnow()
     cutoff = now_utc + datetime.timedelta(days=3)
 
-    all_tasks = tasks_res.get("result", []) if tasks_res.get("ok") else []
-    upcoming: list = []
-    no_deadline: list = []
+    window_start = _utc_str(now_utc)
+    window_end = _utc_str(cutoff)
 
-    if isinstance(all_tasks, list):
-        for t in all_tasks:
-            deadline_str = (
-                t.get("deadline")
-                or t.get("dueAt")
-                or t.get("dueDate")
-                or t.get("endsAt")
-                or ""
-            )
-            if deadline_str:
-                try:
-                    dl = datetime.datetime.fromisoformat(
-                        deadline_str.replace("Z", "+00:00")
-                    ).replace(tzinfo=None)
-                    if now_utc <= dl <= cutoff:
-                        t["_deadline_parsed"] = dl.isoformat()
-                        upcoming.append(t)
-                except ValueError:
-                    pass
-            else:
-                # No explicit deadline — include if not completed
-                if not t.get("completedAt") and not t.get("submittedAt"):
-                    no_deadline.append(t)
+    events = _get_events(program_id, window_start, window_end, api_key)
+    tasks = _get_tasks_for_events(events, program_id, api_key)
+
+    upcoming = []
+    for t in tasks:
+        if _is_done(t):
+            continue
+        dl = _parse_deadline(t)
+        if dl and now_utc <= dl <= cutoff:
+            upcoming.append({
+                "id": t.get("id"),
+                "title": t.get("title"),
+                "status": t.get("status"),
+                "points": t.get("points"),
+                "deadline": dl.isoformat(),
+                "available": t.get("available"),
+                "proofRequired": t.get("proofRequired"),
+            })
+
+    upcoming.sort(key=lambda t: t["deadline"])
 
     output = {
-        "window_days": 3,
         "as_of": now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "upcoming_with_deadline": upcoming,
-        "active_without_deadline": no_deadline,
+        "window_days": 3,
+        "upcoming_count": len(upcoming),
+        "upcoming": upcoming,
     }
     print(json.dumps(output, indent=2, default=str))
 
