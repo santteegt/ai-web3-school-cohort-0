@@ -2,15 +2,15 @@
 
 > Generated: 2026-05-20 | Cohort 0 | AI × Web3 School  
 > Based on: [Handbook](https://aiweb3.school/en/handbook/) + program structure + learner profile  
-> Updated: 2026-05-20 (v2 — aligned to official 4-week program structure)
+> Updated: 2026-05-20 (v3 — corrected to official 5-week structure: 3-week bootcamp + 2-week hackathon)
 
 ---
 
 ## Overview
 
-Santiago is strong on Web3 and an independent developer. This plan follows the official 4-week program structure: 3 weeks of structured learning + 1 week of hackathon sprint. The emphasis is on filling AI/Agent gaps, then applying them at the AI × Web3 intersection.
+Santiago is strong on Web3 and an independent developer. This plan follows the official program structure: 3-week bootcamp (May 17 – June 7) + 2-week hackathon sprint (June 7 – June 14+). The emphasis is on filling AI/Agent gaps first, then applying them at the AI × Web3 intersection, then shipping a demo.
 
-Estimated pace: **2–4 hours/day** · Total: ~4 weeks
+Estimated pace: **2–4 hours/day** · Total: ~5 weeks · Program: May 17 – June 14, 2026
 
 ---
 
@@ -79,18 +79,31 @@ Estimated pace: **2–4 hours/day** · Total: ~4 weeks
 
 ---
 
-## Week 4 — Hackathon Sprint + Demo Showcase
+## Weeks 4–5 — Hackathon Sprint + Demo Showcase
 
-*Goal: Build the core implementation, test it, document it, and present it.*
+*Goal: Build the core implementation, test it, document it, and present it. Two full weeks to ship.*
+
+### Week 4 — Build
 
 | Day | Focus | Deliverable |
 |---|---|---|
-| Day 22–23 | Core implementation | Working prototype in `experiments/` or dedicated folder |
-| Day 24 | Basic testing + README | README written, demo flow working |
-| Day 25 | On-chain / tool-call records | Relevant contract addresses, testnet tx hashes, or MCP tool logs |
-| Day 26 | Mentor feedback + polish | Incorporate office-hour feedback |
-| Day 27 | Final submission prep | Project name, track, target user, problem def, demo link, repo, video |
-| Day 28 | Demo showcase | Present — celebrate — collect feedback |
+| Day 22 | Hackathon kickoff | Repo structure, task breakdown, team alignment (if applicable) |
+| Day 23–24 | Core implementation | Working prototype in `experiments/` or dedicated folder |
+| Day 25 | On-chain / tool-call integration | Contract calls, testnet txs, MCP tool logs wired into demo |
+| Day 26 | Basic testing + README | README written, demo flow end-to-end working |
+| Day 27 | Mentor / office-hour feedback | Incorporate feedback, adjust scope |
+| Day 28 | Week 4 checkpoint | Mid-hackathon push — what's working, what's cut |
+
+### Week 5 — Polish + Submit
+
+| Day | Focus | Deliverable |
+|---|---|---|
+| Day 29–30 | Polish + edge cases | Stable demo, handle failure cases |
+| Day 31 | Demo video recording | Short walkthrough video |
+| Day 32 | Final submission prep | Project name, track, target user, problem def, demo link, repo, video |
+| Day 33 | Buffer / overflow | Fix last blockers, finalize docs |
+| Day 34 | Submit | Final submission on WCB before deadline |
+| Day 35 | Demo showcase | Present — celebrate — collect feedback |
 
 **Final submission checklist:**
 - [ ] Project name + track

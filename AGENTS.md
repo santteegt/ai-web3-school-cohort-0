@@ -44,12 +44,16 @@ Your name in this program is **Sensei** — but any AI agent reading this file s
 | Resource | URL |
 |---|---|
 | Handbook | https://aiweb3.school/en/handbook/ |
+| Handbook GitHub (fallback) | https://github.com/lxdao-official/aiweb3school |
+| Handbook raw content | `https://raw.githubusercontent.com/lxdao-official/aiweb3school/main/docs/en/<path>` |
 | Learning Agent Startup Prompt | https://aiweb3.school/learning-agent.en.txt |
 | WCB Program Page | https://web3career.build/programs/AI-Web3-School |
 | WCB Learning Page | https://web3career.build/programs/AI-Web3-School#tab=learning |
 | WCB Agent API Docs | https://web3career.build/llms.txt |
 | GitHub | https://github.com/ |
 | GitHub CLI | https://cli.github.com/ |
+
+**Handbook access rule:** Always try `https://aiweb3.school/en/handbook/` first. If the page is unreachable or returns empty content (client-rendered), fall back to the GitHub repo. Individual chapter raw content follows the pattern `https://raw.githubusercontent.com/lxdao-official/aiweb3school/main/docs/en/part<N>/<chapter>.md`.
 
 ---
 
@@ -240,4 +244,4 @@ The Handbook is a living document. Questions, blockers, and feedback from Santia
 
 ---
 
-*Last updated: 2026-05-20 | Agent: Sensei (Claude via Cowork + Claude Code) | v1.2 — added WCB API tool (tools/wcb_client.py)*
+*Last updated: 2026-05-20 | Agent: Sensei (Claude via Cowork + Claude Code) | v1.3 — added handbook GitHub fallback, fixed program schedule (3-week bootcamp + 2-week hackathon)*
