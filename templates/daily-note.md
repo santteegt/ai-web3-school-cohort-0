@@ -54,8 +54,6 @@
 **Blockers / questions:**
 
 
-**WCB Check-in link:** <!-- paste after submitting -->
-
 ---
 
 ## Notes for Tomorrow
