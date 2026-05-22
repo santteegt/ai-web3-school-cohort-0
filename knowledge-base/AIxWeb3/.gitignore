@@ -1,0 +1,6 @@
+# Obsidian compiled plugin bundles (large, binary-ish JS)
+.obsidian/plugins/
+
+# Obsidian workspace state (changes every session, machine-specific)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json

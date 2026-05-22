@@ -241,6 +241,52 @@ This ensures Claude Code always has fresh context on next use, even if the Cowor
 
 ---
 
+## 13. Knowledge Base Skills
+
+Skills for building and studying from the Obsidian vault at `knowledge-base/AIxWeb3/`.  
+Skills are stored as SKILL.md files in `.claude/skills/` and invoked via slash commands in Claude Code.
+
+### `/wiki-build` — Incremental Wiki Builder
+
+**File:** `.claude/skills/wiki-builder/SKILL.md`
+
+Processes raw source notes and builds/updates a structured, interlinked wiki of concept and source pages.
+
+**When to use:** After adding or editing any file in `knowledge-base/AIxWeb3/raw/`.
+
+**Key behavior:**
+- Reads `wiki/.hashes.json` to detect only new/changed files (incremental — will NOT reprocess unchanged sources)
+- Creates source summary pages in `wiki/sources/<slug>.md`
+- Creates or updates concept pages at `wiki/<concept-slug>.md`
+- Adds `[[wikilinks]]` between related concepts
+- Updates `wiki/index.md` (content catalog) and appends to `wiki/log.md` (ingest log)
+- Saves updated hashes to `wiki/.hashes.json`
+
+**Model:** Run with **Sonnet** — wiki building requires synthesis and cross-referencing. Do not use Haiku for this skill.
+
+---
+
+### `/concept-cards [topic]` — Marp Concept Card Generator
+
+**File:** `.claude/skills/concept-cards/SKILL.md`
+
+Generates Marp concept card slides from wiki pages with three-part structure per card.
+
+**When to use:** After `/wiki-build` has populated `wiki/index.md`. Run with no argument for all concepts, or `/concept-cards rag` to filter by topic tag.
+
+**Output:**
+- Marp deck: `knowledge-base/AIxWeb3/concepts/concepts-<YYYY-MM-DD>.md` — open in Obsidian with Marp Slides plugin to view
+- HTML export: `submissions/concept-cards.html` — open in any browser
+
+**Card structure (per concept):**
+- One-sentence explanation (precise, jargon-minimal)
+- Concrete example (specific system, tool, or real scenario)
+- Boundary (common misconception or usage limit)
+
+**Model split:** Sonnet orchestrates; spawn Haiku subagents (model: "haiku") for per-concept card generation. Haiku quality is sufficient for the templated card format.
+
+---
+
 ## 12. Program Context
 
 AI × Web3 School was jointly initiated by **LXDAO** and **ETHPanda**.  
@@ -250,4 +296,4 @@ The Handbook is a living document. Questions, blockers, and feedback from Santia
 
 ---
 
-*Last updated: 2026-05-20 | Agent: Sensei (Claude via Cowork + Claude Code) | v1.3 — added handbook GitHub fallback, fixed program schedule (3-week bootcamp + 2-week hackathon)*
+*Last updated: 2026-05-22 | Agent: Sensei (Claude via Claude Code) | v1.4 — added Section 13: Knowledge Base Skills (/wiki-build, /concept-cards)*
