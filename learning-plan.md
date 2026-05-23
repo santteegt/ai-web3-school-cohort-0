@@ -18,16 +18,29 @@ Estimated pace: **2–4 hours/day** · Total: ~5 weeks · Program: May 17 – Ju
 
 *Goal: Build shared language across LLMs, prompts, agents, tool use, wallets, transactions, and smart contracts — connecting everything into one execution chain.*
 
-| Day | Topic | Handbook Chapter(s) | Deliverable |
-|---|---|---|---|
-| Day 0 (today) | Setup | — | Repo, AGENTS.md, learning-plan, Sensei agent ✅ |
-| Day 1 | LLM + Prompt | [LLM](https://aiweb3.school/en/handbook/llm.html), [Prompt](https://aiweb3.school/en/handbook/prompt.html) | Daily note + first experiment |
-| Day 2 | Context + RAG | [Context](https://aiweb3.school/en/handbook/context.html), [RAG](https://aiweb3.school/en/handbook/rag.html) | Experiment: retrieval over on-chain data |
-| Day 3 | Agent + Frameworks | [Agent](https://aiweb3.school/en/handbook/agent.html), [Frameworks](https://aiweb3.school/en/handbook/frameworks.html) | Vibe-code or Hermes agent practice run |
-| Day 4 | MCP + Tool Use | [MCP](https://aiweb3.school/en/handbook/mcp.html) | Wire up a simple MCP tool call |
-| Day 5 | Wallet + Transaction | [Wallet](https://aiweb3.school/en/handbook/wallet.html) (ref) | Create test wallet, make testnet transaction |
-| Day 6 | Smart Contract basics | [Smart Contract](https://aiweb3.school/en/handbook/smart-contract.html) (ref) | Deploy or call a minimal contract on testnet |
-| Day 7 | Week 1 wrap-up | — | Document successes, failures, human corrections; push to GitHub |
+> **⚡ Accelerated schedule:** Days 2–7 compressed into 3 days (May 22–24) to finish by Sunday.  
+> Day 1 ✅ done on Thu May 21. Day 2 → Friday · Days 3–4 → Saturday · Days 5–7 → Sunday  
+> Web3 days (5–6) are lighter since Santiago is already strong there.
+
+| Day | Date | Topic | Handbook Chapter(s) | Deliverable |
+|---|---|---|---|---|
+| Day 0 | May 17 | Setup | — | Repo, AGENTS.md, learning-plan, Sensei agent ✅ |
+| Day 1 | Thu May 21 ✅ | LLM + Prompt | [LLM](https://aiweb3.school/en/handbook/llm.html), [Prompt](https://aiweb3.school/en/handbook/prompt.html) | Chapters read, notes in knowledge-base, WCB tasks submitted ✅ |
+| Day 2 | **Fri May 22** | Context + RAG | [Context](https://aiweb3.school/en/handbook/context.html), [RAG](https://aiweb3.school/en/handbook/rag.html) | Day 1 experiment carryover + retrieval over on-chain data |
+| Day 3 | **Sat May 23** | Agent + Frameworks | [Agent](https://aiweb3.school/en/handbook/agent.html), [Frameworks](https://aiweb3.school/en/handbook/frameworks.html) | Hermes/vibe-code agent practice run |
+| Day 4 | **Sat May 23** | MCP + Tool Use | [MCP](https://aiweb3.school/en/handbook/mcp.html) | Wire up a simple MCP tool call |
+| Day 5 | **Sun May 24** | Wallet + Transaction | [Wallet](https://aiweb3.school/en/handbook/wallet.html) (ref — light, you know this) | Confirm testnet wallet + quick tx |
+| Day 6 | **Sun May 24** | Smart Contract basics | [Smart Contract](https://aiweb3.school/en/handbook/smart-contract.html) (ref — light, you know this) | Call or deploy a minimal contract |
+| Day 7 | **Sun May 24** | Week 1 wrap-up | — | Document successes, failures, corrections; push to GitHub |
+
+### Daily time estimates (accelerated)
+
+| Date | Sessions | Est. time |
+|---|---|---|
+| Thu May 21 | LLM + Prompt ✅ | Done |
+| Fri May 22 | Context + RAG (+ Day 1 experiment carryover) | ~2–3 h |
+| Sat May 23 | Agent + Frameworks → MCP + Tool Use | ~3–4 h |
+| Sun May 24 | Wallet + Smart Contract (light) → Wrap-up | ~2–3 h |
 
 **Week 1 milestone:** One end-to-end chain — LLM prompt → agent tool call → wallet sign → testnet transaction → receipt
 
