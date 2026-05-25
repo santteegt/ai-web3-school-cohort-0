@@ -127,3 +127,21 @@ _Append-only chronological record of ingests, queries, and lint passes._
 - Hash: `sha256:8fe7fc9a47d487a9767f1fba353688f4bfd17405f700d17f374142d8d52113d7`
 - Pages created/updated: 6
 - New concepts: inference, local-model, quantization, model-serving (maas, ai-agent-tracing updated)
+
+---
+
+## [2026-05-25] ingest | Web3 Fundamentals - Introduction
+
+- Source: `raw/Web3 Fundamentals - Introduction.md`
+- Hash: `sha256:6588efb9157c56f8fae82d1640d1056dc4127dd2c2f14921feca664a6cb1f30b`
+- Pages created/updated: 1 (source page only — concepts covered by Web3 Chapters ingest below)
+- New concepts: (see web3-chapters ingest for full concept list; source cross-links: eoa, mnemonic, private-key, cryptographic-signature, web3-transaction, gas, layer-2, smart-contract, testnet, block-explorer, erc-4337, smart-account, session-key, agent-wallet)
+
+---
+
+## [2026-05-25] ingest | Web3 Chapters
+
+- Source: `raw/Web3 Chapters.md`
+- Hash: `sha256:5b653865d1c02350233e3f5e5ba4441d6f60fac9beb25f8d1e5eb281e42a29e7`
+- Pages created/updated: 57 (2 source pages + 55 concept pages)
+- New concepts: cryptography, hash-function, public-key, private-key, cryptographic-signature, merkle-tree, eoa, mnemonic, web3-transaction, gas, block-explorer, smart-contract, solidity, evm, abi, contract-event, contract-upgrade, web3-dev-stack, remix-ide, hardhat, foundry, openzeppelin, viem-wagmi, blockchain-network, block, consensus, proof-of-stake, testnet, layer-2, rollup, erc-4337, smart-account, bundler, paymaster, session-key, defi, erc20-token, amm, defi-lending, stablecoin, liquidity, oracle, price-feed, oracle-risk, ai-oracle, on-chain-indexing, subgraph, rpc, data-pipeline, web3-security, reentrancy, access-control, contract-audit, tx-simulation, on-chain-monitoring
