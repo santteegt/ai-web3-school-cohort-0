@@ -68,6 +68,4 @@
 ## Must-read
 
 - [OpenAI Agents Guide](https://platform.openai.com/docs/guides/agents/best-practices): understand the basic pieces of Agent workflows, tools, guardrails, knowledge, and monitoring.
-- [OpenAI Agents SDK](https://platform.openai.com/docs/guides/agents-sdk/): see how to build Agent applications with tools, handoff, streaming, and tracing.
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/): useful for learning stateful, multi-step, recoverable Agent workflows.
 - [Anthropic: Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents): distinguish workflow and agent from an engineering perspective; useful for calibrating complexity.
