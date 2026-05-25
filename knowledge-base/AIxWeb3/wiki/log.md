@@ -64,3 +64,39 @@ _Append-only chronological record of ingests, queries, and lint passes._
 - Hash: `sha256:ab9b382c92d9dd462466e6d8d4e8efd4202e7c123c794dbb40112a0677b9c82f`
 - Pages created/updated: 3
 - New concepts: agent-workflow (vibe-coding, agent-wallet, machine-payment updated)
+
+---
+
+## [2026-05-24] ingest | Agent
+
+- Source: `raw/Agent.md`
+- Hash: `sha256:3f074253dac7b4d37fba126712d84a6dfe4ff8a4b161ba8f500658555c223fcd`
+- Pages created/updated: 10
+- New concepts: agent-planning, agent-reflection, agent-stop-conditions, multi-agent-systems, aixweb3-agent-architecture (ai-agent, tool-calling, state-management updated)
+
+---
+
+## [2026-05-24] ingest | Frameworks
+
+- Source: `raw/Frameworks.md`
+- Hash: `sha256:1dcc052435fe93bd6538a760ddd9a8a589722a32cd90b8107adb04362cac2641`
+- Pages created/updated: 8
+- New concepts: langchain, langgraph, openai-agents-sdk, dspy, hermes, learning-agents, ai-frameworks-overview
+
+---
+
+## [2026-05-24] ingest | MCP
+
+- Source: `raw/MCP.md`
+- Hash: `sha256:253d6a443bf25dd37bd1328ef09d9a73f27aa7f45c7f5731f4c17dc3ca5b4781`
+- Pages created/updated: 6
+- New concepts: mcp-server, mcp-client, tool-schema, mcp-permission-model (mcp updated)
+
+---
+
+## [2026-05-24] ingest | Vibe Coding
+
+- Source: `raw/Vibe Coding.md`
+- Hash: `sha256:8216d42de88af260f7c3873b5154953c646407403b85e01dc118f8b1ff9d5542`
+- Pages created/updated: 2
+- New concepts: ai-coding (vibe-coding updated)

@@ -1,12 +1,13 @@
 # Wiki Index
 
-_Last updated: 2026-05-22 — 54 pages (47 concept/topic + 7 source)_
+_Last updated: 2026-05-24 — 75 pages (68 concept/topic + 11 source)_
 
 ---
 
 ## Topics (Overview Pages)
 
-- [[ai-foundations-overview]] — Full map of AI Foundations concepts: LLM, Prompt, Context, RAG, Agent
+- [[ai-foundations-overview]] — Full map of AI Foundations concepts: LLM, Prompt, Context, RAG, Agent, Frameworks, MCP
+- [[ai-frameworks-overview]] — Framework selection, LangChain/LangGraph/DSPy/Hermes comparison, three-layer responsibility model
 - [[aixweb3-bridge-overview]] — The intersection layer: where AI agents meet on-chain systems
 - [[frontier-exploration-overview]] — Hackathon tracks: Agentic Commerce, Wallet/Permission, AI Security, Governance, Dev Tooling
 
@@ -21,6 +22,10 @@ _Last updated: 2026-05-22 — 54 pages (47 concept/topic + 7 source)_
 - [[sources/rag]] — RAG as evidence chain: chunking, vector DB, retrieval, citations
 - [[sources/aixweb3-school]] — Handbook outline: four-layer learning map
 - [[sources/program-structure]] — Four-week bootcamp structure and deliverables
+- [[sources/agent]] — Agent as constrained execution loop: planning, state, reflection, AI × Web3 architecture
+- [[sources/frameworks]] — Framework selection, LangChain/LangGraph/OpenAI SDK/DSPy/Hermes, learning agents
+- [[sources/mcp]] — MCP architecture: client/server split, tool schemas, permission model
+- [[sources/vibe-coding]] — AI coding as disciplined human-AI iteration; engineering discipline requirements
 
 ---
 
@@ -73,15 +78,37 @@ _Last updated: 2026-05-22 — 54 pages (47 concept/topic + 7 source)_
 
 ## Concepts — AI Foundations: Agent
 
-- [[ai-agent]] — Autonomous planning + tool use; when to use vs. simpler alternatives
+- [[ai-agent]] — Constrained execution loop: goal, tools, state, permissions, stop conditions _(updated)_
 - [[prompt-workflow-agent-boundary]] — Three architectures with different failure modes
-- [[tool-calling]] — Model-to-world action mechanism; the fourth control layer
-- [[state-management]] — Shared state across agent nodes; within-session whiteboard
-- [[mcp]] — Unified connectivity protocol between LLMs and external tools
+- [[tool-calling]] — Model-to-world action mechanism; requires tool design discipline _(updated)_
+- [[state-management]] — Externalized, queryable, recoverable, auditable agent state _(updated)_
+- [[agent-planning]] — Candidate plan generation; step classification as read/write; not an authorization
+- [[agent-reflection]] — Self-checking for intermediate correction; not a substitute for deterministic checks
+- [[agent-stop-conditions]] — Explicit halting criteria: goal reached, budget exceeded, risk crossed
+- [[multi-agent-systems]] — Coordination patterns; amplifies failures when roles are unclear
+- [[mcp]] — Unified tool connectivity protocol; client/server architecture _(updated)_
+- [[mcp-server]] — Exposes resources, tools, prompts; defines permission model
+- [[mcp-client]] — Connects model to servers; handles discovery, confirmation, session isolation
+- [[tool-schema]] — Machine-readable tool declaration; vague schemas cause wrong-parameter calls
+- [[mcp-permission-model]] — Permission design per tool risk level; the most underestimated MCP issue
 - [[guardrails]] — Hard execution constraints; code-enforced, not prompt-enforced
 - [[agent-handoff]] — Control transfer after subtask completes
 - [[ai-agent-tracing]] — Execution chain observability; debugging and audit
-- [[vibe-coding]] — AI-assisted rapid prototyping; Week 1 exercise
+- [[maas]] — API-based model access; per-token billing, no GPU required
+- [[vibe-coding]] — AI-assisted rapid prototyping; requires engineering discipline _(updated)_
+- [[ai-coding]] — AI coding in the full engineering flow: issue → branch → commit → test → review → merge
+
+---
+
+## Concepts — AI Foundations: Frameworks
+
+- [[ai-frameworks-overview]] — Selection criteria, three-layer responsibility model
+- [[langchain]] — Component library for composing AI capabilities; good for prototyping
+- [[langgraph]] — DAG-based stateful workflows; reference for explicit state management
+- [[openai-agents-sdk]] — Agent engineering primitives: handoffs, guardrails, tracing, structured output
+- [[dspy]] — Metric-driven prompt optimization; treats pipelines as optimizable programs
+- [[hermes]] — Tool-calling and structured-output oriented model ecosystem
+- [[learning-agents]] — Systems that improve via evaluation loop, not direct online behavior change
 
 ---
 
@@ -95,3 +122,4 @@ _Last updated: 2026-05-22 — 54 pages (47 concept/topic + 7 source)_
 - [[agent-identity]] — Agent identification, authorization, accountability
 - [[verifiable-ai]] — Proving model outputs and execution processes
 - [[ai-security]] — Prompt injection defense, tool abuse prevention, permission isolation
+- [[aixweb3-agent-architecture]] — 8-step reference pattern: goal → plan → read/write split → policy → simulation → confirmation → execution → log

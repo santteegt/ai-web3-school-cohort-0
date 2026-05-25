@@ -2,8 +2,8 @@
 title: "Tool Calling"
 type: concept
 tags: [ai-foundations, agent, llm]
-source_count: 2
-date_updated: "2026-05-22"
+source_count: 3
+date_updated: "2026-05-24"
 ---
 
 ## Definition
@@ -18,6 +18,8 @@ Tool calling is the mechanism by which a language model emits a structured reque
 - Tool misuse is an agent-specific failure mode: the model invoking the wrong tool or passing incorrect parameters — requires [[ai-agent-tracing]] to detect
 - Parameter verification before tool calls is a key [[prompt-injection]] defense — prevents injected content from manipulating what tools are called with what arguments
 - In AI × Web3: tool calling connects agents to RPC nodes, wallets, smart contracts, and on-chain data
+- **Tool design requirements** (from Agent.md): each tool must declare its input schema, permission scope, whether it is read-only, whether it creates external side effects, how calls are logged before and after execution, and which calls require human confirmation
+- **[[tool-schema]]** is the formal artifact capturing these declarations — vague schemas cause wrong-parameter calls
 
 ## Related Concepts
 
@@ -30,7 +32,10 @@ Tool calling is the mechanism by which a language model emits a structured reque
 - [[web3-tool-use]] — AI × Web3 application of tool calling (RPC, wallet, contract tools)
 - [[four-control-layers]] — tool calling is the fourth control layer
 
+- [[tool-schema]] — the formal declaration of a tool's interface and constraints
+
 ## Sources
 
 - [[sources/ai-fundamentals-introduction]] — tool calling as control layer and agent component
 - [[sources/context]] — tool results in the fact layer of agent context
+- [[sources/agent]] — tool design requirements: schema, permission scope, side effects, logging, confirmation
