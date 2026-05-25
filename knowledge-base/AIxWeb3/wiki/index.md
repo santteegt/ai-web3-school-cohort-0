@@ -1,6 +1,6 @@
 # Wiki Index
 
-_Last updated: 2026-05-24 — 75 pages (68 concept/topic + 11 source)_
+_Last updated: 2026-05-25 — 89 pages (79 concept/topic + 14 source)_
 
 ---
 
@@ -26,6 +26,9 @@ _Last updated: 2026-05-24 — 75 pages (68 concept/topic + 11 source)_
 - [[sources/frameworks]] — Framework selection, LangChain/LangGraph/OpenAI SDK/DSPy/Hermes, learning agents
 - [[sources/mcp]] — MCP architecture: client/server split, tool schemas, permission model
 - [[sources/vibe-coding]] — AI coding as disciplined human-AI iteration; engineering discipline requirements
+- [[sources/evaluation]] — Eval pipeline: harness, golden set, LLM-as-judge, regression, observability; AI × Web3 eval requirements
+- [[sources/fine-tuning]] — Fine-tuning: SFT, LoRA, PEFT, dataset quality, overfitting; what fine-tuning cannot do
+- [[sources/inference]] — Inference layer: API vs. local models, quantization, serving, audit requirements
 
 ---
 
@@ -37,7 +40,16 @@ _Last updated: 2026-05-24 — 75 pages (68 concept/topic + 11 source)_
 - [[transformer-architecture]] — Attention-based architecture; pattern composition without ground-truth authority
 - [[hallucination]] — Confident fabrication; requires external verification, not just better prompts
 - [[multimodal]] — Models processing text, images, audio, and video
-- [[maas]] — API-based model access; per-token billing, no GPU required
+- [[maas]] — API-based model access; per-token billing, no GPU required _(updated)_
+- [[fine-tuning]] — Adapting a pre-trained model for a class of tasks; not a first resort
+- [[supervised-fine-tuning]] — SFT: input/output pair training for fixed-format tasks
+- [[lora]] — Low-Rank Adaptation: parameter-efficient fine-tuning via adapter matrices
+- [[peft]] — Parameter-Efficient Fine-Tuning: class of methods adapting models with minimal parameter changes
+- [[overfitting]] — Model memorizes training data; detected by eval on held-out test sets
+- [[inference]] — Production layer delivering model outputs under latency, cost, and quality constraints
+- [[local-model]] — Self-hosted model weights for privacy, cost control, or customization
+- [[quantization]] — Reducing weight precision to lower VRAM and latency; quality tradeoff
+- [[model-serving]] — Infrastructure for production model inference: queuing, batching, monitoring, scaling
 
 ---
 
@@ -76,6 +88,17 @@ _Last updated: 2026-05-24 — 75 pages (68 concept/topic + 11 source)_
 
 ---
 
+## Concepts — AI Foundations: Evaluation
+
+- [[evaluation]] — Disciplined practice of measuring AI system reliability with samples, metrics, and regression
+- [[eval-harness]] — Repeatable framework feeding samples, calling system, running graders, recording results
+- [[golden-set]] — Curated sample set covering real tasks, boundary cases, and historical bugs
+- [[llm-as-judge]] — LLM grading open-ended outputs; useful but requires calibration against human scoring
+- [[regression-testing]] — Converting known bugs into tests that rerun before every release
+- [[observability]] — Recording real-user behavior at runtime to feed back into the eval pipeline
+
+---
+
 ## Concepts — AI Foundations: Agent
 
 - [[ai-agent]] — Constrained execution loop: goal, tools, state, permissions, stop conditions _(updated)_
@@ -93,8 +116,8 @@ _Last updated: 2026-05-24 — 75 pages (68 concept/topic + 11 source)_
 - [[mcp-permission-model]] — Permission design per tool risk level; the most underestimated MCP issue
 - [[guardrails]] — Hard execution constraints; code-enforced, not prompt-enforced
 - [[agent-handoff]] — Control transfer after subtask completes
-- [[ai-agent-tracing]] — Execution chain observability; debugging and audit
-- [[maas]] — API-based model access; per-token billing, no GPU required
+- [[ai-agent-tracing]] — Execution chain observability; debugging and audit _(updated)_
+- [[maas]] — API-based model access; per-token billing, no GPU required _(updated)_
 - [[vibe-coding]] — AI-assisted rapid prototyping; requires engineering discipline _(updated)_
 - [[ai-coding]] — AI coding in the full engineering flow: issue → branch → commit → test → review → merge
 
@@ -108,7 +131,7 @@ _Last updated: 2026-05-24 — 75 pages (68 concept/topic + 11 source)_
 - [[openai-agents-sdk]] — Agent engineering primitives: handoffs, guardrails, tracing, structured output
 - [[dspy]] — Metric-driven prompt optimization; treats pipelines as optimizable programs
 - [[hermes]] — Tool-calling and structured-output oriented model ecosystem
-- [[learning-agents]] — Systems that improve via evaluation loop, not direct online behavior change
+- [[learning-agents]] — Systems that improve via evaluation loop, not direct online behavior change _(updated)_
 
 ---
 

@@ -2,8 +2,8 @@
 title: "MaaS (Model-as-a-Service)"
 type: concept
 tags: [ai-foundations, llm]
-source_count: 1
-date_updated: "2026-05-22"
+source_count: 2
+date_updated: "2026-05-25"
 ---
 
 ## Definition
@@ -24,7 +24,10 @@ Model-as-a-Service (MaaS) is the API-based access model for large language model
 - [[tokens]] — MaaS billing unit; token count determines cost
 - [[structured-output]] — a key pattern for MaaS application development
 - [[tool-calling]] — MaaS APIs expose tool/function calling as a first-class feature
+- [[inference]] — MaaS is the API-based inference deployment mode
+- [[local-model]] — the self-hosted alternative to MaaS
 
 ## Sources
 
 - [[sources/ai-fundamentals-introduction]] — MaaS definition and core parameters
+- [[sources/inference]] — MaaS as the API inference mode; engineering challenges beyond API calls

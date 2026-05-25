@@ -100,3 +100,30 @@ _Append-only chronological record of ingests, queries, and lint passes._
 - Hash: `sha256:8216d42de88af260f7c3873b5154953c646407403b85e01dc118f8b1ff9d5542`
 - Pages created/updated: 2
 - New concepts: ai-coding (vibe-coding updated)
+
+---
+
+## [2026-05-25] ingest | Evaluation
+
+- Source: `raw/Evaluation.md`
+- Hash: `sha256:882f72b3021d8a34fb056456d5dbb146093146a0cd7c555f092351e700935292`
+- Pages created/updated: 9
+- New concepts: evaluation, eval-harness, golden-set, llm-as-judge, regression-testing, observability (learning-agents, ai-agent-tracing updated)
+
+---
+
+## [2026-05-25] ingest | Fine Tuning
+
+- Source: `raw/Fine Tuning.md`
+- Hash: `sha256:d48cef814321b9ab9cc3de25f9737713e22a49b6e63ac3037f5840b4f47439b7`
+- Pages created/updated: 6
+- New concepts: fine-tuning, supervised-fine-tuning, lora, peft, overfitting
+
+---
+
+## [2026-05-25] ingest | Inference
+
+- Source: `raw/Inference.md`
+- Hash: `sha256:8fe7fc9a47d487a9767f1fba353688f4bfd17405f700d17f374142d8d52113d7`
+- Pages created/updated: 6
+- New concepts: inference, local-model, quantization, model-serving (maas, ai-agent-tracing updated)

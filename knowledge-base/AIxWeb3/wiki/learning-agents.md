@@ -2,8 +2,8 @@
 title: "Learning Agents"
 type: concept
 tags: [ai-foundations, agent, frameworks]
-source_count: 1
-date_updated: "2026-05-24"
+source_count: 2
+date_updated: "2026-05-25"
 ---
 
 ## Definition
@@ -25,7 +25,11 @@ A learning agent is a system that improves from feedback, logs, evaluation resul
 - [[ai-agent-tracing]] — traces and logs are the raw material for learning
 - [[guardrails]] — learning systems must not bypass guardrails during the feedback incorporation process
 - [[knowledge-base]] — retriever tuning updates the knowledge base; this is a form of learning
+- [[evaluation]] — the structured eval pipeline is the gate all learning must pass through before production
+- [[regression-testing]] — regression tests are the final check before a learning update is released
+- [[golden-set]] — growing the golden set with observed failures is a core learning activity
 
 ## Sources
 
 - [[sources/frameworks]] — learning agents definition and safe learning process
+- [[sources/evaluation]] — evaluation loop as the safe path for agent improvement; regression and observability
