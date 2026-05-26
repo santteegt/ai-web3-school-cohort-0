@@ -296,4 +296,34 @@ The Handbook is a living document. Questions, blockers, and feedback from Santia
 
 ---
 
-*Last updated: 2026-05-22 | Agent: Sensei (Claude via Claude Code) | v1.4 — added Section 13: Knowledge Base Skills (/wiki-build, /concept-cards)*
+## 14. Interactive Quiz Skill (`/quiz`)
+
+**File:** `skills/quiz/SKILL.md`
+
+Runs a 5-question interactive multi-choice quiz drawn from the wiki knowledge base. Uses spaced-repetition topic tracking so each session covers a fresh concept.
+
+**When to use:**
+- Run `/quiz` to start an on-demand session
+- Triggered automatically by the Cowork scheduled task (every 2 hours)
+- Any time you want to test or reinforce understanding of a wiki concept
+
+**How it works:**
+1. Reads `logs/quiz-cache.json` to get already-covered topics (resets every 72 hours)
+2. Randomly selects one concept from `knowledge-base/AIxWeb3/wiki/`
+3. Displays a topic preview widget with wiki page link
+4. Generates 5 factual multi-choice questions from the wiki page content
+5. Runs questions interactively via widgets with A/B/C/D answer buttons
+6. Correct answer → next question immediately; wrong answer → concept explainer shown before continuing
+7. Final score widget with link to wiki page and option to run another quiz
+8. Updates `logs/quiz-cache.json` with the covered topic slug
+
+**Cache:** `logs/quiz-cache.json` — tracks covered slugs, resets every 72 hours automatically.
+
+**Model:** Run with **Sonnet** only. Question generation requires factual grounding and plausible distractor construction.
+
+**Scheduled task:** Cowork task fires every 2 hours (`0 */2 * * *`) with prompt:  
+`"It's quiz time! Read skills/quiz/SKILL.md and run an interactive quiz for Santiago."`
+
+---
+
+*Last updated: 2026-05-25 | Agent: Sensei (Claude via Cowork) | v1.5 — added Section 14: Interactive Quiz Skill (/quiz)*
