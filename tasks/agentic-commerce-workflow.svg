@@ -1,0 +1,150 @@
+<svg viewBox="0 0 940 798" xmlns="http://www.w3.org/2000/svg" font-family="'Inter',system-ui,sans-serif">
+<title>Minimal AI x Web3 Agentic Commerce Workflow</title>
+<desc>Swimlane diagram: 9-step agentic commerce flow across Santiago (human), Requester Agent (AI), Data Provider Agent (AI), On-chain/L2.</desc>
+<rect width="940" height="798" fill="#f8fafc"/>
+<text x="470" y="26" font-size="14" font-weight="700" fill="#1a1a2e" text-anchor="middle">Minimal AI x Web3 — Agentic Commerce Workflow</text>
+<rect x="20" y="40" width="11" height="11" rx="2" fill="#3b82f6"/>
+<text x="35" y="49" font-size="10" fill="#374151">Santiago (Human)</text>
+<rect x="160" y="40" width="11" height="11" rx="2" fill="#7c3aed"/>
+<text x="175" y="49" font-size="10" fill="#374151">Requester Agent (AI)</text>
+<rect x="335" y="40" width="11" height="11" rx="2" fill="#059669"/>
+<text x="350" y="49" font-size="10" fill="#374151">Data Provider Agent (AI)</text>
+<rect x="530" y="40" width="11" height="11" rx="2" fill="#d97706"/>
+<text x="545" y="49" font-size="10" fill="#374151">On-chain / L2</text>
+<text x="672" y="49" font-size="9.5" fill="#6b7280">[KEY]=Wallet sign  [!]=Risk  [OK]=Verified  [H]=Manual confirm</text>
+<rect x="150" y="66" width="178" height="34" rx="6" fill="#3b82f6"/>
+<text x="239" y="88" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.4">SANTIAGO</text>
+<rect x="328" y="66" width="213" height="34" rx="6" fill="#7c3aed"/>
+<text x="434" y="88" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.4">REQUESTER AGENT</text>
+<rect x="541" y="66" width="189" height="34" rx="6" fill="#059669"/>
+<text x="635" y="88" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.4">DATA PROVIDER AGENT</text>
+<rect x="730" y="66" width="210" height="34" rx="6" fill="#d97706"/>
+<text x="835" y="88" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.4">ON-CHAIN / L2</text>
+<line x1="0" y1="100" x2="940" y2="100" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="176" x2="940" y2="176" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="252" x2="940" y2="252" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="328" x2="940" y2="328" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="404" x2="940" y2="404" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="480" x2="940" y2="480" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="556" x2="940" y2="556" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="632" x2="940" y2="632" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="708" x2="940" y2="708" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="0" y1="784" x2="940" y2="784" stroke="#e2e8f0" stroke-width="1"/>
+<text x="144" y="128" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">1 · INITIATE</text>
+<text x="144" y="144" font-size="9.5" fill="#1d4ed8" text-anchor="end">Initiator</text>
+<rect x="154" y="104" width="170" height="68" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="239" y="120" font-size="11.5" font-weight="700" fill="#1e40af" text-anchor="middle">Issue Task</text>
+<text x="239" y="133" font-size="10" fill="#1e40af" text-anchor="middle" opacity="0.8">Natural-language intent</text>
+<rect x="205.2" y="157" width="67.6" height="12" rx="2" fill="#fef9c3" stroke="#fde047" stroke-width="0.8"/>
+<text x="239" y="166" font-size="9" font-weight="700" fill="#854d0e" text-anchor="middle">INITIATOR</text>
+<rect x="332" y="104" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="434" y="120" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Receive Task</text>
+<text x="434" y="133" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">Parse intent · plan steps</text>
+<text x="144" y="204" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">2 · DISCOVER</text>
+<text x="144" y="220" font-size="9.5" fill="#5b21b6" text-anchor="end">AI executes</text>
+<rect x="332" y="180" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="434" y="196" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Query Registry</text>
+<text x="434" y="209" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">Search for matching provider</text>
+<rect x="545" y="180" width="181" height="68" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="635" y="196" font-size="11.5" font-weight="700" fill="#065f46" text-anchor="middle">Advertise Capability</text>
+<text x="635" y="209" font-size="10" fill="#065f46" text-anchor="middle" opacity="0.8">Endpoint + schema</text>
+<rect x="734" y="180" width="202" height="68" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+<text x="835" y="196" font-size="11.5" font-weight="700" fill="#92400e" text-anchor="middle">Registry Lookup</text>
+<text x="835" y="209" font-size="10" fill="#92400e" text-anchor="middle" opacity="0.8">On-chain / indexer</text>
+<rect x="794.8" y="233" width="80.4" height="12" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.8"/>
+<text x="835" y="242" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">CHAIN STATE</text>
+<text x="144" y="280" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">3 · NEGOTIATE</text>
+<text x="144" y="296" font-size="9.5" fill="#5b21b6" text-anchor="end">AI executes</text>
+<rect x="332" y="256" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="533" y="268" font-size="9.5" fill="#b91c1c" text-anchor="end" font-weight="700">!</text>
+<text x="434" y="272" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Propose Terms</text>
+<text x="434" y="285" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">Price · schema · SLA</text>
+<rect x="355.4" y="309" width="157.2" height="12" rx="2" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.8"/>
+<text x="434" y="318" font-size="9" font-weight="700" fill="#b91c1c" text-anchor="middle">RISK: manipulated offer</text>
+<rect x="545" y="256" width="181" height="68" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="635" y="272" font-size="11.5" font-weight="700" fill="#065f46" text-anchor="middle">Accept / Counter</text>
+<text x="635" y="285" font-size="10" fill="#065f46" text-anchor="middle" opacity="0.8">Signed agreement</text>
+<text x="144" y="356" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">4 · PAY</text>
+<text x="144" y="372" font-size="9.5" fill="#5b21b6" text-anchor="end">Wallet sign</text>
+<rect x="332" y="332" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="434" y="348" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Sign Micro-payment</text>
+<text x="434" y="361" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">Scoped wallet · spend limit</text>
+<rect x="393.8" y="385" width="80.4" height="12" rx="2" fill="#faf5ff" stroke="#c4b5fd" stroke-width="0.8"/>
+<text x="434" y="394" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle">WALLET SIGN</text>
+<rect x="734" y="332" width="202" height="68" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="932" y="344" font-size="9.5" fill="#b91c1c" text-anchor="end" font-weight="700">!</text>
+<text x="835" y="348" font-size="11.5" font-weight="700" fill="#92400e" text-anchor="middle">Payment Tx -&gt; L2</text>
+<text x="835" y="361" font-size="10" fill="#92400e" text-anchor="middle" opacity="0.8">Broadcast + confirmed</text>
+<rect x="759.6" y="385" width="150.8" height="12" rx="2" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.8"/>
+<text x="835" y="394" font-size="9" font-weight="700" fill="#b91c1c" text-anchor="middle">RISK: replay/overspend</text>
+<text x="144" y="432" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">5 · RECEIPT</text>
+<text x="144" y="448" font-size="9.5" fill="#059669" text-anchor="end">Verify</text>
+<rect x="332" y="408" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="434" y="424" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Verify Receipt</text>
+<text x="434" y="437" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">tx hash + event log</text>
+<rect x="377.8" y="461" width="112.4" height="12" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.8"/>
+<text x="434" y="470" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">PROOF OF PAYMENT</text>
+<rect x="545" y="408" width="181" height="68" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="635" y="424" font-size="11.5" font-weight="700" fill="#065f46" text-anchor="middle">Confirm Payment</text>
+<text x="635" y="437" font-size="10" fill="#065f46" text-anchor="middle" opacity="0.8">Release data on receipt</text>
+<rect x="734" y="408" width="202" height="68" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+<text x="835" y="424" font-size="11.5" font-weight="700" fill="#92400e" text-anchor="middle">Immutable Receipt</text>
+<text x="835" y="437" font-size="10" fill="#92400e" text-anchor="middle" opacity="0.8">tx hash + event log</text>
+<rect x="794.8" y="461" width="80.4" height="12" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.8"/>
+<text x="835" y="470" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">AUDIT TRAIL</text>
+<text x="144" y="508" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">6 · ANALYZE</text>
+<text x="144" y="524" font-size="9.5" fill="#5b21b6" text-anchor="end">AI executes</text>
+<rect x="332" y="484" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="533" y="496" font-size="9.5" fill="#b91c1c" text-anchor="end" font-weight="700">!</text>
+<text x="434" y="500" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Process Received Data</text>
+<text x="434" y="513" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">RAG + chain-aware context</text>
+<rect x="358.6" y="537" width="150.8" height="12" rx="2" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.8"/>
+<text x="434" y="546" font-size="9" font-weight="700" fill="#b91c1c" text-anchor="middle">RISK: prompt injection</text>
+<rect x="545" y="484" width="181" height="68" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="635" y="500" font-size="11.5" font-weight="700" fill="#065f46" text-anchor="middle">Deliver Dataset</text>
+<text x="635" y="513" font-size="10" fill="#065f46" text-anchor="middle" opacity="0.8">Structured payload</text>
+<text x="144" y="584" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">7 · CONFIRM</text>
+<text x="144" y="600" font-size="9.5" fill="#1d4ed8" text-anchor="end">Manual confirm</text>
+<rect x="154" y="560" width="170" height="68" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="239" y="576" font-size="11.5" font-weight="700" fill="#1e40af" text-anchor="middle">Approve Intent</text>
+<text x="239" y="589" font-size="10" fill="#1e40af" text-anchor="middle" opacity="0.8">Review proposed action</text>
+<rect x="189.2" y="613" width="99.6" height="12" rx="2" fill="#eff6ff" stroke="#93c5fd" stroke-width="0.8"/>
+<text x="239" y="622" font-size="9" font-weight="700" fill="#1d4ed8" text-anchor="middle">MANUAL CONFIRM</text>
+<rect x="332" y="560" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="434" y="576" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Propose Action</text>
+<text x="434" y="589" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">Simulated tx preview</text>
+<rect x="734" y="560" width="202" height="68" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+<text x="835" y="576" font-size="11.5" font-weight="700" fill="#92400e" text-anchor="middle">Tx Simulation</text>
+<text x="835" y="589" font-size="10" fill="#92400e" text-anchor="middle" opacity="0.8">Dry-run before signing</text>
+<text x="144" y="660" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">8 · EXECUTE</text>
+<text x="144" y="676" font-size="9.5" fill="#5b21b6" text-anchor="end">Wallet sign</text>
+<rect x="332" y="636" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="533" y="648" font-size="9.5" fill="#b91c1c" text-anchor="end" font-weight="700">!</text>
+<text x="434" y="652" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Sign Intent Tx</text>
+<text x="434" y="665" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">Guardrails + allowlist</text>
+<rect x="393.8" y="689" width="80.4" height="12" rx="2" fill="#faf5ff" stroke="#c4b5fd" stroke-width="0.8"/>
+<text x="434" y="698" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle">WALLET SIGN</text>
+<rect x="734" y="636" width="202" height="68" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="932" y="648" font-size="9.5" fill="#b91c1c" text-anchor="end" font-weight="700">!</text>
+<text x="835" y="652" font-size="11.5" font-weight="700" fill="#92400e" text-anchor="middle">Intent Tx -&gt; L2</text>
+<text x="835" y="665" font-size="10" fill="#92400e" text-anchor="middle" opacity="0.8">Submit + await finality</text>
+<rect x="772.4" y="689" width="125.2" height="12" rx="2" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.8"/>
+<text x="835" y="698" font-size="9" font-weight="700" fill="#b91c1c" text-anchor="middle">RISK: MEV/frontrun</text>
+<text x="144" y="736" font-size="10.5" font-weight="700" fill="#374151" text-anchor="end">9 · VERIFY</text>
+<text x="144" y="752" font-size="9.5" fill="#059669" text-anchor="end">Result</text>
+<rect x="154" y="712" width="170" height="68" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="239" y="728" font-size="11.5" font-weight="700" fill="#1e40af" text-anchor="middle">View Outcome</text>
+<text x="239" y="741" font-size="10" fill="#1e40af" text-anchor="middle" opacity="0.8">Final state confirmed</text>
+<rect x="192.4" y="765" width="93.2" height="12" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.8"/>
+<text x="239" y="774" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">TASK COMPLETE</text>
+<rect x="332" y="712" width="205" height="68" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="434" y="728" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">Check On-chain State</text>
+<text x="434" y="741" font-size="10" fill="#5b21b6" text-anchor="middle" opacity="0.8">Fresh RPC read</text>
+<rect x="371.4" y="765" width="125.2" height="12" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.8"/>
+<text x="434" y="774" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">VERIFICATION CHAIN</text>
+<rect x="734" y="712" width="202" height="68" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+<text x="835" y="728" font-size="11.5" font-weight="700" fill="#92400e" text-anchor="middle">Receipt + Final State</text>
+<text x="835" y="741" font-size="10" fill="#92400e" text-anchor="middle" opacity="0.8">tx hash · event logs</text>
+<rect x="782.0" y="765" width="106.0" height="12" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.8"/>
+<text x="835" y="774" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">IMMUTABLE PROOF</text>
+</svg>

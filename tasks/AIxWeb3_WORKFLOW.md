@@ -1,9 +1,13 @@
 # Minimal AI × Web3 Agentic Commerce Workflow
 
 > **Use case:** A Requester Agent needs external data to execute an on-chain intent. It discovers a Data Provider Agent, negotiates terms, pays via an on-chain micro-payment, verifies the receipt, analyzes the received data, and — after human confirmation — executes the final on-chain intent.  
-> **Diagram files:** `agentic-commerce-workflow.html` · `agentic-commerce-workflow.mermaid`
+> **Diagram files:** `agentic-commerce-workflow.svg` · `agentic-commerce-workflow.html`
 
 ---
+
+![Agentic Commerce Workflow](./agentic-commerce-workflow.svg)
+
+> HTML version [`agentic-commerce-workflow.html`](./agentic-commerce-workflow.html)
 
 ## 1. What Problem This Workflow Solves
 
@@ -59,80 +63,6 @@ The workflow has five named risk points, grouped by category:
 
 ---
 
-## Diagram (Mermaid)
-
-```mermaid
-flowchart TD
-    subgraph H ["👤 Santiago (Human Owner)"]
-        H1["**1. Issue Task**\nNatural-language intent\n[INITIATOR]"]
-        H7["**7. Approve Intent**\nReview proposed on-chain action\n[👤 MANUAL CONFIRM]"]
-        H9["**9. View Outcome**\nFinal state confirmed\n[✅ TASK COMPLETE]"]
-    end
-
-    subgraph RA ["🤖 Requester Agent (AI)"]
-        RA1["**1b. Receive Task**\nParse intent · plan steps"]
-        RA2["**2. Query Service Registry**\nSearch for matching data provider"]
-        RA3["**3. Propose Terms**\nPrice · schema · SLA\n[⚠️ RISK: manipulated offer]"]
-        RA4["**4. Sign Micro-payment**\nScoped agent wallet — spend limit enforced\n[🔑 WALLET SIGN]"]
-        RA5["**5. Verify Receipt**\nCheck tx hash + event log\n[✅ PROOF OF PAYMENT]"]
-        RA6["**6. Process Received Data**\nBuild chain-aware context · RAG + on-chain state\n[⚠️ RISK: prompt injection in data]"]
-        RA7b["**7b. Propose Action**\nSimulated tx preview shown to human"]
-        RA8["**8. Sign Intent Tx**\nGuardrails + contract allowlist checked\n[🔑 WALLET SIGN] [⚠️ RISK: irreversible]"]
-        RA9["**9b. Check On-chain State**\nFresh RPC read confirms execution\n[✅ VERIFICATION CHAIN]"]
-    end
-
-    subgraph PA ["🤖 Data Provider Agent (AI)"]
-        PA2["**2b. Advertise Capability**\nPublished endpoint + schema"]
-        PA3b["**3b. Accept / Counter Terms**\nSigned agreement"]
-        PA5b["**5b. Confirm Payment**\nRelease data on receipt"]
-        PA6b["**6b. Deliver Dataset**\nStructured payload"]
-    end
-
-    subgraph OC ["⛓️ On-chain / L2"]
-        OC2["**2c. Registry Lookup**\nOn-chain or indexer\n[✅ CHAIN STATE]"]
-        OC4["**4b. Payment Tx → L2**\nBroadcast + confirmed\n[⚠️ RISK: replay / overspend]\n[✅ ON-CHAIN RECEIPT]"]
-        OC5["**5c. Immutable Receipt**\ntx hash + event log\n[✅ AUDIT TRAIL]"]
-        OC7["**7c. Tx Simulation**\nDry-run before signing"]
-        OC8["**8b. Intent Tx → L2**\nSubmit + await finality\n[⚠️ RISK: MEV / frontrun]"]
-        OC9["**9c. Receipt + Final State**\ntx hash · event logs · updated balances\n[✅ IMMUTABLE PROOF]"]
-    end
-
-    H1 --> RA1
-    RA1 --> RA2
-    RA2 <--> PA2
-    RA2 --> OC2
-    OC2 --> RA3
-    RA3 <--> PA3b
-    RA3 --> RA4
-    RA4 -->|signs tx| OC4
-    OC4 --> RA5
-    OC4 --> OC5
-    RA5 --> PA5b
-    PA5b --> PA6b
-    PA6b --> RA6
-    RA6 --> RA7b
-    RA7b --> OC7
-    RA7b --> H7
-    OC7 -.->|simulation result| H7
-    H7 -->|confirmed ✓| RA8
-    RA8 --> OC8
-    OC8 --> OC9
-    OC9 --> RA9
-    RA9 --> H9
-
-    classDef human    fill:#eff6ff,stroke:#3b82f6,color:#1e40af,font-weight:bold
-    classDef agent    fill:#f5f3ff,stroke:#7c3aed,color:#5b21b6,font-weight:bold
-    classDef provider fill:#ecfdf5,stroke:#059669,color:#065f46,font-weight:bold
-    classDef chain    fill:#fffbeb,stroke:#d97706,color:#92400e,font-weight:bold
-
-    class H1,H7,H9 human
-    class RA1,RA2,RA3,RA4,RA5,RA6,RA7b,RA8,RA9 agent
-    class PA2,PA3b,PA5b,PA6b provider
-    class OC2,OC4,OC5,OC7,OC8,OC9 chain
-```
-
----
-
 ## Sources (Wiki Knowledge Base)
 
 All concepts referenced in this document are grounded in the following wiki pages from `knowledge-base/AIxWeb3/wiki/`:
@@ -153,3 +83,5 @@ All concepts referenced in this document are grounded in the following wiki page
 ---
 
 *Generated: 2026-05-27 | Agent: Sensei (Claude via Cowork) | Task: AIxWeb3_WORKFLOW*
+
+*Reviewed: 2026-05-27 | Santiago*

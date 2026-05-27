@@ -1,0 +1,267 @@
+<svg viewBox="0 0 900 1080" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Segoe UI, Arial, sans-serif">
+
+  <!-- ── Background ── -->
+  <rect width="900" height="1080" fill="#0f1117"/>
+
+  <!-- ══════════════════════════════════════════
+       TITLE
+  ══════════════════════════════════════════ -->
+  <text x="450" y="36" text-anchor="middle" font-size="17" font-weight="700" fill="#e2e8f0">Restricted Web3 Assistant — Agentic Commerce Workflow</text>
+  <text x="450" y="54" text-anchor="middle" font-size="11" fill="#64748b">Use case: AI-assisted DeFi yield deposit (500 USDC)</text>
+
+  <!-- ══════════════════════════════════════════
+       SWIMLANE HEADERS  (y=68 → 100)
+  ══════════════════════════════════════════ -->
+  <!-- Lane widths: 0-200 | 200-430 | 430-660 | 660-900 -->
+  <rect x="2"   y="68" width="198" height="32" rx="4" fill="#1e293b"/>
+  <rect x="202" y="68" width="228" height="32" rx="4" fill="#1a2744"/>
+  <rect x="432" y="68" width="228" height="32" rx="4" fill="#1a2a20"/>
+  <rect x="662" y="68" width="236" height="32" rx="4" fill="#1c1a2e"/>
+
+  <text x="101" y="89" text-anchor="middle" font-size="12" font-weight="700" fill="#94a3b8">👤 USER</text>
+  <text x="316" y="89" text-anchor="middle" font-size="12" font-weight="700" fill="#60a5fa">🤖 AI / SENSEI</text>
+  <text x="546" y="89" text-anchor="middle" font-size="12" font-weight="700" fill="#4ade80">⚙️ WEB3 TOOLS</text>
+  <text x="780" y="89" text-anchor="middle" font-size="12" font-weight="700" fill="#a78bfa">⛓️ BLOCKCHAIN</text>
+
+  <!-- ── Lane background stripes ── -->
+  <rect x="2"   y="100" width="198" height="970" fill="#131820" rx="0"/>
+  <rect x="202" y="100" width="228" height="970" fill="#111827" rx="0"/>
+  <rect x="432" y="100" width="228" height="970" fill="#111a12" rx="0"/>
+  <rect x="662" y="100" width="236" height="970" fill="#12101f" rx="0"/>
+
+  <!-- lane dividers -->
+  <line x1="200" y1="68" x2="200" y2="1075" stroke="#1e293b" stroke-width="1.5"/>
+  <line x1="430" y1="68" x2="430" y2="1075" stroke="#1e293b" stroke-width="1.5"/>
+  <line x1="660" y1="68" x2="660" y2="1075" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- ══════════════════════════════════════════
+       LEGEND
+  ══════════════════════════════════════════ -->
+  <rect x="12" y="106" width="178" height="94" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="101" y="123" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">LEGEND</text>
+  <rect x="20" y="129" width="12" height="10" rx="2" fill="#3b82f6"/>
+  <text x="38" y="139" font-size="9.5" fill="#93c5fd">AI — permitted (read / plan)</text>
+  <rect x="20" y="144" width="12" height="10" rx="2" fill="#22c55e"/>
+  <text x="38" y="154" font-size="9.5" fill="#86efac">Tool call (read-only)</text>
+  <rect x="20" y="159" width="12" height="10" rx="2" fill="#f59e0b"/>
+  <text x="38" y="169" font-size="9.5" fill="#fcd34d">Simulation / validation</text>
+  <!-- stop sign -->
+  <polygon points="20,185 26,179 34,179 40,185 40,193 34,199 26,199 20,193" fill="#ef4444" stroke="#fca5a5" stroke-width="1"/>
+  <text x="23" y="193" font-size="7" font-weight="700" fill="white">✋</text>
+  <text x="47" y="192" font-size="9.5" fill="#fca5a5">Manual confirmation required</text>
+
+  <!-- ══════════════════════════════════════════
+       STEP ROWS
+       Row Y positions (center): 225 285 345 405 470 530 590 655 715 780 840 895 955 1010
+  ══════════════════════════════════════════ -->
+
+  <!-- ─── STEP 0: User intent ─── y=220 -->
+  <text x="101" y="215" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">STEP 1 — User Input</text>
+  <!-- User bubble -->
+  <rect x="12" y="220" width="176" height="46" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="100" y="238" text-anchor="middle" font-size="9.5" font-weight="600" fill="#93c5fd">Natural Language Intent</text>
+  <text x="100" y="252" text-anchor="middle" font-size="9" fill="#7dd3fc">"Find best yield for 500 USDC</text>
+  <text x="100" y="263" text-anchor="middle" font-size="9" fill="#7dd3fc">and deposit for me"</text>
+  <!-- arrow to AI -->
+  <line x1="188" y1="243" x2="212" y2="243" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- AI: parse intent -->
+  <rect x="212" y="220" width="206" height="46" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="315" y="238" text-anchor="middle" font-size="9.5" font-weight="600" fill="#93c5fd">Parse Intent + Plan Steps</text>
+  <text x="315" y="251" text-anchor="middle" font-size="9" fill="#7dd3fc">Extract: token=USDC, amount=500</text>
+  <text x="315" y="263" text-anchor="middle" font-size="9" fill="#7dd3fc">goal=max-yield, action=deposit</text>
+
+  <!-- ─── STEP 2: Read chain state ─── y=290 -->
+  <text x="546" y="284" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">STEP 2 — Read On-chain State (read-only)</text>
+  <!-- arrow AI → Tools -->
+  <line x1="418" y1="243" x2="444" y2="300" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow-green)"/>
+  <!-- Tools box -->
+  <rect x="442" y="290" width="206" height="52" rx="6" fill="#14381f" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="545" y="308" text-anchor="middle" font-size="9.5" font-weight="600" fill="#86efac">RPC Read Calls</text>
+  <text x="545" y="321" text-anchor="middle" font-size="9" fill="#bbf7d0">• Fetch USDC balance (wallet)</text>
+  <text x="545" y="333" text-anchor="middle" font-size="9" fill="#bbf7d0">• Query Aave / Compound APY rates</text>
+  <!-- arrow to chain -->
+  <line x1="648" y1="316" x2="672" y2="316" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+  <!-- Chain read result -->
+  <rect x="672" y="290" width="216" height="52" rx="6" fill="#1a1035" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="780" y="308" text-anchor="middle" font-size="9.5" font-weight="600" fill="#c4b5fd">On-chain Read</text>
+  <text x="780" y="321" text-anchor="middle" font-size="9" fill="#ddd6fe">Balance: 500 USDC ✓</text>
+  <text x="780" y="333" text-anchor="middle" font-size="9" fill="#ddd6fe">Aave APY: 4.2% | Compound: 3.8%</text>
+  <!-- result back to AI -->
+  <line x1="442" y1="342" x2="418" y2="342" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow-green-left)"/>
+
+  <!-- ─── STEP 3: AI analyzes + selects ─── y=360 -->
+  <text x="315" y="376" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">STEP 3 — AI Analysis</text>
+  <rect x="212" y="382" width="206" height="46" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="315" y="400" text-anchor="middle" font-size="9.5" font-weight="600" fill="#93c5fd">Select Protocol + Draft Tx Params</text>
+  <text x="315" y="413" text-anchor="middle" font-size="9" fill="#7dd3fc">→ Aave chosen (higher APY 4.2%)</text>
+  <text x="315" y="425" text-anchor="middle" font-size="9" fill="#7dd3fc">→ Draft: approve 500 USDC + deposit</text>
+
+  <!-- ─── STEP 4: Simulate tx ─── y=450 -->
+  <text x="546" y="445" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">STEP 4 — Tx Simulation (validation)</text>
+  <line x1="418" y1="405" x2="444" y2="455" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow-amber)"/>
+  <rect x="442" y="451" width="206" height="52" rx="6" fill="#2d1b00" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="545" y="469" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fcd34d">Tenderly / eth_call Simulation</text>
+  <text x="545" y="482" text-anchor="middle" font-size="9" fill="#fef3c7">• Estimate gas: ~180,000</text>
+  <text x="545" y="494" text-anchor="middle" font-size="9" fill="#fef3c7">• Simulate revert: PASS ✓</text>
+  <line x1="648" y1="477" x2="672" y2="477" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+  <rect x="672" y="451" width="216" height="52" rx="6" fill="#1a1035" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="780" y="469" text-anchor="middle" font-size="9.5" font-weight="600" fill="#c4b5fd">Simulated (no state change)</text>
+  <text x="780" y="482" text-anchor="middle" font-size="9" fill="#ddd6fe">Gas OK, no revert, slippage &lt;0.1%</text>
+  <text x="780" y="494" text-anchor="middle" font-size="9" fill="#ddd6fe">Expected aTokens returned ✓</text>
+  <!-- back to AI -->
+  <line x1="442" y1="503" x2="418" y2="503" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow-amber-left)"/>
+
+  <!-- ─── STEP 5: AI presents plan ─── y=530 -->
+  <text x="315" y="526" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">STEP 5 — Present Plan to User</text>
+  <rect x="212" y="532" width="206" height="56" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="315" y="549" text-anchor="middle" font-size="9.5" font-weight="600" fill="#93c5fd">Summary + Calldata for Review</text>
+  <text x="315" y="562" text-anchor="middle" font-size="9" fill="#7dd3fc">Protocol: Aave v3 (4.2% APY)</text>
+  <text x="315" y="574" text-anchor="middle" font-size="9" fill="#7dd3fc">Gas est: 180k (~$0.18 on L2)</text>
+  <text x="315" y="586" text-anchor="middle" font-size="9" fill="#7dd3fc">2 transactions required</text>
+  <!-- arrow back to user -->
+  <line x1="212" y1="560" x2="188" y2="560" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue-left)"/>
+
+  <!-- ══════════ MANUAL GATE 1 ══════════ -->
+  <line x1="2" y1="605" x2="898" y2="605" stroke="#ef4444" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+  <rect x="2" y="598" width="896" height="18" fill="#1a0808" opacity="0.7"/>
+  <text x="450" y="611" text-anchor="middle" font-size="10" font-weight="700" fill="#fca5a5">✋  MANUAL CONFIRMATION GATE 1 — ERC-20 Approval Signature  ✋</text>
+
+  <!-- ─── STEP 6: User approves ─── y=628 -->
+  <rect x="12" y="620" width="176" height="46" rx="6" fill="#3b0f0f" stroke="#ef4444" stroke-width="2"/>
+  <text x="100" y="638" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fca5a5">User Signs ERC-20 Approval</text>
+  <text x="100" y="650" text-anchor="middle" font-size="9" fill="#fecaca">In wallet UI (MetaMask / Safe)</text>
+  <text x="100" y="662" text-anchor="middle" font-size="9" fill="#fecaca">AI cannot sign on user's behalf</text>
+  <!-- arrow to tools -->
+  <line x1="188" y1="643" x2="444" y2="643" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+  <!-- Tools submit -->
+  <rect x="442" y="620" width="206" height="46" rx="6" fill="#14381f" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="545" y="638" text-anchor="middle" font-size="9.5" font-weight="600" fill="#86efac">Broadcast Approval Tx</text>
+  <text x="545" y="650" text-anchor="middle" font-size="9" fill="#bbf7d0">approve(spender=Aave, 500 USDC)</text>
+  <text x="545" y="662" text-anchor="middle" font-size="9" fill="#bbf7d0">Signed by user's EOA/Smart Account</text>
+  <line x1="648" y1="643" x2="672" y2="643" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+  <!-- Chain confirm -->
+  <rect x="672" y="620" width="216" height="46" rx="6" fill="#1a1035" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="780" y="638" text-anchor="middle" font-size="9.5" font-weight="600" fill="#c4b5fd">Approval Tx Mined</text>
+  <text x="780" y="650" text-anchor="middle" font-size="9" fill="#ddd6fe">txHash: 0xabc… confirmed</text>
+  <text x="780" y="662" text-anchor="middle" font-size="9" fill="#ddd6fe">Allowance set on USDC contract ✓</text>
+
+  <!-- ─── STEP 7: AI verifies approval ─── y=685 -->
+  <rect x="212" y="682" width="206" height="38" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="315" y="700" text-anchor="middle" font-size="9.5" font-weight="600" fill="#93c5fd">Verify Allowance On-chain</text>
+  <text x="315" y="713" text-anchor="middle" font-size="9" fill="#7dd3fc">allowance(user, Aave) == 500 ✓</text>
+  <line x1="442" y1="701" x2="418" y2="701" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow-green-left)"/>
+  <rect x="442" y="682" width="206" height="38" rx="6" fill="#14381f" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="545" y="700" text-anchor="middle" font-size="9.5" font-weight="600" fill="#86efac">RPC: allowance() read</text>
+  <text x="545" y="713" text-anchor="middle" font-size="9" fill="#bbf7d0">Confirmed: 500 USDC approved</text>
+
+  <!-- ══════════ MANUAL GATE 2 ══════════ -->
+  <line x1="2" y1="735" x2="898" y2="735" stroke="#ef4444" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+  <rect x="2" y="728" width="896" height="18" fill="#1a0808" opacity="0.7"/>
+  <text x="450" y="741" text-anchor="middle" font-size="10" font-weight="700" fill="#fca5a5">✋  MANUAL CONFIRMATION GATE 2 — Deposit Contract Write Signature  ✋</text>
+
+  <!-- ─── STEP 8: User signs deposit ─── y=756 -->
+  <rect x="12" y="750" width="176" height="52" rx="6" fill="#3b0f0f" stroke="#ef4444" stroke-width="2"/>
+  <text x="100" y="768" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fca5a5">User Signs Deposit Call</text>
+  <text x="100" y="780" text-anchor="middle" font-size="9" fill="#fecaca">Reviews calldata shown by AI</text>
+  <text x="100" y="791" text-anchor="middle" font-size="9" fill="#fecaca">Confirms in wallet UI manually</text>
+  <text x="100" y="800" text-anchor="middle" font-size="9" fill="#fecaca">AI cannot access private key</text>
+  <line x1="188" y1="775" x2="444" y2="775" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+  <!-- Tools submit deposit -->
+  <rect x="442" y="750" width="206" height="52" rx="6" fill="#14381f" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="545" y="768" text-anchor="middle" font-size="9.5" font-weight="600" fill="#86efac">Broadcast Deposit Tx</text>
+  <text x="545" y="781" text-anchor="middle" font-size="9" fill="#bbf7d0">supply(asset=USDC, amount=500,</text>
+  <text x="545" y="793" text-anchor="middle" font-size="9" fill="#bbf7d0">onBehalfOf=user, referral=0)</text>
+  <text x="545" y="800" text-anchor="middle" font-size="9" fill="#bbf7d0">via Aave v3 Pool contract</text>
+  <line x1="648" y1="775" x2="672" y2="775" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+  <!-- Chain state change -->
+  <rect x="672" y="750" width="216" height="52" rx="6" fill="#1a1035" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="780" y="768" text-anchor="middle" font-size="9.5" font-weight="600" fill="#c4b5fd">Deposit Tx Mined</text>
+  <text x="780" y="781" text-anchor="middle" font-size="9" fill="#ddd6fe">State: USDC → Aave Pool</text>
+  <text x="780" y="793" text-anchor="middle" font-size="9" fill="#ddd6fe">aUSDC minted to user wallet</text>
+  <text x="780" y="803" text-anchor="middle" font-size="9" fill="#ddd6fe">Supply event emitted ✓</text>
+
+  <!-- ─── STEP 9: AI verifies result ─── y=825 -->
+  <text x="315" y="820" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">STEP 6 — Verification</text>
+  <rect x="212" y="826" width="206" height="52" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="315" y="844" text-anchor="middle" font-size="9.5" font-weight="600" fill="#93c5fd">Parse Receipt + Verify</text>
+  <text x="315" y="857" text-anchor="middle" font-size="9" fill="#7dd3fc">• Check aUSDC balance increased</text>
+  <text x="315" y="869" text-anchor="middle" font-size="9" fill="#7dd3fc">• Verify Supply event on explorer</text>
+  <text x="315" y="878" text-anchor="middle" font-size="9" fill="#7dd3fc">• Confirm txHash + block finality</text>
+  <line x1="442" y1="852" x2="418" y2="852" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow-green-left)"/>
+  <rect x="442" y="826" width="206" height="52" rx="6" fill="#14381f" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="545" y="844" text-anchor="middle" font-size="9.5" font-weight="600" fill="#86efac">Block Explorer Query</text>
+  <text x="545" y="857" text-anchor="middle" font-size="9" fill="#bbf7d0">getBalance(aUSDC, user) = 500.02</text>
+  <text x="545" y="869" text-anchor="middle" font-size="9" fill="#bbf7d0">getLogs(Supply, block=latest) ✓</text>
+  <text x="545" y="878" text-anchor="middle" font-size="9" fill="#bbf7d0">status=1 (success) ✓</text>
+
+  <!-- ─── STEP 10: Report to user ─── y=900 -->
+  <rect x="212" y="896" width="206" height="38" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="315" y="914" text-anchor="middle" font-size="9.5" font-weight="600" fill="#93c5fd">Report + Explorer Link</text>
+  <text x="315" y="927" text-anchor="middle" font-size="9" fill="#7dd3fc">Confirmed. 500 USDC earning 4.2%</text>
+  <line x1="212" y1="915" x2="188" y2="915" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue-left)"/>
+  <rect x="12" y="896" width="176" height="38" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="100" y="914" text-anchor="middle" font-size="9.5" font-weight="600" fill="#93c5fd">User sees confirmation</text>
+  <text x="100" y="927" text-anchor="middle" font-size="9" fill="#7dd3fc">Block explorer link provided</text>
+
+  <!-- ─── RISKS ROW ─── y=955 -->
+  <line x1="2" y1="950" x2="898" y2="950" stroke="#334155" stroke-width="1"/>
+  <text x="450" y="964" text-anchor="middle" font-size="10" font-weight="700" fill="#f87171">⚠  KEY RISKS &amp; RESTRICTIONS</text>
+  <!-- risk boxes -->
+  <rect x="12" y="970" width="196" height="50" rx="5" fill="#1c1008" stroke="#f59e0b" stroke-width="1"/>
+  <text x="110" y="984" text-anchor="middle" font-size="8.5" font-weight="600" fill="#fcd34d">Prompt Injection</text>
+  <text x="110" y="995" text-anchor="middle" font-size="8" fill="#fef3c7">Malicious data in protocol</text>
+  <text x="110" y="1006" text-anchor="middle" font-size="8" fill="#fef3c7">docs could redirect deposit</text>
+  <text x="110" y="1016" text-anchor="middle" font-size="8" fill="#fef3c7">target → guardrails required</text>
+
+  <rect x="220" y="970" width="196" height="50" rx="5" fill="#1c1008" stroke="#f59e0b" stroke-width="1"/>
+  <text x="318" y="984" text-anchor="middle" font-size="8.5" font-weight="600" fill="#fcd34d">Stale / Hallucinated Prices</text>
+  <text x="318" y="995" text-anchor="middle" font-size="8" fill="#fef3c7">APY rates from context window</text>
+  <text x="318" y="1006" text-anchor="middle" font-size="8" fill="#fef3c7">may be outdated or fabricated</text>
+  <text x="318" y="1016" text-anchor="middle" font-size="8" fill="#fef3c7">→ must re-fetch at sign time</text>
+
+  <rect x="428" y="970" width="196" height="50" rx="5" fill="#1c1008" stroke="#f59e0b" stroke-width="1"/>
+  <text x="526" y="984" text-anchor="middle" font-size="8.5" font-weight="600" fill="#fcd34d">Wrong Contract Address</text>
+  <text x="526" y="995" text-anchor="middle" font-size="8" fill="#fef3c7">Hallucinated contract address =</text>
+  <text x="526" y="1006" text-anchor="middle" font-size="8" fill="#fef3c7">loss of funds, irreversible</text>
+  <text x="526" y="1016" text-anchor="middle" font-size="8" fill="#fef3c7">→ hardcode allowlist + simulate</text>
+
+  <rect x="636" y="970" width="252" height="50" rx="5" fill="#1c1008" stroke="#f59e0b" stroke-width="1"/>
+  <text x="762" y="984" text-anchor="middle" font-size="8.5" font-weight="600" fill="#fcd34d">Overly Broad Wallet Delegation</text>
+  <text x="762" y="995" text-anchor="middle" font-size="8" fill="#fef3c7">If agent holds key, compromise = full</text>
+  <text x="762" y="1006" text-anchor="middle" font-size="8" fill="#fef3c7">fund loss → scoped session keys only</text>
+  <text x="762" y="1016" text-anchor="middle" font-size="8" fill="#fef3c7">→ ERC-4337 + spending limits</text>
+
+  <!-- ══════════════════════════════════════════
+       ARROW MARKERS
+  ══════════════════════════════════════════ -->
+  <defs>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-blue-left" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#22c55e"/>
+    </marker>
+    <marker id="arrow-green-left" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#22c55e"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#a78bfa"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrow-amber-left" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <!-- outer border -->
+  <rect x="1" y="1" width="898" height="1078" rx="6" fill="none" stroke="#1e293b" stroke-width="1.5"/>
+</svg>
