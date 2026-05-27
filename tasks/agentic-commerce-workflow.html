@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minimal AI × Web3 Agentic Commerce Workflow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #1a1a2e; padding: 24px; }
+  h1 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; font-size: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 13px; height: 13px; border-radius: 3px; }
+
+  .lanes-header { display: grid; grid-template-columns: 150px 1fr 1fr 1fr 1fr; gap: 4px; margin-bottom: 4px; }
+  .lane-label { padding: 7px 8px; border-radius: 6px 6px 0 0; font-size: 11px; font-weight: 700; text-align: center; letter-spacing: 0.04em; text-transform: uppercase; }
+  .l-human { background:#3b82f6; color:#fff; }
+  .l-req   { background:#7c3aed; color:#fff; }
+  .l-prov  { background:#059669; color:#fff; }
+  .l-chain { background:#d97706; color:#fff; }
+
+  .step-row { display: grid; grid-template-columns: 150px 1fr 1fr 1fr 1fr; gap: 4px; min-height: 70px; align-items: stretch; }
+  .step-row + .step-row { border-top: 1px dashed #e2e8f0; }
+  .step-num { display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding-right: 12px; font-size: 10.5px; font-weight: 700; color: #64748b; text-align: right; line-height: 1.4; }
+  .step-num span { font-weight: 400; font-size: 10px; }
+
+  .cell { padding: 7px 9px; border-radius: 6px; font-size: 11.5px; line-height: 1.4; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 62px; position: relative; }
+  .cell-empty { background: transparent; }
+  .cell-human { background:#eff6ff; border:1.5px solid #93c5fd; color:#1e40af; }
+  .cell-req   { background:#f5f3ff; border:1.5px solid #c4b5fd; color:#5b21b6; }
+  .cell-prov  { background:#ecfdf5; border:1.5px solid #6ee7b7; color:#065f46; }
+  .cell-chain { background:#fffbeb; border:1.5px solid #fcd34d; color:#92400e; }
+  .cell-risk  { border-style: dashed !important; }
+  .cell-risk::after  { content:'⚠️'; position:absolute; top:3px; right:5px; font-size:10px; }
+  .cell-sign::after  { content:'🔑'; position:absolute; top:3px; right:5px; font-size:10px; }
+  .cell-confirm::after { content:'👤'; position:absolute; top:3px; right:5px; font-size:10px; }
+  .cell-verify::after  { content:'✅'; position:absolute; top:3px; right:5px; font-size:10px; }
+  .cell-sign-risk::after  { content:'🔑⚠️'; position:absolute; top:3px; right:5px; font-size:10px; }
+
+  .ci { display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .ct { font-weight:700; font-size:11.5px; }
+  .cs { font-size:10px; opacity:0.8; }
+  .badge { display:inline-block; font-size:9.5px; font-weight:700; border-radius:3px; padding:1px 4px; margin-top:3px; }
+  .b-risk   { background:#fef2f2; color:#b91c1c; border:1px solid #fca5a5; }
+  .b-sign   { background:#faf5ff; color:#7c3aed; border:1px solid #c4b5fd; }
+  .b-manual { background:#eff6ff; color:#1d4ed8; border:1px solid #93c5fd; }
+  .b-verify { background:#f0fdf4; color:#166534; border:1px solid #86efac; }
+  .b-init   { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
+</style>
+</head>
+<body>
+<h1>Minimal AI × Web3 Agentic Commerce Workflow</h1>
+<p class="subtitle">Use case: Requester Agent discovers a Data Provider Agent, pays on-chain, analyzes returned data, and executes an on-chain intent after human confirmation.</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Santiago (Human)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Requester Agent (AI)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#059669"></div>Data Provider Agent (AI)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>On-chain / L2</div>
+  <div class="legend-item">🔑 Wallet signing &nbsp; 👤 Manual confirm &nbsp; ✅ Verification &nbsp; ⚠️ Risk point</div>
+</div>
+
+<div class="lanes-header">
+  <div></div>
+  <div class="lane-label l-human">Santiago</div>
+  <div class="lane-label l-req">Requester Agent</div>
+  <div class="lane-label l-prov">Data Provider Agent</div>
+  <div class="lane-label l-chain">On-chain / L2</div>
+</div>
+
+<!-- Step 1 -->
+<div class="step-row">
+  <div class="step-num">1 · INITIATE<br><span style="color:#1d4ed8">▶ Initiator</span></div>
+  <div class="cell cell-human cell-confirm">
+    <div class="ci"><div class="ct">Issue Task</div><div class="cs">Natural-language intent</div><span class="badge b-init">INITIATOR</span></div>
+  </div>
+  <div class="cell cell-req"><div class="ci"><div class="ct">Receive Task</div><div class="cs">Parse intent · plan steps</div></div></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-empty"></div>
+</div>
+
+<!-- Step 2 -->
+<div class="step-row">
+  <div class="step-num">2 · DISCOVER<br><span style="color:#5b21b6">▶ AI executes</span></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-req"><div class="ci"><div class="ct">Query Service Registry</div><div class="cs">Search for matching provider</div></div></div>
+  <div class="cell cell-prov"><div class="ci"><div class="ct">Advertise Capability</div><div class="cs">Published endpoint + schema</div></div></div>
+  <div class="cell cell-chain cell-verify"><div class="ci"><div class="ct">Registry Lookup</div><div class="cs">On-chain or indexer</div><span class="badge b-verify">CHAIN STATE</span></div></div>
+</div>
+
+<!-- Step 3 -->
+<div class="step-row">
+  <div class="step-num">3 · NEGOTIATE<br><span style="color:#5b21b6">▶ AI executes</span></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-req cell-risk"><div class="ci"><div class="ct">Propose Terms</div><div class="cs">Price · schema · SLA</div><span class="badge b-risk">RISK: manipulated offer</span></div></div>
+  <div class="cell cell-prov"><div class="ci"><div class="ct">Accept / Counter</div><div class="cs">Signed agreement</div></div></div>
+  <div class="cell cell-empty"></div>
+</div>
+
+<!-- Step 4 -->
+<div class="step-row">
+  <div class="step-num">4 · PAY<br><span style="color:#7c3aed">🔑 Wallet sign</span></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-req cell-sign"><div class="ci"><div class="ct">Sign Micro-payment</div><div class="cs">Scoped agent wallet<br>spend limit enforced</div><span class="badge b-sign">WALLET SIGN</span></div></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-chain cell-risk cell-verify"><div class="ci"><div class="ct">Payment Tx → L2</div><div class="cs">Broadcast + confirmed</div><span class="badge b-risk">RISK: replay / overspend</span><span class="badge b-verify">ON-CHAIN RECEIPT</span></div></div>
+</div>
+
+<!-- Step 5 -->
+<div class="step-row">
+  <div class="step-num">5 · RECEIPT<br><span style="color:#166534">✅ Verify</span></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-req cell-verify"><div class="ci"><div class="ct">Verify Receipt</div><div class="cs">Check tx hash + event log</div><span class="badge b-verify">PROOF OF PAYMENT</span></div></div>
+  <div class="cell cell-prov"><div class="ci"><div class="ct">Confirm Payment</div><div class="cs">Release data on receipt</div></div></div>
+  <div class="cell cell-chain cell-verify"><div class="ci"><div class="ct">Immutable Receipt</div><div class="cs">tx hash + event log</div><span class="badge b-verify">AUDIT TRAIL</span></div></div>
+</div>
+
+<!-- Step 6 -->
+<div class="step-row">
+  <div class="step-num">6 · ANALYZE<br><span style="color:#5b21b6">▶ AI executes</span></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-req cell-risk"><div class="ci"><div class="ct">Process Received Data</div><div class="cs">Build chain-aware context<br>RAG + on-chain state</div><span class="badge b-risk">RISK: prompt injection in data</span></div></div>
+  <div class="cell cell-prov"><div class="ci"><div class="ct">Deliver Dataset</div><div class="cs">Structured payload</div></div></div>
+  <div class="cell cell-empty"></div>
+</div>
+
+<!-- Step 7 -->
+<div class="step-row">
+  <div class="step-num">7 · CONFIRM<br><span style="color:#1d4ed8">👤 Manual</span></div>
+  <div class="cell cell-human cell-confirm"><div class="ci"><div class="ct">Approve Intent</div><div class="cs">Review proposed action</div><span class="badge b-manual">MANUAL CONFIRM</span></div></div>
+  <div class="cell cell-req"><div class="ci"><div class="ct">Propose Action</div><div class="cs">Simulated tx preview<br>shown to human</div></div></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-chain"><div class="ci"><div class="ct">Tx Simulation</div><div class="cs">Dry-run before signing</div></div></div>
+</div>
+
+<!-- Step 8 -->
+<div class="step-row">
+  <div class="step-num">8 · EXECUTE<br><span style="color:#7c3aed">🔑 Wallet sign</span></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-req cell-sign-risk cell-req"><div class="ci"><div class="ct">Sign Intent Tx</div><div class="cs">Guardrails + contract allowlist<br>checked before sign</div><span class="badge b-sign">WALLET SIGN</span><span class="badge b-risk">RISK: irreversible</span></div></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-chain cell-risk"><div class="ci"><div class="ct">Intent Tx → L2</div><div class="cs">Submit + await finality</div><span class="badge b-risk">RISK: MEV / frontrun</span></div></div>
+</div>
+
+<!-- Step 9 -->
+<div class="step-row">
+  <div class="step-num">9 · VERIFY<br><span style="color:#166534">✅ Result</span></div>
+  <div class="cell cell-human cell-verify"><div class="ci"><div class="ct">View Outcome</div><div class="cs">Final state confirmed</div><span class="badge b-verify">TASK COMPLETE</span></div></div>
+  <div class="cell cell-req cell-verify"><div class="ci"><div class="ct">Check On-chain State</div><div class="cs">Fresh RPC read<br>confirms execution</div><span class="badge b-verify">VERIFICATION CHAIN</span></div></div>
+  <div class="cell cell-empty"></div>
+  <div class="cell cell-chain cell-verify"><div class="ci"><div class="ct">Receipt + Final State</div><div class="cs">tx hash · event logs<br>updated balances</div><span class="badge b-verify">IMMUTABLE PROOF</span></div></div>
+</div>
+
+</body>
+</html>
