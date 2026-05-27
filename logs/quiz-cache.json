@@ -1,4 +1,4 @@
 {
-  "covered": ["session-key"],
+  "covered": ["session-key", "agent-wallet"],
   "reset_at": "2026-05-29T22:12:31.000Z"
 }
