@@ -2,31 +2,44 @@
 title: "Machine Payment"
 type: concept
 tags: [aixweb3-bridge, web3-foundations, agent]
-source_count: 2
-date_updated: "2026-05-22"
+source_count: 3
+date_updated: "2026-05-28"
 ---
 
 ## Definition
 
-Machine payment is the capability of AI agents to autonomously complete micro-payments and service settlements on-chain — paying for compute, APIs, data, or task completion without human intervention for each transaction.
+Machine Payment discusses how agents, APIs, services, and wallets automatically complete quoting, authorization, payment, receipts, and budget control. The focus is not on "AI spending money" but on making payments between machines limitable, verifiable, and traceable. Core principle: decouple "payment intent" from "actual settlement" and ensure every step has evidence.
 
 ## Key Points
 
-- Enables agent-to-agent commerce: one agent pays another for a service it needs to complete its task
-- Requires a scoped [[agent-wallet]] with spending limits — unbounded payment authority for an agent is a critical security risk
-- Machine payment is at the core of the **Agentic Commerce** frontier track: agents discover services, negotiate terms, complete payment, and leave on-chain receipts
-- On-chain receipts (transaction hashes, event logs) serve as immutable proof of service payment — critical for auditability
-- Micro-payment patterns require low-fee chains (L2s) or payment channels — L1 gas fees make per-task micro-payments uneconomical
+- Budget precedes execution — without budget boundaries, there is no safe automatic payment
+- Quotes must be comparable: agents need price, currency, validity period, service scope, and refund conditions
+- Receipts must be verifiable: after payment, it must be provable to whom it was paid, why, and what was delivered
+- The full flow: user authorizes budget → agent gets quote → system checks policy → payment enters escrow or direct settlement → service delivered → receipt as evidence
+- Micro-payment patterns require L2s, payment channels, or batch settlement — L1 gas fees make per-call settlement uneconomical
+
+## Sub-Concepts
+
+- [[stablecoin-payment]] — pricing vs. settlement currency, chain/token considerations
+- [[budget]] — layered spending limits: global, task, call, provider, emergency stop
+- [[quote]] — executable price offer with validity period, refund conditions, and quote ID
+- [[payment-intent]] — authorization to pay for a service type, not yet settled
+- [[x402]] — HTTP 402 payment flow for per-use API/content payments
+- [[mpp]] — Machine Payments Protocol: discovery, quote, auth, settlement, receipt
+- [[subscription]] — continuous service payment with cancellation capabilities
+- [[micropayment]] — high-frequency small-amount with batch settlement strategies
 
 ## Related Concepts
 
 - [[agent-wallet]] — the payment mechanism for machine payments
+- [[settlement-and-escrow]] — completing the payment lifecycle after initial transfer
 - [[agent-workflow]] — payment is a step in agentic workflows
 - [[agent-identity]] — the paying agent must be identifiable for receipt purposes
 - [[web3-tool-use]] — payment tool calls sign and submit transactions
-- [[verification-chain]] — payment submissions require simulation and validation
+- [[payment-and-commerce]] — the broader direction this belongs to
 
 ## Sources
 
 - [[sources/aixweb3-school]] — machine payment as AI × Web3 Bridge topic
 - [[sources/program-structure]] — testnet payments as Week 3 practice exercise
+- [[sources/bridge-chapters]] — detailed chapter with sub-concepts, first principles, and minimal practice

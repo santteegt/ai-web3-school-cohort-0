@@ -145,3 +145,51 @@ _Append-only chronological record of ingests, queries, and lint passes._
 - Hash: `sha256:5b653865d1c02350233e3f5e5ba4441d6f60fac9beb25f8d1e5eb281e42a29e7`
 - Pages created/updated: 57 (2 source pages + 55 concept pages)
 - New concepts: cryptography, hash-function, public-key, private-key, cryptographic-signature, merkle-tree, eoa, mnemonic, web3-transaction, gas, block-explorer, smart-contract, solidity, evm, abi, contract-event, contract-upgrade, web3-dev-stack, remix-ide, hardhat, foundry, openzeppelin, viem-wagmi, blockchain-network, block, consensus, proof-of-stake, testnet, layer-2, rollup, erc-4337, smart-account, bundler, paymaster, session-key, defi, erc20-token, amm, defi-lending, stablecoin, liquidity, oracle, price-feed, oracle-risk, ai-oracle, on-chain-indexing, subgraph, rpc, data-pipeline, web3-security, reentrancy, access-control, contract-audit, tx-simulation, on-chain-monitoring
+
+---
+
+## [2026-05-28] ingest | AIxWeb3 Bridge - Introduction
+
+- Source: `raw/AIxWeb3 Bridge - Introduction.md`
+- Hash: `sha256:7113300e90e3c5153406418a0c8fa4862b8ca4a7da7d9a72954f428e9e7c9389`
+- Pages created/updated: 10 (1 source page + 6 direction pages + 3 standards pages)
+- New concepts: payment-and-commerce, identity-reputation-capability, wallet-permission-safe-execution, privacy-security-sovereignty, dev-tooling-agent-workflow, governance-coordination-public-goods, erc-7702, erc-8183, erc-8004
+- Updated: aixweb3-bridge-overview (source_count 2→4, added 6 bridge direction links)
+
+---
+
+## [2026-05-28] ingest | AIxWeb3 - Problem Space & Direction Map
+
+- Source: `raw/AIxWeb3 - Problem Space & Direction Map.md`
+- Hash: `sha256:8d819350859d80f1ece2a43fc6dc04b4ff39fcedf7975ac08ae65385ebaa3fe4`
+- Pages created/updated: 3 (1 source page + 2 framework concept pages)
+- New concepts: direction-evaluation-matrix, deep-exploration-paths
+
+---
+
+## [2026-05-28] ingest | AIxWeb3 Project - Unified Evaluation Framework
+
+- Source: `raw/AIxWeb3 Project - Unified Evaluation Framework.md`
+- Hash: `sha256:84ea7ef2ed95946fefeb5d9ebd0ad940e3b9182730dd543c8f29ae48c96cc4d7`
+- Pages created/updated: 2 (1 source page + 1 concept page)
+- New concepts: unified-evaluation-framework
+
+---
+
+## [2026-05-28] ingest | AIxWeb3 Bridge Chapters
+
+- Source: `raw/AIxWeb3 Bridge Chapters.md`
+- Hash: `sha256:40836f87f09edea93cb828db7f0330e781701f9da726e73da1a23e5e7542cc06`
+- Pages created/updated: 104 (1 source page + 6 major topic pages + 87 sub-concept pages + 10 updated existing pages)
+- New major topics: settlement-and-escrow, agent-trust-and-reputation, ai-privacy, ai-sovereignty, governance-ai, decentralized-ai, cobo-pact
+- New sub-concepts: on-chain-data, contract-docs, transaction-history, explorer-context, indexing-context, rpc-tool, contract-read, contract-write, wallet-tool, defi-tool, tool-permission, tool-log, task-graph, human-in-the-loop, retry-fallback, trace, regression-set, aa-wallet, policy, guard, simulation, revocation, human-check, stablecoin-payment, budget, quote, payment-intent, x402, mpp, subscription, micropayment, escrow, receipt, delivery-proof, acceptance, refund, dispute, evaluator, agent-profile, capability, service-endpoint, registry, did-vc, a2a-protocol, ownership, reputation, review, attestation, stake, slashing, validation, ai-output, data-feed, model-result, proof-of-inference, dispute-challenge, tee, zk, zkml, verifiable-compute, benchmark, audit-trail, tool-abuse, malicious-context, key-safety, permission-isolation, sandbox, audit-log, alert, data-boundary, local-ai, private-memory, secret-management, minimal-disclosure, encrypted-data, user-consent, user-control, data-portability, model-choice, local-first-ai, censorship-resistance, dacc, crops, proposal-summary, meeting-action, contribution-graph, budget-check, source-traceability, deep-funding, plurality, model-market, data-market, compute-market, inference-network, model-routing, quality-benchmark
+- Updated: chain-aware-context, web3-tool-use, agent-workflow, agent-wallet, machine-payment, agent-identity, verifiable-ai, ai-security, ai-oracle, aixweb3-bridge-overview
+
+---
+
+## [2026-05-28] ingest | Fine Tuning (updated)
+
+- Source: `raw/Fine Tuning.md`
+- Hash: `sha256:1c8089e72c91794d0a719e01237e3da995b75fcdbf0286175bf79c5e08a7c4f8`
+- Pages created/updated: 2 (1 source page updated + 1 concept page updated)
+- Updated: sources/fine-tuning (added AI×Web3 use cases section), fine-tuning (added aixweb3-bridge tag, AI×Web3 use cases)

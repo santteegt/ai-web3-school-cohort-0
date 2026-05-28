@@ -2,21 +2,30 @@
 title: "Chain-aware Context"
 type: concept
 tags: [aixweb3-bridge, context, web3-foundations]
-source_count: 1
-date_updated: "2026-05-22"
+source_count: 2
+date_updated: "2026-05-28"
 ---
 
 ## Definition
 
-Chain-aware context is the practice of incorporating live on-chain state — wallet balances, contract storage, recent transactions, governance votes, oracle prices — into an agent's context so that its reasoning is grounded in current blockchain reality rather than stale or fabricated data.
+Chain-aware Context refers to ensuring that an AI can see the correct chain, address, contract, transaction, event, balance, authorization, and data source before answering or acting — rather than guessing on-chain state from a single user statement. Models cannot judge on-chain facts based on linguistic memory; on-chain facts must be read from tools and indexing layers.
 
 ## Key Points
 
-- On-chain state is the "fact layer" of agent context in Web3 settings — it should be fetched fresh at query time, not cached long-term
-- Chain-aware context requires [[retrieval-augmented-generation]] applied to blockchain data: RPC queries, indexer lookups, and event log retrieval
-- Key challenge: on-chain data is voluminous and constantly changing — [[context-engineering]] decisions (what to fetch, when to refresh, what to summarize) are critical
-- Any agent action based on chain-aware context (e.g. "user has enough USDC for this transaction") must be re-verified at execution time, not just at context-building time
-- Connects to [[web3-tool-use]]: agents retrieve chain state via RPC calls, indexer APIs, and oracle feeds
+- On-chain state is time-sensitive: balance, authorization, and position change with blocks
+- Context must have sources: contract addresses, block numbers, transaction hashes, and explorer links must be traceable
+- Context must distinguish between facts and interpretations: tools return facts, models interpret
+- Any agent action based on chain-aware context must be re-verified at execution time, not just context-building time
+- A complete chain-aware context package includes: user goals, chain ID, user address and balance, relevant contract addresses/ABIs/docs, recent transactions and authorizations, indexing data update time, citations for every key conclusion
+
+## Sub-Concepts
+
+- [[on-chain-data]] — balances, transactions, logs, contract states, block info with chain ID + block number
+- [[contract-docs]] — ABI + documentation + NatSpec to fill semantic gaps beyond function signatures
+- [[transaction-history]] — past user/contract behavior with hash-level evidence
+- [[explorer-context]] — verifiable evidence from block explorers with clickable links
+- [[indexing-context]] — product-oriented queryable on-chain events (The Graph, custom indexers)
+- [[citations]] — on-chain interpretations must lead back to transaction hashes, block numbers, or explorer links
 
 ## Related Concepts
 
@@ -26,7 +35,9 @@ Chain-aware context is the practice of incorporating live on-chain state — wal
 - [[web3-tool-use]] — the tools used to fetch on-chain data
 - [[agent-wallet]] — wallet balance and permission state is a critical chain-aware context element
 - [[information-governance]] — on-chain data has high trust but must be timestamped
+- [[malicious-context]] — contract docs and web content can contain attack instructions
 
 ## Sources
 
 - [[sources/aixweb3-school]] — chain-aware context as AI × Web3 Bridge topic
+- [[sources/bridge-chapters]] — detailed chapter with sub-concepts, first principles, and minimal practice

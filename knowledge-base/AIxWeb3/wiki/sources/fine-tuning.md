@@ -1,10 +1,10 @@
 ---
 title: "Fine Tuning"
 type: source
-tags: [ai-foundations, llm, fine-tuning]
+tags: [ai-foundations, llm, fine-tuning, aixweb3-bridge]
 source_file: "raw/Fine Tuning.md"
-source_hash: "sha256:d48cef814321b9ab9cc3de25f9737713e22a49b6e63ac3037f5840b4f47439b7"
-date_ingested: "2026-05-25"
+source_hash: "sha256:1c8089e72c91794d0a719e01237e3da995b75fcdbf0286175bf79c5e08a7c4f8"
+date_ingested: "2026-05-28"
 ---
 
 ## Summary
@@ -26,3 +26,17 @@ This source frames fine-tuning as a targeted tool for making a model more consis
 - "Fix data before fixing the model: bad data trains bad habits more stably."
 - "Have evals before fine-tuning: otherwise you do not know whether the tuned model improved or only became smoother on a few samples."
 - Fine-tuning cannot directly turn the model into a trusted execution layer in AI × Web3 — it can improve format consistency for transaction explanations, governance summaries, risk labels, and tool-call style, but permission safety and reliability must be enforced in code
+
+## AI × Web3 Use Cases Added (2026-05-28)
+
+- Transaction-explanation style: consistent formatting for on-chain transaction summaries
+- Governance-summary format: structured proposal summaries with fixed section layout
+- Risk-label output: consistent classification outputs for security/risk scoring
+- Contract-comment style: consistent NatSpec and documentation generation
+- Tool-call style: consistent function calling format and argument structure
+
+## Additional Resources Added
+
+- Unsloth Docs — lightweight fine-tuning path closer to hands-on practice
+- TRL Documentation — SFT, preference optimization, and related training flows
+- OpenAI Evals API Reference — evals before and after fine-tuning to measure improvement

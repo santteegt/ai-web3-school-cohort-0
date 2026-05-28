@@ -2,25 +2,29 @@
 title: "AI Oracle"
 type: concept
 tags: [web3-foundations, oracle, aixweb3-bridge, frontier]
-source_count: 1
-date_updated: "2026-05-25"
+source_count: 2
+date_updated: "2026-05-28"
 ---
-
-# AI Oracle
 
 ## Definition
 
-An AI Oracle is an emerging pattern where AI model outputs (predictions, classifications, summaries) are published verifiably on-chain, allowing smart contracts to act on AI-generated data. It extends the oracle concept from external data (prices, weather) to AI inference results — and inherits all oracle risks while adding new AI-specific ones.
+An AI Oracle is a mechanism that submits model outputs, scores, classifications, or inference results to on-chain systems for use. Its challenge is not just "how to get data on-chain" but how to record inputs, models, versions, proofs, and disputes. Core principle: when AI output affects on-chain assets or permissions, the output itself must have a source, boundary, and dispute mechanism.
 
 ## Key Points
 
-- **Use cases**: on-chain AI-powered risk scoring, sentiment-based DeFi triggers, AI-verified content, autonomous agent decision attestation
-- **Verifiability problem**: how does an on-chain contract verify that the published AI output actually came from a specific model run on specific inputs? Options: ZK proofs of inference, trusted execution environments (TEEs), multi-oracle consensus
-- **ZK inference**: zero-knowledge proofs that a computation (model forward pass) was executed correctly — computationally expensive but trustless; projects like EZKL and Modulus Labs work on this
-- **TEE-based**: model runs in a Trusted Execution Environment (e.g., Intel SGX); TEE signs the output; contract verifies the attestation
-- **Oracle committees**: multiple independent nodes run the same model; output is the median or consensus — similar to Chainlink's aggregation
-- **AI oracle risk**: input manipulation, model version drift, output freshness, TEE compromise — all new attack surfaces beyond standard oracle risks
-- **AI × Web3 significance**: AI oracles are the bridge between AI agent decisions and on-chain enforcement
+- Standard oracles bring external data on-chain; AI oracles bring model judgments: "whether a task is completed," "whether content is non-compliant," "whether an address is high-risk"
+- Inputs must be traceable (what the model saw), results must be structured (on-chain systems consume fields, not long text), disputes must be designed upfront (who can challenge, challenge window, review process)
+- Layering by risk: low-risk → display labels; medium-risk → human review; high-risk → proofs + challenge periods + multi-party verification
+- AI oracle inherits all oracle risks AND adds: model errors, input contamination, prompt injection, data bias, tampered execution environments, non-reviewable outputs
+
+## Sub-Concepts
+
+- [[ai-output]] — structured fields (machine) + human explanation (UI/disputes); never long text for contract decisions
+- [[data-feed]] — continuous AI-processed data with version tracking and drift handling
+- [[model-result]] — model version + prompt template + input reference + output schema
+- [[oracle-risk]] — errors, contamination, prompt injection, economic attacks, versioning issues
+- [[proof-of-inference]] — TEE/ZK/signed-log proofs that output came from specific model + input
+- [[dispute-challenge]] — optimistic challenge window for objecting to AI oracle outputs
 
 ## Related Concepts
 
@@ -30,7 +34,9 @@ An AI Oracle is an emerging pattern where AI model outputs (predictions, classif
 - [[smart-contract]] — the consumer of AI oracle outputs
 - [[agent-identity]] — AI oracles can attest which agent produced an output
 - [[chain-aware-context]] — AI agents read chain state; AI oracles write AI state to chain
+- [[settlement-and-escrow]] — AI oracle outputs often trigger escrow state transitions
 
 ## Sources
 
 - [[sources/web3-chapters]] — Chapter: Oracle
+- [[sources/bridge-chapters]] — detailed chapter with sub-concepts, first principles, and minimal practice

@@ -1,9 +1,9 @@
 ---
 title: "Fine-Tuning"
 type: concept
-tags: [ai-foundations, llm, fine-tuning]
+tags: [ai-foundations, llm, fine-tuning, aixweb3-bridge]
 source_count: 1
-date_updated: "2026-05-25"
+date_updated: "2026-05-28"
 ---
 
 ## Definition

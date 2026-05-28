@@ -2,21 +2,30 @@
 title: "Agent Workflow"
 type: concept
 tags: [aixweb3-bridge, agent]
-source_count: 2
-date_updated: "2026-05-22"
+source_count: 3
+date_updated: "2026-05-28"
 ---
 
 ## Definition
 
-An agent workflow defines the execution structure for an AI agent's task: which steps are automated end-to-end, which steps require human-in-the-loop confirmation, and how control flows between them. In AI × Web3, workflow design is especially critical because mistakes may be irreversible on-chain.
+Agent Workflow organizes "user goals → context reading → plan generation → tool calling → risk check → execution → recording and review" into a controllable process. The core principle: putting a probabilistic model into a deterministic process. High-risk agents cannot rely solely on "next-step reasoning" — they must have states, boundaries, and stop conditions.
 
 ## Key Points
 
-- Not all workflow steps should be automated: high-risk, irreversible, or compliance-sensitive steps should require human-in-the-loop checkpoints
-- Workflow design answers four questions for each step: who initiates, who executes, who pays, who verifies, and who carries the risk
-- The Prompt → Workflow → Agent spectrum means most tasks should be handled as structured workflows before considering full agent autonomy
-- In Week 2 of the program, track selection involves mapping out a workflow for a specific AI × Web3 use case
-- Common Web3 workflow pattern: agent retrieves data → proposes action → human confirms → agent executes on-chain → agent records receipt
+- Not all workflow steps should be automated: high-risk, irreversible, or compliance-sensitive steps require human-in-the-loop checkpoints
+- A mature agent is more than just a prompt: it needs a task graph, state machine, tool permissions, error handling, human confirmation, trace, and evaluation sets
+- Common Web3 workflow pattern: read context → generate plan → simulate → confirm → execute on-chain → record receipt
+- Automation requires recoverable state: the system must know how to continue or stop when a tool fails, user rejects, or transaction is pending
+
+## Sub-Concepts
+
+- [[task-graph]] — break goals into dependent nodes with per-step input/output/permissions/stop-conditions
+- [[state-machine]] — explicit states (draft, simulation_failed, waiting_confirmation, confirmed, reverted) for on-chain execution
+- [[human-in-the-loop]] — layered risk-based confirmation at key risk points, not every step
+- [[retry-fallback]] — cautious retry patterns (broadcast state awareness for Web3)
+- [[trace]] — full record of input/judgment/tool/result enabling post-incident review
+- [[evaluation-harness]] — systematic testing including unauthorized-request rejection and wrong-chain detection
+- [[regression-set]] — fixed safety test cases run before any model/prompt/tool change
 
 ## Related Concepts
 
@@ -26,8 +35,10 @@ An agent workflow defines the execution structure for an AI agent's task: which 
 - [[guardrails]] — guardrails enforce workflow rules at each step
 - [[agent-wallet]] — wallet permissions are scoped to specific workflow steps
 - [[machine-payment]] — payment steps within agent workflows
+- [[langgraph]] — stateful workflow framework for complex agents
 
 ## Sources
 
 - [[sources/aixweb3-school]] — agent workflow as AI × Web3 Bridge topic
 - [[sources/program-structure]] — workflow design as Week 2 track exercise
+- [[sources/bridge-chapters]] — detailed chapter with sub-concepts, first principles, and minimal practice

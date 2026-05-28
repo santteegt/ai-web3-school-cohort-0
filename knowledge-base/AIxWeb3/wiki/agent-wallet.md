@@ -2,21 +2,33 @@
 title: "Agent Wallet"
 type: concept
 tags: [aixweb3-bridge, web3-foundations, agent]
-source_count: 2
-date_updated: "2026-05-22"
+source_count: 3
+date_updated: "2026-05-28"
 ---
 
 ## Definition
 
-An agent wallet is a blockchain wallet (or delegated signing key) granted to an AI agent, scoped with explicit permissions — spending limits, allowed contracts, time windows, and revocation conditions — so the agent can execute on-chain actions within defined boundaries.
+An Agent Wallet is not simply "giving an AI a wallet private key." The real problem is: what on-chain actions can the agent perform on behalf of the user, whether these actions have limits on amount, time, object, and risk, and when the user must re-confirm. Agents can only be given verifiable, restricted, and revocable action spaces.
 
 ## Key Points
 
-- Agents should not hold a primary wallet — instead, they receive **delegated permissions** scoped to specific actions
-- Key permission dimensions: spending limit (max value per transaction), contract allowlist (which contracts can be called), time window (valid until when), revocation (can be cancelled at any time)
-- Account Abstraction (ERC-4337 / Smart Accounts) enables programmable permission models that are well-suited for agent delegation
-- The agent wallet is how [[agent-memory]] about permissions maps to actual on-chain enforcement — remembered permissions must be re-verified at execution time
-- Overly broad agent wallets are a primary AI × Web3 security risk: if the agent is compromised or hallucinating, it can cause irreversible financial losses
+- Agents should not hold a primary wallet — receive delegated permissions scoped to specific actions
+- A wallet is not just a signature button but a permission system: expresses time, amount, contracts, methods, assets, recipients, and revocation conditions
+- Automation must be bound to revocation capability — users must always see what permissions the agent has, what it has done, and where to turn it off
+- Two failure modes: "agent can only suggest, never execute" (useless) vs. "permissions too broad, risks unacceptable" (dangerous)
+- Typical safe pipeline: user provides goals → agent reads context → system converts to restricted transactions → guards + simulation check → user confirms → smart account executes → logs record
+
+## Sub-Concepts
+
+- [[aa-wallet]] — account abstraction wallet with programmable rules
+- [[smart-account]] — execution boundary with policy, recovery, automation (see also [[erc-4337]])
+- [[session-key]] — time/amount/target-limited temporary key for low-risk automation
+- [[policy]] — checkable rules defining what the agent can do
+- [[guard]] — deterministic pre-execution intercept layer
+- [[simulation]] — preview transaction results before signing
+- [[revocation]] — user + automatic permission withdrawal
+- [[human-check]] — layered confirmation at key risk points
+- [[cobo-pact]] — task-level temporary authorization (task intent + budget + scope + time window)
 
 ## Related Concepts
 
@@ -26,8 +38,10 @@ An agent wallet is a blockchain wallet (or delegated signing key) granted to an 
 - [[machine-payment]] — agent wallet is the mechanism for autonomous payments
 - [[agent-identity]] — the wallet provides on-chain identity for the agent
 - [[verification-chain]] — signing is step 6; must not be reached without all prior checks
+- [[wallet-permission-safe-execution]] — the broader direction this belongs to
 
 ## Sources
 
 - [[sources/aixweb3-school]] — agent wallet as AI × Web3 Bridge topic
 - [[sources/program-structure]] — agent workflow + wallet confirmation as Week 3 exercise
+- [[sources/bridge-chapters]] — detailed chapter with sub-concepts, first principles, and minimal practice
