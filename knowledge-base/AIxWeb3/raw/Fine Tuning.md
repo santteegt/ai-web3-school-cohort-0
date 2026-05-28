@@ -49,6 +49,7 @@
 
 - [OpenAI Fine-tuning Guide](https://platform.openai.com/docs/guides/fine-tuning): learn fine-tuning use cases, data format, and training flow.
 - [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/index): learn parameter-efficient fine-tuning methods such as LoRA and adapters.
+- [Unsloth Docs](https://unsloth.ai/docs): understand a lightweight fine-tuning path that is closer to hands-on practice.
 - [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685): the original LoRA paper, useful for understanding low-rank adaptation.
 - [TRL Documentation](https://huggingface.co/docs/trl/index): learn tools for SFT, preference optimization, and related training flows.
 - [OpenAI Evals API Reference](https://platform.openai.com/docs/api-reference/evals?api-mode=chat): use evals before and after fine-tuning to determine whether performance actually improved.
