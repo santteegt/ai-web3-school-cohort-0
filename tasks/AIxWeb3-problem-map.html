@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI × Web3 Problem Map</title>
+<style>
+  :root {
+    --payment:   #3B82F6;
+    --identity:  #8B5CF6;
+    --capability:#10B981;
+    --wallet:    #F59E0B;
+    --privacy:   #EF4444;
+    --govern:    #14B8A6;
+    --bg:        #0F172A;
+    --surface:   #1E293B;
+    --surface2:  #263347;
+    --muted:     #64748B;
+    --text:      #E2E8F0;
+    --subtext:   #94A3B8;
+    --border:    #334155;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 32px 24px 64px;
+  }
+  /* ── Header ───────────────────────────────────────────── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .page-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+  .page-header h1 span { color: var(--payment); }
+  .page-header p {
+    color: var(--subtext);
+    font-size: 13px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin: 2px 3px;
+    letter-spacing: 0.3px;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  /* ── SVG Map container ────────────────────────────────── */
+  .map-section {
+    max-width: 760px;
+    margin: 0 auto 48px;
+  }
+  .map-section h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--subtext);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .map-svg-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    padding: 24px 8px;
+  }
+  .map-svg-wrap svg { max-width: 100%; height: auto; }
+
+  /* ── Cards grid ───────────────────────────────────────── */
+  .cards-section h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--subtext);
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-header {
+    padding: 14px 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .card-header .icon {
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .card-header .title-block { flex: 1; }
+  .card-header .dir-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    opacity: 0.75;
+    margin-bottom: 2px;
+  }
+  .card-header .dir-name {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .card-body { padding: 14px 16px; flex: 1; }
+
+  .row {
+    display: flex;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .row:last-child { border-bottom: none; }
+  .row-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    width: 22px;
+    text-align: center;
+    margin-top: 1px;
+  }
+  .row-content { flex: 1; }
+  .row-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 3px;
+  }
+  .row-text {
+    font-size: 13px;
+    color: var(--subtext);
+    line-height: 1.45;
+  }
+  .row-text strong { color: var(--text); font-weight: 600; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 6px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+  .divider span {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .divider hr { flex: 1; border: none; border-top: 1px dashed var(--border); }
+
+  .missing-row {
+    display: flex;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .missing-row:last-child { border-bottom: none; }
+  .missing-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+  }
+  .missing-row .row-text { font-size: 12.5px; }
+
+  /* ── Color classes ────────────────────────────────────── */
+  .c-payment  { color: var(--payment); }
+  .c-identity { color: var(--identity); }
+  .c-capab    { color: var(--capability); }
+  .c-wallet   { color: var(--wallet); }
+  .c-privacy  { color: var(--privacy); }
+  .c-govern   { color: var(--govern); }
+
+  .bg-payment  { background: color-mix(in srgb, var(--payment) 15%, transparent); border-left: 3px solid var(--payment); }
+  .bg-identity { background: color-mix(in srgb, var(--identity) 15%, transparent); border-left: 3px solid var(--identity); }
+  .bg-capab    { background: color-mix(in srgb, var(--capability) 15%, transparent); border-left: 3px solid var(--capability); }
+  .bg-wallet   { background: color-mix(in srgb, var(--wallet) 15%, transparent); border-left: 3px solid var(--wallet); }
+  .bg-privacy  { background: color-mix(in srgb, var(--privacy) 15%, transparent); border-left: 3px solid var(--privacy); }
+  .bg-govern   { background: color-mix(in srgb, var(--govern) 15%, transparent); border-left: 3px solid var(--govern); }
+
+  .hdr-payment  { background: color-mix(in srgb, var(--payment) 18%, var(--surface)); }
+  .hdr-identity { background: color-mix(in srgb, var(--identity) 18%, var(--surface)); }
+  .hdr-capab    { background: color-mix(in srgb, var(--capability) 18%, var(--surface)); }
+  .hdr-wallet   { background: color-mix(in srgb, var(--wallet) 18%, var(--surface)); }
+  .hdr-privacy  { background: color-mix(in srgb, var(--privacy) 18%, var(--surface)); }
+  .hdr-govern   { background: color-mix(in srgb, var(--govern) 18%, var(--surface)); }
+
+  /* badge-like missing tags */
+  .no-ai-tag   { background: color-mix(in srgb, #F59E0B 20%, transparent); color: #FCD34D; }
+  .no-web3-tag { background: color-mix(in srgb, #6366F1 20%, transparent); color: #A5B4FC; }
+
+  /* ── Track groups & highlight badges ─────────────────── */
+  .track-group {
+    position: relative;
+    border-radius: 18px;
+    padding: 22px 16px 16px;
+    grid-column: span 2;
+  }
+  .main-group {
+    background: color-mix(in srgb, #8B5CF6 6%, transparent);
+    border: 2px solid #8B5CF6;
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, #8B5CF6 12%, transparent),
+      0 0 32px color-mix(in srgb, #8B5CF6 18%, transparent);
+  }
+  .track-group-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  /* floating pill badges */
+  .track-group-badge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.55);
+  }
+  .badge-main {
+    background: linear-gradient(130deg, #6D28D9 0%, #A855F7 60%, #C084FC 100%);
+    color: #fff;
+    border: 1px solid rgba(196,165,253,0.5);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .badge-secondary {
+    position: absolute;
+    top: 4px;
+    right: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 13px;
+    border-radius: 99px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    background: linear-gradient(130deg, #0F766E 0%, #14B8A6 60%, #2DD4BF 100%);
+    color: #fff;
+    border: 1px solid rgba(94,234,212,0.5);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+    z-index: 3;
+  }
+  /* per-card glow for highlighted directions */
+  .card.hl-identity {
+    border-color: #8B5CF6;
+    border-width: 2px;
+    box-shadow: 0 0 20px color-mix(in srgb, #8B5CF6 30%, transparent), 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .card.hl-capab {
+    border-color: #10B981;
+    border-width: 2px;
+    box-shadow: 0 0 20px color-mix(in srgb, #10B981 28%, transparent), 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .card.hl-govern {
+    border-color: #14B8A6;
+    border-width: 2px;
+    box-shadow: 0 0 20px color-mix(in srgb, #14B8A6 30%, transparent), 0 4px 16px rgba(0,0,0,0.3);
+  }
+  @media (max-width: 700px) {
+    .track-group { grid-column: span 1; }
+    .track-group-inner { grid-template-columns: 1fr; }
+    .track-group-badge { font-size: 10px; padding: 4px 12px; }
+  }
+
+  /* ── Footer ───────────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════ -->
+<header class="page-header">
+  <h1>AI <span>×</span> Web3 — Problem Space Map</h1>
+  <p>Six foundational directions where AI capabilities and Web3 mechanisms are <em>both</em> indispensable. Neither domain alone solves the problem.</p>
+  <div class="legend">
+    <span class="badge" style="background:color-mix(in srgb,#3B82F6 20%,transparent);color:#93C5FD">💳 Payment / Commerce</span>
+    <span class="badge" style="background:color-mix(in srgb,#8B5CF6 20%,transparent);color:#C4B5FD">🪪 Identity / Reputation</span>
+    <span class="badge" style="background:color-mix(in srgb,#10B981 20%,transparent);color:#6EE7B7">🔌 Capability / Interop</span>
+    <span class="badge" style="background:color-mix(in srgb,#F59E0B 20%,transparent);color:#FCD34D">🔐 Wallet / Permission</span>
+    <span class="badge" style="background:color-mix(in srgb,#EF4444 20%,transparent);color:#FCA5A5">🛡 Privacy / Security</span>
+    <span class="badge" style="background:color-mix(in srgb,#14B8A6 20%,transparent);color:#5EEAD4">🏛 Governance / Coordination</span>
+  </div>
+</header>
+
+<!-- ══ SVG MAP ══════════════════════════════════════════ -->
+<section class="map-section">
+  <h2>Direction Map — Hexagonal View</h2>
+  <div class="map-svg-wrap">
+    <svg viewBox="0 0 760 500" xmlns="http://www.w3.org/2000/svg" width="760" height="500">
+      <defs>
+        <!-- glow filters per color -->
+        <filter id="glow-blue"  x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow-purple" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/></filter>
+        <!-- center glow -->
+        <radialGradient id="center-grad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#818CF8" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#818CF8" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- ── background subtle hex outline ─────────────── -->
+      <polygon points="380,60 570,168 570,332 380,440 190,332 190,168"
+               fill="none" stroke="#1E293B" stroke-width="1.5"/>
+
+      <!-- ── center glow halo ───────────────────────────── -->
+      <circle cx="380" cy="250" r="72" fill="url(#center-grad)"/>
+
+      <!-- ── spoke lines ────────────────────────────────── -->
+      <!-- Payment (right) -->
+      <line x1="380" y1="250" x2="544" y2="250" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+      <!-- Identity (top-right) -->
+      <line x1="380" y1="250" x2="462" y2="114" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+      <!-- Capability (top-left) -->
+      <line x1="380" y1="250" x2="298" y2="114" stroke="#10B981" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+      <!-- Wallet (left) -->
+      <line x1="380" y1="250" x2="216" y2="250" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+      <!-- Privacy (bottom-left) -->
+      <line x1="380" y1="250" x2="298" y2="386" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+      <!-- Governance (bottom-right) -->
+      <line x1="380" y1="250" x2="462" y2="386" stroke="#14B8A6" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+
+      <!-- ── center node ─────────────────────────────────── -->
+      <rect x="314" y="218" width="132" height="64" rx="10" fill="#1E293B" stroke="#818CF8" stroke-width="1.8" filter="url(#shadow)"/>
+      <text x="380" y="244" text-anchor="middle" fill="#818CF8" font-size="11" font-weight="800" letter-spacing="1">AI × WEB3</text>
+      <text x="380" y="260" text-anchor="middle" fill="#94A3B8" font-size="10">Problem Space</text>
+      <text x="380" y="274" text-anchor="middle" fill="#64748B" font-size="9">6 Foundational Directions</text>
+
+      <!-- ═══ DIRECTION NODES ══════════════════════════════ -->
+
+      <!-- 1. Payment / Commerce — right (564, 250) -->
+      <g filter="url(#shadow)">
+        <rect x="564" y="218" width="158" height="64" rx="10" fill="#1E293B" stroke="#3B82F6" stroke-width="2"/>
+        <rect x="564" y="218" width="6" height="64" rx="3" fill="#3B82F6"/>
+        <text x="647" y="241" text-anchor="middle" fill="#93C5FD" font-size="9" font-weight="700" letter-spacing="0.8">PAYMENT / COMMERCE</text>
+        <text x="647" y="258" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Closed-loop</text>
+        <text x="647" y="271" text-anchor="middle" fill="#94A3B8" font-size="10">agent economics</text>
+      </g>
+
+      <!-- 2. Identity / Reputation — top-right (462, 114) -->
+      <g filter="url(#shadow)">
+        <rect x="394" y="82" width="152" height="64" rx="10" fill="#1E293B" stroke="#8B5CF6" stroke-width="2"/>
+        <rect x="394" y="82" width="6" height="64" rx="3" fill="#8B5CF6"/>
+        <text x="470" y="105" text-anchor="middle" fill="#C4B5FD" font-size="9" font-weight="700" letter-spacing="0.8">IDENTITY / REPUTATION</text>
+        <text x="470" y="122" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Trustworthy</text>
+        <text x="470" y="135" text-anchor="middle" fill="#94A3B8" font-size="10">agent discovery</text>
+      </g>
+
+      <!-- 3. Capability / Interop — top-left (298, 114) -->
+      <g filter="url(#shadow)">
+        <rect x="214" y="82" width="158" height="64" rx="10" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+        <rect x="214" y="82" width="6" height="64" rx="3" fill="#10B981"/>
+        <text x="293" y="105" text-anchor="middle" fill="#6EE7B7" font-size="9" font-weight="700" letter-spacing="0.8">CAPABILITY / INTEROP</text>
+        <text x="293" y="122" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Open agent</text>
+        <text x="293" y="135" text-anchor="middle" fill="#94A3B8" font-size="10">collaboration</text>
+      </g>
+
+      <!-- 4. Wallet / Permission — left (216, 250) -->
+      <g filter="url(#shadow)">
+        <rect x="38" y="218" width="158" height="64" rx="10" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+        <rect x="38" y="218" width="6" height="64" rx="3" fill="#F59E0B"/>
+        <text x="117" y="241" text-anchor="middle" fill="#FCD34D" font-size="9" font-weight="700" letter-spacing="0.8">WALLET / PERMISSION</text>
+        <text x="117" y="258" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Scoped, auditable</text>
+        <text x="117" y="271" text-anchor="middle" fill="#94A3B8" font-size="10">agent execution</text>
+      </g>
+
+      <!-- 5. Privacy / Security — bottom-left (298, 386) -->
+      <g filter="url(#shadow)">
+        <rect x="214" y="354" width="158" height="64" rx="10" fill="#1E293B" stroke="#EF4444" stroke-width="2"/>
+        <rect x="214" y="354" width="6" height="64" rx="3" fill="#EF4444"/>
+        <text x="293" y="377" text-anchor="middle" fill="#FCA5A5" font-size="9" font-weight="700" letter-spacing="0.8">PRIVACY / SECURITY</text>
+        <text x="293" y="394" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Sovereign, verified</text>
+        <text x="293" y="407" text-anchor="middle" fill="#94A3B8" font-size="10">agent execution</text>
+      </g>
+
+      <!-- 6. Governance / Coordination — bottom-right (462, 386) -->
+      <g filter="url(#shadow)">
+        <rect x="394" y="354" width="162" height="64" rx="10" fill="#1E293B" stroke="#14B8A6" stroke-width="2"/>
+        <rect x="394" y="354" width="6" height="64" rx="3" fill="#14B8A6"/>
+        <text x="475" y="377" text-anchor="middle" fill="#5EEAD4" font-size="9" font-weight="700" letter-spacing="0.8">GOVERNANCE / COORD.</text>
+        <text x="475" y="394" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Transparent,</text>
+        <text x="475" y="407" text-anchor="middle" fill="#94A3B8" font-size="10">accountable DAOs</text>
+      </g>
+
+      <!-- ── axis labels ─────────────────────────────────── -->
+      <text x="380" y="492" text-anchor="middle" fill="#475569" font-size="10">Each direction requires both AI (understanding + reasoning) and Web3 (enforcement + records)</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ══ DIRECTION CARDS ═══════════════════════════════════ -->
+<section class="cards-section">
+  <h2>Direction Breakdown — AI Role · Web3 Mechanism · Why Both Are Required</h2>
+  <div class="cards-grid">
+
+    <!-- ─── 1. Payment / Commerce ─────────────────────── -->
+    <div class="card">
+      <div class="card-header hdr-payment">
+        <div class="icon">💳</div>
+        <div class="title-block">
+          <div class="dir-label c-payment">Direction 1</div>
+          <div class="dir-name">Payment / Commerce / Settlement</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="row-icon">🤖</div>
+          <div class="row-content">
+            <div class="row-label c-payment">AI Role</div>
+            <div class="row-text">
+              <strong>Understands the economic flow.</strong> Parses service intent, discovers providers, evaluates quotes, verifies delivery quality, detects anomalies, and reasons about disputes and failure modes. AI turns natural language intent into a structured payment lifecycle.
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row-icon">⛓</div>
+          <div class="row-content">
+            <div class="row-label c-payment">Web3 Mechanism</div>
+            <div class="row-text">
+              <strong>Enforces and settles the flow.</strong> Programmable money (x402, MPP), smart-contract escrow (ERC-8183), L2 micropayments, on-chain receipts, and trustless multi-party settlement. State machine: <em>pending → locked → delivered → accepted → released</em>.
+            </div>
+          </div>
+        </div>
+        <div class="divider"><hr/><span>Why both are required</span><hr/></div>
+        <div class="missing-row">
+          <span class="missing-tag no-ai-tag">–AI</span>
+          <div class="row-text">Web3 can settle funds on-chain but cannot understand service descriptions, evaluate whether a delivery actually meets the spec, or reason about disputes. A dumb escrow with no delivery oracle is just locked money.</div>
+        </div>
+        <div class="missing-row">
+          <span class="missing-tag no-web3-tag">–Web3</span>
+          <div class="row-text">AI can parse intent and judge quality, but cannot trustlessly move funds, enforce spending limits, or generate tamper-proof payment receipts. Without Web3, "I'll pay after delivery" remains a trust assumption.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Main Track Group: Directions 2 & 3 ──────── -->
+    <div class="track-group main-group">
+      <div class="track-group-badge badge-main">✦ Main Track</div>
+      <div class="track-group-inner">
+
+    <!-- ─── 2. Identity / Reputation ─────────────────── -->
+    <div class="card hl-identity">
+      <div class="card-header hdr-identity">
+        <div class="icon">🪪</div>
+        <div class="title-block">
+          <div class="dir-label c-identity">Direction 2</div>
+          <div class="dir-name">Identity / Reputation / Capability</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="row-icon">🤖</div>
+          <div class="row-content">
+            <div class="row-label c-identity">AI Role</div>
+            <div class="row-text">
+              <strong>Understands what agents can do and how well.</strong> Parses capability manifests, matches services to user goals via semantic search, evaluates task quality for reputation scoring, and detects behavioral anomalies across delivery records.
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row-icon">⛓</div>
+          <div class="row-content">
+            <div class="row-label c-identity">Web3 Mechanism</div>
+            <div class="row-text">
+              <strong>Makes identity and reputation portable and tamper-proof.</strong> DIDs/Verifiable Credentials, ERC-8004 on-chain agent registry, EAS attestations, immutable task delivery records, and stake/slashing for reputation enforcement.
+            </div>
+          </div>
+        </div>
+        <div class="divider"><hr/><span>Why both are required</span><hr/></div>
+        <div class="missing-row">
+          <span class="missing-tag no-ai-tag">–AI</span>
+          <div class="row-text">Web3 can store attestations on-chain, but cannot evaluate the semantic meaning of capability claims, judge task quality, or match an agent's profile to a user's intent. A registry without understanding is just a phone book.</div>
+        </div>
+        <div class="missing-row">
+          <span class="missing-tag no-web3-tag">–Web3</span>
+          <div class="row-text">AI can infer reputation from behavior patterns, but those inferences aren't portable or verifiable across systems. Without Web3, reputation lives in one platform's database and disappears when the platform changes.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 3. Capability / Interoperability ─────────── -->
+    <div class="card hl-capab">
+      <div class="card-header hdr-capab">
+        <div class="icon">🔌</div>
+        <div class="title-block">
+          <div class="dir-label c-capab">Direction 3</div>
+          <div class="dir-name">Capability / Interoperability</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="row-icon">🤖</div>
+          <div class="row-content">
+            <div class="row-label c-capab">AI Role</div>
+            <div class="row-text">
+              <strong>Orchestrates across agents and tools.</strong> Translates between capability formats (MCP, A2A), composes multi-agent workflows, maps natural language goals to structured tool calls, and resolves which combination of capabilities satisfies a user intent.
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row-icon">⛓</div>
+          <div class="row-content">
+            <div class="row-label c-capab">Web3 Mechanism</div>
+            <div class="row-text">
+              <strong>Provides open, trustless discovery and invocation.</strong> On-chain capability registries (ERC-8004), standardized agent-to-agent protocols (A2A), payment for capability access (MPP), and open provenance records for auditable cross-agent invocations.
+            </div>
+          </div>
+        </div>
+        <div class="divider"><hr/><span>Why both are required</span><hr/></div>
+        <div class="missing-row">
+          <span class="missing-tag no-ai-tag">–AI</span>
+          <div class="row-text">Web3 can register capabilities in an open registry, but cannot plan which capabilities to combine for a given goal, resolve ambiguity, or handle errors gracefully across service calls. Composition requires reasoning, not just lookup.</div>
+        </div>
+        <div class="missing-row">
+          <span class="missing-tag no-web3-tag">–Web3</span>
+          <div class="row-text">AI can orchestrate agents, but without open registries and payment primitives there's no trustless discovery or economic incentive for third-party agents to expose capabilities. Multi-agent systems collapse into closed ecosystems.</div>
+        </div>
+      </div>
+    </div>
+
+      </div><!-- /track-group-inner -->
+    </div><!-- /main-group -->
+
+    <!-- ─── 4. Wallet / Permission ────────────────────── -->
+    <div class="card">
+      <div class="card-header hdr-wallet">
+        <div class="icon">🔐</div>
+        <div class="title-block">
+          <div class="dir-label c-wallet">Direction 4</div>
+          <div class="dir-name">Wallet / Permission / Safe Execution</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="row-icon">🤖</div>
+          <div class="row-content">
+            <div class="row-label c-wallet">AI Role</div>
+            <div class="row-text">
+              <strong>Classifies risk and translates intent to permission specs.</strong> Interprets transaction simulation results, detects spending anomalies, converts natural language task scope into structured authorization boundaries, and identifies when a write action crosses a risk threshold requiring human confirmation.
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row-icon">⛓</div>
+          <div class="row-content">
+            <div class="row-label c-wallet">Web3 Mechanism</div>
+            <div class="row-text">
+              <strong>Enforces permissions at the cryptographic layer.</strong> ERC-4337 smart accounts, session keys, EIP-7702 delegation, on-chain policy enforcement, revocable Pacts (Cobo model), and immutable execution logs that can't be deleted post-hoc.
+            </div>
+          </div>
+        </div>
+        <div class="divider"><hr/><span>Why both are required</span><hr/></div>
+        <div class="missing-row">
+          <span class="missing-tag no-ai-tag">–AI</span>
+          <div class="row-text">Web3 can enforce permissions at the protocol level, but cannot dynamically assess the semantic risk of an action, understand why an agent is requesting a permission, or flag unusual behavior patterns before they result in an irreversible transaction.</div>
+        </div>
+        <div class="missing-row">
+          <span class="missing-tag no-web3-tag">–Web3</span>
+          <div class="row-text">AI can model risk and generate permission specs, but cannot cryptographically enforce them or prevent unauthorized signing. Without smart accounts and session keys, permissions exist only as policy text — enforceable only by trust.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 5. Privacy / Security ─────────────────────── -->
+    <div class="card">
+      <div class="card-header hdr-privacy">
+        <div class="icon">🛡</div>
+        <div class="title-block">
+          <div class="dir-label c-privacy">Direction 5</div>
+          <div class="dir-name">Privacy / Security / Sovereignty</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="row-icon">🤖</div>
+          <div class="row-content">
+            <div class="row-label c-privacy">AI Role</div>
+            <div class="row-text">
+              <strong>Detects semantic and behavioral threats.</strong> Threat modeling, prompt injection detection, audit log analysis, anomaly detection in tool calls, attack surface classification, and identifying when agent behavior has been manipulated by adversarial inputs.
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row-icon">⛓</div>
+          <div class="row-content">
+            <div class="row-label c-privacy">Web3 Mechanism</div>
+            <div class="row-text">
+              <strong>Provides cryptographic proof and sovereign infrastructure.</strong> Zero-knowledge proofs for privacy-preserving computation, TEEs for confidential execution, on-chain audit trails that can't be deleted, censorship resistance, and user key ownership enabling portability without vendor lock-in.
+            </div>
+          </div>
+        </div>
+        <div class="divider"><hr/><span>Why both are required</span><hr/></div>
+        <div class="missing-row">
+          <span class="missing-tag no-ai-tag">–AI</span>
+          <div class="row-text">Web3 provides ZKPs and immutable logs, but cannot detect prompt injection, social engineering, or model-layer manipulation. An on-chain audit trail records what happened — it doesn't prevent the agent from being tricked into signing a malicious transaction.</div>
+        </div>
+        <div class="missing-row">
+          <span class="missing-tag no-web3-tag">–Web3</span>
+          <div class="row-text">AI can detect threats but cannot provide cryptographic proof of correct computation or sovereign data storage. Without Web3, "trust the AI" remains a vendor trust assumption — users cannot independently verify what the model actually did or export their data.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 6. Governance / Coordination ──────────────── -->
+    <div class="card hl-govern" style="position:relative">
+      <div class="badge-secondary">◈ Secondary Track</div>
+      <div class="card-header hdr-govern">
+        <div class="icon">🏛</div>
+        <div class="title-block">
+          <div class="dir-label c-govern">Direction 6</div>
+          <div class="dir-name">Governance / Coordination / Public Goods</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="row-icon">🤖</div>
+          <div class="row-content">
+            <div class="row-label c-govern">AI Role</div>
+            <div class="row-text">
+              <strong>Reduces information overload and surfaces actionable structure.</strong> Summarizes proposals, extracts meeting action items, models budget impact, synthesizes community sentiment, and tracks contribution records — but cannot make value judgments, approve budgets, or replace community deliberation.
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row-icon">⛓</div>
+          <div class="row-content">
+            <div class="row-label c-govern">Web3 Mechanism</div>
+            <div class="row-text">
+              <strong>Makes governance binding, transparent, and auditable.</strong> On-chain voting (Snapshot, Governor), transparent treasury execution, verifiable contribution records, DAO coordination primitives, and immutable decision logs that prevent retroactive revision of who voted for what.
+            </div>
+          </div>
+        </div>
+        <div class="divider"><hr/><span>Why both are required</span><hr/></div>
+        <div class="missing-row">
+          <span class="missing-tag no-ai-tag">–AI</span>
+          <div class="row-text">Web3 can record votes and execute treasury transfers on-chain, but cannot synthesize complex proposals into accessible summaries, reduce participation fatigue, or help communities understand the downstream implications of a governance decision.</div>
+        </div>
+        <div class="missing-row">
+          <span class="missing-tag no-web3-tag">–Web3</span>
+          <div class="row-text">AI can summarize proposals and suggest actions, but without Web3 there is no way to make those decisions binding, tamper-proof, or trustlessly executable. AI governance without on-chain enforcement is just a well-organized Notion doc.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cards-grid -->
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════════════ -->
+<footer class="footer">
+  <p>AI × Web3 School — Cohort 0 | Problem Map · Week 2 Deliverable</p>
+  <p style="margin-top:4px">Source: <a href="https://aiweb3.school/en/handbook/" style="color:#475569">AIxWeb3 School Handbook</a> · Bridge Introduction · Problem Space &amp; Direction Map · Built: 2026-05-29</p>
+</footer>
+
+</body>
+</html>

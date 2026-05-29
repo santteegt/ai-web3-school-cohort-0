@@ -1,11 +1,11 @@
 ## AIxWeb3 Foundational Directions
 
-- payment / commerce
+- payment / commerce / settlement
 - identity / reputation
 - capability / interoperability
-- wallet / permission
-- privacy / security
-- governance / coordination
+- wallet / permission / Safe execution
+- privacy / security / Sovereignty
+- governance / coordination / public goods
 
 ## Problem space and Direction Map
 
