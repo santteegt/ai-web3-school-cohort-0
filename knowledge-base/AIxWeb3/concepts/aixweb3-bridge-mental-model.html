@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI × Web3 Bridge — Mental Model</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    padding: 32px 24px;
+    max-width: 1360px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+  .diagram-wrap {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+  .diagram-wrap svg { display: block; min-width: 900px; }
+
+  /* Key design facts */
+  .section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #64748b;
+    margin-bottom: 14px;
+  }
+  .facts-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 900px) {
+    .facts-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .fact-card {
+    background: white;
+    border-radius: 8px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--c);
+    box-shadow: 0 1px 2px rgba(0,0,0,.06);
+  }
+  .fact-card .num {
+    font-size: 10px; font-weight: 700; color: var(--c);
+    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px;
+  }
+  .fact-card .module {
+    font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 6px;
+  }
+  .fact-card .principle {
+    font-size: 12px; color: #475569; line-height: 1.55;
+  }
+  .fact-card .std {
+    margin-top: 8px; font-size: 11px; color: #94a3b8;
+    font-style: italic;
+  }
+
+  /* Connection table */
+  .conn-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .conn-table thead th {
+    background: #f8fafc; padding: 8px 12px; text-align: left;
+    font-size: 11px; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: .06em;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .conn-table tbody tr:hover { background: #f8fafc; }
+  .conn-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .conn-table td:first-child { font-weight: 600; color: #0f172a; }
+  .table-wrap {
+    background: white; border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06); overflow: hidden;
+  }
+</style>
+</head>
+<body>
+
+<h1>AI × Web3 Bridge — System Mental Model</h1>
+<p class="subtitle">8 core modules that every AI × Web3 agent system must account for — how they connect, which standards implement them, and the one design principle that matters most per module.</p>
+
+<div class="diagram-wrap">
+<svg width="1300" height="510" viewBox="0 0 1300 510"
+  xmlns="http://www.w3.org/2000/svg"
+  font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+
+  <defs>
+    <marker id="ah-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,1.5 L8,5 L0,8.5 Z" fill="#94a3b8"/>
+    </marker>
+    <marker id="ah-gray-bwd" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M10,1.5 L2,5 L10,8.5 Z" fill="#94a3b8"/>
+    </marker>
+    <marker id="ah-indigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,1.5 L8,5 L0,8.5 Z" fill="#818CF8"/>
+    </marker>
+    <marker id="ah-sky" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,1.5 L8,5 L0,8.5 Z" fill="#38BDF8"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000022"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1300" height="510" fill="#f1f5f9"/>
+
+  <!-- Header -->
+  <text x="650" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">AI × Web3 Bridge — System Mental Model</text>
+  <text x="650" y="46" text-anchor="middle" font-size="11" fill="#94a3b8">Execution flow · Standards · Key design principles</text>
+
+  <!-- Layer labels -->
+  <text x="62" y="75" font-size="8.5" font-weight="700" fill="#cbd5e1" letter-spacing="2">EXECUTION LAYER  ➜</text>
+  <text x="62" y="358" font-size="8.5" font-weight="700" fill="#cbd5e1" letter-spacing="2">IDENTITY &amp; TRUST FOUNDATION</text>
+
+  <!-- Divider -->
+  <line x1="62" y1="280" x2="1238" y2="280" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- === ARROWS === -->
+
+  <!-- Execution spine -->
+  <line x1="232" y1="141" x2="268" y2="141" stroke="#94a3b8" stroke-width="2"
+    marker-start="url(#ah-gray-bwd)" marker-end="url(#ah-gray)"/>
+  <line x1="432" y1="141" x2="468" y2="141" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="632" y1="141" x2="668" y2="141" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="832" y1="141" x2="868" y2="141" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="1032" y1="141" x2="1068" y2="141" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+
+  <!-- Identity cross-connections -->
+  <line x1="550" y1="373" x2="550" y2="190" stroke="#818CF8" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#ah-indigo)"/>
+  <path d="M 632,423 Q 700,306 750,190" stroke="#818CF8" stroke-width="1.8" fill="none" marker-end="url(#ah-indigo)"/>
+  <line x1="632" y1="423" x2="868" y2="423" stroke="#818CF8" stroke-width="1.8" marker-end="url(#ah-indigo)"/>
+
+  <!-- Trust cross-connections -->
+  <line x1="950" y1="373" x2="950" y2="190" stroke="#38BDF8" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#ah-sky)"/>
+  <path d="M 1032,423 Q 1100,306 1150,190" stroke="#38BDF8" stroke-width="1.8" fill="none" stroke-dasharray="5,3" marker-end="url(#ah-sky)"/>
+
+  <!-- === NODES === -->
+
+  <!-- N1: Chain-aware Context (blue) -->
+  <rect x="70" y="93" width="162" height="96" rx="10" fill="#1D4ED8" filter="url(#shadow)"/>
+  <text x="151" y="109" text-anchor="middle" font-size="8" fill="#BFDBFE" font-weight="700" letter-spacing="1.8">DATA LAYER</text>
+  <text x="151" y="126" text-anchor="middle" font-size="13" font-weight="700" fill="white">Chain-aware</text>
+  <text x="151" y="142" text-anchor="middle" font-size="13" font-weight="700" fill="white">Context</text>
+  <text x="151" y="163" text-anchor="middle" font-size="8" fill="#93C5FD">JSON-RPC · The Graph</text>
+  <text x="151" y="175" text-anchor="middle" font-size="8" fill="#93C5FD">Block Explorer API</text>
+
+  <!-- N2: Web3 Tool Use (emerald) -->
+  <rect x="270" y="93" width="162" height="96" rx="10" fill="#047857" filter="url(#shadow)"/>
+  <text x="351" y="109" text-anchor="middle" font-size="8" fill="#A7F3D0" font-weight="700" letter-spacing="1.8">TOOLING LAYER</text>
+  <text x="351" y="126" text-anchor="middle" font-size="13" font-weight="700" fill="white">Web3</text>
+  <text x="351" y="142" text-anchor="middle" font-size="13" font-weight="700" fill="white">Tool Use</text>
+  <text x="351" y="163" text-anchor="middle" font-size="8" fill="#6EE7B7">MCP · JSON-RPC</text>
+  <text x="351" y="175" text-anchor="middle" font-size="8" fill="#6EE7B7">ERC-7231</text>
+
+  <!-- N3: Agent Workflow (amber) -->
+  <rect x="470" y="93" width="162" height="96" rx="10" fill="#92400E" filter="url(#shadow)"/>
+  <text x="551" y="109" text-anchor="middle" font-size="8" fill="#FDE68A" font-weight="700" letter-spacing="1.8">ORCHESTRATION</text>
+  <text x="551" y="126" text-anchor="middle" font-size="13" font-weight="700" fill="white">Agent</text>
+  <text x="551" y="142" text-anchor="middle" font-size="13" font-weight="700" fill="white">Workflow</text>
+  <text x="551" y="163" text-anchor="middle" font-size="8" fill="#FDE68A">LangGraph · FSM · A2A</text>
+  <text x="551" y="175" text-anchor="middle" font-size="8" fill="#FDE68A">human-in-the-loop</text>
+
+  <!-- N4: Agent Wallet (orange-red) -->
+  <rect x="670" y="93" width="162" height="96" rx="10" fill="#9A3412" filter="url(#shadow)"/>
+  <text x="751" y="109" text-anchor="middle" font-size="8" fill="#FED7AA" font-weight="700" letter-spacing="1.8">EXECUTION</text>
+  <text x="751" y="126" text-anchor="middle" font-size="13" font-weight="700" fill="white">Agent</text>
+  <text x="751" y="142" text-anchor="middle" font-size="13" font-weight="700" fill="white">Wallet</text>
+  <text x="751" y="163" text-anchor="middle" font-size="8" fill="#FED7AA">ERC-4337 · EIP-7702</text>
+  <text x="751" y="175" text-anchor="middle" font-size="8" fill="#FED7AA">Session Keys</text>
+
+  <!-- N5: Machine Payment (violet) -->
+  <rect x="870" y="93" width="162" height="96" rx="10" fill="#5B21B6" filter="url(#shadow)"/>
+  <text x="951" y="109" text-anchor="middle" font-size="8" fill="#DDD6FE" font-weight="700" letter-spacing="1.8">FINANCIAL</text>
+  <text x="951" y="126" text-anchor="middle" font-size="13" font-weight="700" fill="white">Machine</text>
+  <text x="951" y="142" text-anchor="middle" font-size="13" font-weight="700" fill="white">Payment</text>
+  <text x="951" y="163" text-anchor="middle" font-size="8" fill="#C4B5FD">x402 · MPP</text>
+  <text x="951" y="175" text-anchor="middle" font-size="8" fill="#C4B5FD">L2 payment channels</text>
+
+  <!-- N6: Settlement & Escrow (pink) -->
+  <rect x="1070" y="93" width="162" height="96" rx="10" fill="#9D174D" filter="url(#shadow)"/>
+  <text x="1151" y="109" text-anchor="middle" font-size="8" fill="#FBCFE8" font-weight="700" letter-spacing="1.8">SETTLEMENT</text>
+  <text x="1151" y="126" text-anchor="middle" font-size="13" font-weight="700" fill="white">Settlement</text>
+  <text x="1151" y="142" text-anchor="middle" font-size="13" font-weight="700" fill="white">&amp; Escrow</text>
+  <text x="1151" y="163" text-anchor="middle" font-size="8" fill="#FBCFE8">ERC-8183 · State machine</text>
+  <text x="1151" y="175" text-anchor="middle" font-size="8" fill="#FBCFE8">Delivery proof</text>
+
+  <!-- N7: Agent Identity (indigo) -->
+  <rect x="470" y="375" width="162" height="96" rx="10" fill="#3730A3" filter="url(#shadow)"/>
+  <text x="551" y="391" text-anchor="middle" font-size="8" fill="#C7D2FE" font-weight="700" letter-spacing="1.8">IDENTITY</text>
+  <text x="551" y="408" text-anchor="middle" font-size="13" font-weight="700" fill="white">Agent</text>
+  <text x="551" y="424" text-anchor="middle" font-size="13" font-weight="700" fill="white">Identity</text>
+  <text x="551" y="445" text-anchor="middle" font-size="8" fill="#A5B4FC">DID/VC · A2A</text>
+  <text x="551" y="457" text-anchor="middle" font-size="8" fill="#A5B4FC">ERC-8004</text>
+
+  <!-- N8: Agent Trust & Reputation (sky) -->
+  <rect x="870" y="375" width="162" height="96" rx="10" fill="#0369A1" filter="url(#shadow)"/>
+  <text x="951" y="391" text-anchor="middle" font-size="8" fill="#BAE6FD" font-weight="700" letter-spacing="1.8">TRUST</text>
+  <text x="951" y="408" text-anchor="middle" font-size="13" font-weight="700" fill="white">Agent Trust &amp;</text>
+  <text x="951" y="424" text-anchor="middle" font-size="13" font-weight="700" fill="white">Reputation</text>
+  <text x="951" y="445" text-anchor="middle" font-size="8" fill="#7DD3FC">ERC-8004 · EAS</text>
+  <text x="951" y="457" text-anchor="middle" font-size="8" fill="#7DD3FC">Attestations</text>
+
+  <!-- === RELATIONSHIP LABELS === -->
+  <rect x="207" y="127" width="54" height="14" rx="4" fill="white" opacity="0.9"/>
+  <text x="234" y="137.5" text-anchor="middle" font-size="8" fill="#475569" font-weight="600">data flow</text>
+
+  <rect x="557" y="270" width="58" height="14" rx="4" fill="white" opacity="0.9"/>
+  <text x="586" y="280.5" text-anchor="middle" font-size="8" fill="#6366F1" font-weight="600">authorizes</text>
+
+  <rect x="655" y="297" width="62" height="14" rx="4" fill="white" opacity="0.9"/>
+  <text x="686" y="307.5" text-anchor="middle" font-size="8" fill="#6366F1" font-weight="600">anchors id.</text>
+
+  <rect x="714" y="411" width="68" height="14" rx="4" fill="white" opacity="0.9"/>
+  <text x="748" y="421.5" text-anchor="middle" font-size="8" fill="#6366F1" font-weight="600">prerequisite</text>
+
+  <rect x="958" y="270" width="44" height="14" rx="4" fill="white" opacity="0.9"/>
+  <text x="980" y="280.5" text-anchor="middle" font-size="8" fill="#0284C7" font-weight="600">informs</text>
+
+  <rect x="1062" y="297" width="52" height="14" rx="4" fill="white" opacity="0.9"/>
+  <text x="1088" y="307.5" text-anchor="middle" font-size="8" fill="#0284C7" font-weight="600">evidence</text>
+
+  <!-- === LEGEND === -->
+  <text x="62" y="487" font-size="8.5" font-weight="700" fill="#94a3b8" letter-spacing="1.5">ARROW LEGEND</text>
+  <line x1="160" y1="484" x2="195" y2="484" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="200" y="487" font-size="8.5" fill="#475569">Execution flow</text>
+  <line x1="310" y1="484" x2="345" y2="484" stroke="#818CF8" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#ah-indigo)"/>
+  <text x="350" y="487" font-size="8.5" fill="#475569">Identity enables (dashed)</text>
+  <line x1="510" y1="484" x2="545" y2="484" stroke="#818CF8" stroke-width="1.8" marker-end="url(#ah-indigo)"/>
+  <text x="550" y="487" font-size="8.5" fill="#475569">Identity anchors (solid)</text>
+  <line x1="700" y1="484" x2="735" y2="484" stroke="#38BDF8" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#ah-sky)"/>
+  <text x="740" y="487" font-size="8.5" fill="#475569">Trust informs / provides evidence</text>
+  <line x1="980" y1="484" x2="1015" y2="484" stroke="#94a3b8" stroke-width="2" marker-start="url(#ah-gray-bwd)" marker-end="url(#ah-gray)"/>
+  <text x="1020" y="487" font-size="8.5" fill="#475569">Bidirectional (data flow)</text>
+
+</svg>
+</div>
+
+<!-- Key Design Principles -->
+<p class="section-title">Key Design Principles — One per Module</p>
+<div class="facts-grid">
+
+  <div class="fact-card" style="--c:#1D4ED8">
+    <div class="num">① Data Layer</div>
+    <div class="module">Chain-aware Context</div>
+    <div class="principle">Re-verify at execution time — context becomes stale with every block. Never trust a context snapshot from context-building time to still be valid when the transaction fires.</div>
+    <div class="std">JSON-RPC · The Graph · Block Explorer API</div>
+  </div>
+
+  <div class="fact-card" style="--c:#047857">
+    <div class="num">② Tooling Layer</div>
+    <div class="module">Web3 Tool Use</div>
+    <div class="principle">Read/write separation is mandatory. Reading on-chain state and sending transactions must be different tools with different permission levels — irreversible writes cannot share access grants with safe reads.</div>
+    <div class="std">MCP · JSON-RPC · ERC-7231</div>
+  </div>
+
+  <div class="fact-card" style="--c:#92400E">
+    <div class="num">③ Orchestration</div>
+    <div class="module">Agent Workflow</div>
+    <div class="principle">Not all steps should be automated — high-risk, irreversible, or compliance-sensitive steps require human-in-the-loop. Automation is not binary; it's a per-step risk decision with explicit stop conditions.</div>
+    <div class="std">LangGraph · FSM · A2A Protocol</div>
+  </div>
+
+  <div class="fact-card" style="--c:#9A3412">
+    <div class="num">④ Execution</div>
+    <div class="module">Agent Wallet</div>
+    <div class="principle">Never give agents primary wallet keys. Agents must receive delegated permissions that are scoped (specific contracts/methods/amounts), time-limited (session keys), and revocable by the user at any time.</div>
+    <div class="std">ERC-4337 · Session Keys · EIP-7702</div>
+  </div>
+
+  <div class="fact-card" style="--c:#5B21B6">
+    <div class="num">⑤ Financial</div>
+    <div class="module">Machine Payment</div>
+    <div class="principle">Budget precedes execution — there is no safe autopayment without layered spending limits (global, task, per-call, emergency stop). Decouple payment intent from actual settlement to preserve auditability.</div>
+    <div class="std">x402 · MPP · L2 payment channels</div>
+  </div>
+
+  <div class="fact-card" style="--c:#9D174D">
+    <div class="num">⑥ Settlement</div>
+    <div class="module">Settlement &amp; Escrow</div>
+    <div class="principle">Design the dispute flow before launch, not after first failure. Fund states must be explicit (pending → locked → delivered → accepted/disputed → released/refunded) and delivery proof must be preservable.</div>
+    <div class="std">ERC-8183 · State machine · Delivery proof</div>
+  </div>
+
+  <div class="fact-card" style="--c:#3730A3">
+    <div class="num">⑦ Identity</div>
+    <div class="module">Agent Identity</div>
+    <div class="principle">Identity ≠ Trust — it is only the first prerequisite layer. An identity proves who the agent is and who controls it; it does not prove the agent is reliable. Authorization must be explicit and session-scoped, never persistent.</div>
+    <div class="std">DID/VC · A2A Protocol · ERC-8004</div>
+  </div>
+
+  <div class="fact-card" style="--c:#0369A1">
+    <div class="num">⑧ Trust</div>
+    <div class="module">Agent Trust &amp; Reputation</div>
+    <div class="principle">Reputation must be task-type-specific, not a single score. An agent excellent at governance summaries may be poor at contract test generation. Credibility comes from verifiable behavior records, not self-declaration.</div>
+    <div class="std">ERC-8004 · EAS · Attestations</div>
+  </div>
+
+</div>
+
+<!-- Connection reference table -->
+<p class="section-title">Module Connections at a Glance</p>
+<div class="table-wrap">
+<table class="conn-table">
+  <thead>
+    <tr>
+      <th>From</th>
+      <th>To</th>
+      <th>Relationship</th>
+      <th>Design implication</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Chain-aware Context ↔</td>
+      <td>Web3 Tool Use</td>
+      <td>Bidirectional data flow</td>
+      <td>Tool calls populate context; context requirements drive which tools to invoke</td>
+    </tr>
+    <tr>
+      <td>Web3 Tool Use →</td>
+      <td>Agent Workflow</td>
+      <td>Tools called by workflow</td>
+      <td>Workflow orchestrates tool calls; tools must not initiate autonomous actions</td>
+    </tr>
+    <tr>
+      <td>Agent Workflow →</td>
+      <td>Agent Wallet</td>
+      <td>Scopes permissions</td>
+      <td>Wallet permissions are defined at workflow design time, not at execution time</td>
+    </tr>
+    <tr>
+      <td>Agent Wallet →</td>
+      <td>Machine Payment</td>
+      <td>Executes payments</td>
+      <td>Every payment is a signed transaction from a scoped wallet; no payment without a session key</td>
+    </tr>
+    <tr>
+      <td>Machine Payment →</td>
+      <td>Settlement &amp; Escrow</td>
+      <td>Lifecycle completion</td>
+      <td>Payment → escrow lock → delivery check → release or refund; settlement is not a separate system</td>
+    </tr>
+    <tr>
+      <td>Agent Identity →</td>
+      <td>Agent Workflow</td>
+      <td>Authorizes (dashed)</td>
+      <td>Workflow steps check identity before allowing high-risk tool calls or payment actions</td>
+    </tr>
+    <tr>
+      <td>Agent Identity →</td>
+      <td>Agent Wallet</td>
+      <td>Anchors on-chain identity</td>
+      <td>The wallet address is the agent's primary on-chain identity anchor; same address across transactions</td>
+    </tr>
+    <tr>
+      <td>Agent Identity →</td>
+      <td>Agent Trust &amp; Rep</td>
+      <td>Prerequisite</td>
+      <td>Reputation cannot accumulate without a stable, verifiable identity to attach records to</td>
+    </tr>
+    <tr>
+      <td>Agent Trust &amp; Rep →</td>
+      <td>Machine Payment</td>
+      <td>Informs counterparty (dashed)</td>
+      <td>Payers check trust score before authorizing auto-payment to an unknown agent endpoint</td>
+    </tr>
+    <tr>
+      <td>Settlement &amp; Escrow ↔</td>
+      <td>Agent Trust &amp; Rep</td>
+      <td>Evidence ↔ credibility</td>
+      <td>Escrow receipts and delivery proofs are the raw material of reputation; high trust can auto-accept delivery</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p style="font-size:11px; color:#94a3b8; margin-top:20px; text-align:right;">
+  AI × Web3 School — Cohort 0 | Knowledge base: <code>knowledge-base/AIxWeb3/concepts/</code>
+</p>
+
+</body>
+</html>

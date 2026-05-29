@@ -1,4 +1,20 @@
 {
-  "covered": ["session-key", "agent-wallet"],
+  "covered": [
+    "session-key",
+    "agent-wallet",
+    "chain-aware-context",
+    "multi-agent-systems",
+    "machine-payment",
+    "agent-identity",
+    "verifiable-ai",
+    "mcp-permission-model",
+    "tool-calling",
+    "agent-planning",
+    "retrieval-augmented-generation",
+    "evaluation",
+    "agent-profile",
+    "context-window",
+    "agent-reflection"
+  ],
   "reset_at": "2026-05-29T22:12:31.000Z"
 }
