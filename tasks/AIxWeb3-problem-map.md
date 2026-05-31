@@ -43,6 +43,17 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 
 **Why it is not a pure Web3 problem:** Smart contracts can enforce payment conditions and settle funds, but they cannot understand what "delivery" means for a given service, evaluate whether the output is acceptable, or reason about disputes. A dumb escrow with no delivery oracle is just locked money.
 
+**Verification method:** Three-layer chain matching the workflow's verification pattern:
+ 1. *Delivery proof before release*: the accepted deliverable must be hashed and matched against the hash committed at quote time — file hash, signed API log, or on-chain event.
+ 3. *On-chain receipt confirmation*: payment transaction hash + emitted ERC event log provides cryptographic proof that funds moved with specific parameters at a specific block height.
+ 3. *Escrow state audit*: verify the state machine transitioned correctly through each stage (`pending → locked → delivered → accepted → released`) by reading contract storage — a stuck or skipped state is a dispute trigger.
+
+**Risk boundaries:** Payment exploits from an overly broad agent wallet are the primary financial risk
+- ERC-4337 session keys with per-transaction spend limits and contract allowlists are the required mitigation, not optional
+- Negotiation integrity is the second risk: a malicious provider can present false capability schemas or bait-and-switch pricing before payment; schema validation of the delivered payload against the quoted spec must happen before the acceptance step, not after.
+- Prompt injection via the delivered data payload is the third risk — provider output flows into the agent's reasoning context and can embed adversarial instructions; treat provider data as a separate, lower-trust context layer with sanitization before ingestion.
+- Irreversible execution applies to any on-chain settlement: simulation before signing and a human gate before irreversible transfers are the hard stops.
+
 ---
 
 ### 2 · Identity / Reputation / Capability
@@ -60,6 +71,18 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 **Why it is not a pure AI problem:** AI can infer reputation from behavioral patterns, but those inferences are platform-specific and disappear when the platform changes. Without Web3, there is no portable, tamper-proof record of what an agent has done.
 
 **Why it is not a pure Web3 problem:** Web3 can store attestations on-chain, but cannot understand the semantic content of a capability claim or evaluate whether a task was completed well. An on-chain registry without AI-assisted matching is just a phone book nobody can query intelligently.
+
+**Verification method:**
+1. *Registry read at task time, not build time*: re-read the agent's ERC-8004 profile and capability manifest immediately before invoking it — cached context from earlier in the session may be stale if the agent was updated or paused.
+2. *Attestation trace*: query EAS for third-party attestations on the agent; trace each attestation back to its attester address and verify the attester's own on-chain credibility (a self-attestation loop with no independent endorsers is a red flag).
+3. *Behavioral cross-check*: compare claimed capabilities against verifiable on-chain delivery records — an agent claiming 500 successful completions with zero on-chain delivery logs has unverified reputation.
+4. *Semantic round-trip*: after invoking an agent, verify that the output format matches the capability manifest's declared output schema; a mismatch between claim and delivery is a reputation data point.
+
+**Risk boundaries:**
+- Reputation gaming via Sybil attacks (fake delivery records, self-attestation loops) is the defining risk of this direction — economic stake/slashing is the required mitigation because social reputation systems can be gamed at near-zero cost.
+- False capability claims introduce a misrouting risk: the agent gets invoked for a task it cannot complete, possibly injecting garbage or adversarial content into the calling agent's context (same prompt injection vector).
+- Identity spoofing — impersonating another agent's DID or wallet address — is prevented by DID resolution and signature verification, not by registry lookup alone. Stale registry data is a subtler risk: a capability manifest that was accurate at registration time may describe a deprecated API or a model version that no longer exists; always re-verify at invocation time.
+- No private keys or funds are at risk at the read-only discovery and matching layer, which keeps the prototype phase risk surface low.
 
 ---
 
@@ -79,6 +102,17 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 
 **Why it is not a pure Web3 problem:** Web3 can register capabilities and standardize interfaces, but cannot reason about which capabilities to combine for a given goal, resolve semantic ambiguity across different agents' capability descriptions, or handle failures gracefully during composition.
 
+**Verification method:**
+1. *Interface conformance test*: after invoking a sub-agent, validate that its response matches the declared MCP or A2A output schema before passing it to the next stage in the composition chain — a schema mismatch at handoff is a failure point, not a recoverable error.
+2. *Invocation provenance trace*: each agent-to-agent call should produce an on-chain or log-anchored record of caller identity, tool invoked, input hash, and output hash — this makes the full composition chain auditable after the fact.
+3. *End-to-end composition test*: submit a multi-step goal and trace whether each sub-agent's output correctly seeds the next stage's input, including checking that context was not silently truncated or corrupted across the handoff boundary.
+
+**Risk boundaries:**
+- Prompt injection through the composition chain is the primary risk unique to this direction: each handoff is a trust boundary where one agent's output becomes another agent's input, and a malicious or misconfigured upstream agent can embed adversarial instructions that manipulate downstream agents.
+- Attribution failure is the governance risk — in a multi-agent chain, determining which agent bears responsibility for a bad outcome requires per-step provenance logs; without them, post-incident investigation is impossible.
+- Schema mismatch between agents using nominally compatible protocols (e.g., different MCP versions) causes silent data corruption rather than hard failures, making it harder to detect.
+- Closed-ecosystem lock-in is the structural risk: any platform-controlled intermediary in the chain can break open composition silently at any step; open registries and direct A2A calls are the mitigation.
+
 ---
 
 ### 4 · Wallet / Permission / Safe Execution
@@ -96,6 +130,19 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 **Why it is not a pure AI problem:** AI can model risk and generate permission specs in natural language, but it cannot cryptographically enforce them. Without smart accounts, an agent with a private key can sign anything — "I only intended to authorize X" is not a technical constraint.
 
 **Why it is not a pure Web3 problem:** Smart contracts can enforce permissions at the protocol level, but cannot dynamically assess the semantic risk of a transaction, understand the intent behind a permission request, or detect when an agent's behavior has been manipulated. A policy rule without contextual risk assessment is either too restrictive or too permissive.
+
+**Verification method:** Mirrors the workflow's three-layer chain applied to every write action.
+1. *Simulation before signing*: dry-run every candidate transaction via `eth_call` or a simulation API — preview expected state changes, gas cost, and token movements before the human confirmation gate; any simulation failure is a hard stop.
+2. *Permission pre-check at execution time, not only at authorization time*: re-verify session key scope against the target contract, function selector, and amount immediately before signing — do not rely on the permission check done when the Pact was first authorized, because on-chain state may have changed.
+3. *Immutable audit log read-back*: after execution, read the transaction receipt (status, gas used, emitted events) and compare against the simulated outcome; divergence between simulated and actual state is an investigation trigger.
+4. *Revocation test*: periodically verify that the revocation path works — a permission that cannot be revoked in practice is as dangerous as an unbounded permission.
+
+**Risk boundaries:**
+- Unscoped authority is the primary risk — an agent wallet without per-transaction spend limits and contract allowlists can be drained or misused beyond the intended task scope; ERC-4337 session keys with explicit allowlists are required, not optional.
+- Zombie permissions (stale never-expiring session keys) are the second risk and the hardest to detect: they accumulate silently and become persistent attack surfaces; time-bounded keys with mandatory expiry are the mitigation.
+- Shadow operations — agent wallet actions not reflected in any user-visible interface — make it impossible for the user to detect abuse; on-chain audit trail with alerting is the control.
+- Prompt injection into the permission specification is a subtle but serious risk: if the agent generates permission scopes from free-form LLM output, an adversarial input can cause over-broad permissions to be requested; permission specs should be generated from structured templates with bounded fields, not arbitrary model output.
+- Irreversible execution remains the hard boundary: any on-chain transaction that moves funds or changes ownership cannot be undone; the human gate in Step 7 of the reference workflow is the mandatory control.
 
 ---
 
@@ -115,6 +162,19 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 
 **Why it is not a pure Web3 problem:** Web3 provides ZKPs and immutable logs, but cannot detect that an agent has been fed adversarial inputs before it reaches the signing step. An on-chain audit trail faithfully records a malicious transaction that the agent was manipulated into producing. Detection requires AI; prevention requires both.
 
+**Verification method:**
+1. *Threat model audit*: structured enumeration of asset inventory (what credentials, keys, budgets does the agent hold?), attack surfaces (where can adversarial input enter?), and controls (what stops each attack?) — this is the primary verification artifact for this direction, and it must be produced before any code.
+2. *Adversarial input test*: submit known prompt injection payloads (instruction-embedded documents, forged tool return values, phishing-style context injections) and verify that guardrails trigger correctly and no adversarial instruction reaches the signing or execution layer.
+3. *Audit trail integrity check*: verify that the on-chain audit log cannot be deleted, modified, or selectively omitted after the fact — an audit trail with gaps is not an audit trail.
+4. *Sovereignty checklist*: verify that the user can (a) export all their data, (b) revoke all agent authorizations, (c) switch model providers, and (d) continue operating core assets without the original platform — a system that fails any of these has a sovereignty gap.
+
+**Risk boundaries:**
+- Prompt injection via external inputs (web pages, document payloads, tool response values) is the most critical risk class because it bypasses all on-chain controls — it manipulates the reasoning layer before any transaction is formed; input sanitization and lower-trust context layers are the mitigation.
+- Sensitive data in the context window (private keys, API keys, session tokens, PII) is the second risk: anything placed in an LLM prompt is potentially logged, cached, or leaked through the model provider's infrastructure; credentials must never enter prompts, only scoped tool calls.
+- Provider dependency creates a sovereignty gap: if the user cannot verify what the model did or migrate away, "trust the AI" is a vendor trust assumption with no technical basis; local execution or TEE attestation is the mitigation.
+- Least-privilege tool access is not optional — an agent granted more tool access than its current task requires has an expanded attack surface with no benefit; tool permissions should be scoped per-task, not per-session.
+- Audit trail gaps make post-incident investigation impossible: if execution is not logged on-chain with sufficient granularity, the only evidence of what the agent did is the agent's own output, which cannot be trusted after a compromise.
+
 ---
 
 ### 6 · Governance / Coordination / Public Goods
@@ -132,6 +192,19 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 **Why it is not a pure AI problem:** AI can summarize proposals and suggest optimal decisions, but without Web3 those suggestions are advisory only. AI governance without on-chain enforcement is a well-organized document — effective only as long as participants choose to honor it.
 
 **Why it is not a pure Web3 problem:** Web3 can record votes and execute budget transfers on-chain, but it cannot reduce proposal complexity, synthesize community sentiment, or help participants understand the downstream implications of a vote. High participation costs and information overload are the main reasons DAO governance fails — and those require AI to address.
+
+**Verification method:**
+1. *Source linkback audit*: every factual claim in an AI-generated governance brief must trace to a specific forum post ID, Snapshot proposal ID, or on-chain transaction — any claim without a source link is unverifiable and should be flagged or omitted.
+2. *Diff check against original thread*: compare the AI brief against the source discussion thread and verify that minority views, technical objections, and dissenting arguments are not omitted or misrepresented; selective summarization that only captures the majority view is a failure mode, not a feature.
+3. *On-chain ground truth check*: verify vote tallies, treasury execution status, and contributor records directly against chain state (Snapshot GraphQL API, Governor contract read) — do not trust the brief's numbers without an independent chain read.
+4. *Staleness check*: governance proposals update continuously; the brief must carry an explicit timestamp and link to the live source, and briefs older than a defined threshold should be invalidated automatically.
+
+**Risk boundaries:**
+- Authoritative misrepresentation is the primary risk — an AI-generated brief mistaken for an official community decision or recommendation can distort governance outcomes without any single actor being responsible; every brief must carry an explicit disclaimer and source links.
+- AI-initiated governance actions are the hard boundary: the agent must be architecturally read-only — it surfaces and summarizes, never proposes, votes, or executes treasury actions; this constraint should be enforced in code, not just by instruction.
+- Selective summarization can suppress minority views or technical objections that ultimately prove correct; structured output formats that require capturing both sides of every proposal are the mitigation.
+- Stale governance data produces briefs that misrepresent the current state of a proposal after it has been amended — link to live sources and timestamp every output.
+- Identity attribution risk: if AI-generated governance content is published under a specific on-chain identity without that identity holder's explicit consent, it constitutes a form of impersonation with on-chain consequences; all AI-generated content must be explicitly attributed as such and not signed by a user's wallet without review.
 
 ---
 
