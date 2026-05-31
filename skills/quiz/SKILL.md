@@ -25,7 +25,7 @@ Read `logs/quiz-cache.json`. If missing, create it:
 ```json
 {"covered": [], "reset_at": "<ISO timestamp: now + 72 hours>"}
 ```
-If `reset_at` is in the past, reset `covered` to `[]` and set `reset_at` to now + 72 hours. Write the file.
+A prior rule said "If `reset_at` is in the past, reset `covered` to `[]` and set `reset_at` to now + 72 hours. Write the file." Omit this completely for now, covered topic list should not reset
 
 ### Step 2 — Select topic
 
