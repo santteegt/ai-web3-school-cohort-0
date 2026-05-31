@@ -14,14 +14,14 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 
 ## Quick-Reference Table
 
-| # | Direction | AI Role | Web3 Mechanism | Key Standards |
-|---|-----------|---------|----------------|---------------|
-| 1 | **Payment / Commerce** | Intent parsing, delivery verification, dispute reasoning | Programmable escrow, on-chain receipts, L2 micropayments | x402, MPP, ERC-8183, L2 channels |
-| 2 | **Identity / Reputation** | Capability matching, quality scoring, behavioral analysis | Portable attestations, tamper-proof delivery records, stake/slash | DIDs/VCs, ERC-8004, EAS |
-| 3 | **Capability / Interop** | Goal decomposition, multi-agent orchestration, semantic routing | Open registries, standardized invocation, provenance records | MCP, A2A, ERC-8004, MPP |
-| 4 | **Wallet / Permission** | Risk classification, intent → permission spec, anomaly detection | Cryptographic enforcement, revocable delegation, audit logs | ERC-4337, Session Keys, EIP-7702 |
-| 5 | **Privacy / Security** | Prompt injection detection, threat modeling, behavioral anomalies | ZKPs, TEEs, on-chain audit trails, sovereign data ownership | ZKP, TEE, EAS, on-chain logs |
-| 6 | **Governance / Coordination** | Proposal summarization, sentiment synthesis, action item extraction | Binding on-chain votes, transparent treasury, immutable decision records | Snapshot, Governor, Gitcoin |
+| # | Direction | Real User | Best Learning Form | Key Standards |
+|---|-----------|-----------|-------------------|---------------|
+| 1 | **Payment / Commerce** | Developer building autonomous agent services that need to pay for and receive payment for API calls, data, or compute without human approval per transaction | Product demo | x402, MPP, ERC-8183, L2 channels |
+| 2 | **Identity / Reputation** | Developer building multi-agent pipelines who needs to discover, evaluate, and compose third-party agents without relying on a single marketplace | Developer tooling | DIDs/VCs, ERC-8004, EAS |
+| 3 | **Capability / Interop** | Developer whose system needs agents from different providers or frameworks to interoperate without writing a custom adapter for every combination | Developer tooling | MCP, A2A, ERC-8004, MPP |
+| 4 | **Wallet / Permission** | Developer integrating agent execution into a product who needs to grant scoped, revocable on-chain authority — and a clean audit trail when something goes wrong | Risk model → product demo | ERC-4337, Session Keys, EIP-7702 |
+| 5 | **Privacy / Security** | Security engineer or developer building agent systems that handle credentials or private keys who needs to define and communicate a threat model before deployment | Risk model | ZKP, TEE, EAS, on-chain logs |
+| 6 | **Governance / Coordination** | DAO contributor or core team member managing participation fatigue who needs AI-synthesized governance briefs tied to verifiable on-chain records | Product demo | Snapshot, Governor, Gitcoin |
 
 ---
 
@@ -30,6 +30,10 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 ### 1 · Payment / Commerce / Settlement
 
 **Core question:** Who initiates, executes, pays, verifies, and carries risk across a machine-to-machine service transaction?
+
+**Real user:** A developer or product builder creating autonomous agent services who needs agents to discover, pay for, and settle machine-to-machine transactions without requiring human approval at each step.
+
+**Best learning form:** **Product demo** — the full payment lifecycle (discovery → quote → escrow → delivery → settlement) is concrete enough to demonstrate end-to-end with x402 + a minimal escrow contract. Developer tooling is a close second if the goal is building reusable payment primitives others can integrate.
 
 **AI role:** Understands the economic flow. Parses user or agent intent into a structured service request, discovers and evaluates providers, verifies delivery quality against acceptance criteria, detects payment anomalies, and reasons about failure modes and dispute resolution. AI turns a vague instruction ("buy me compute for this task") into a complete payment lifecycle.
 
@@ -45,6 +49,10 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 
 **Core question:** How are agents discovered, described, invoked, verified, and trusted across an open multi-agent ecosystem?
 
+**Real user:** A developer building multi-agent pipelines who needs to discover, evaluate, and compose third-party agents as open services — without relying on a single marketplace operator to vouch for agent quality or hard-coding agent addresses into every integration.
+
+**Best learning form:** **Developer tooling** — the standards layer (ERC-8004, A2A, DID/VC) is being designed by others; the tractable entry point is the interface layer above it: a tool that takes a user goal, queries a registry, evaluates capability manifests semantically, and returns a ranked shortlist with trust scores. A working implementation of that layer is both a learning artifact and a hackathon deliverable.
+
 **AI role:** Understands what agents can do and how well they do it. Parses capability manifests in natural language, performs semantic matching between agent profiles and user goals, evaluates task completion quality for reputation accumulation, and detects behavioral anomalies across delivery histories.
 
 **Web3 mechanism:** Makes identity and reputation portable and tamper-proof. DIDs and Verifiable Credentials anchor identity to a wallet address. ERC-8004 provides an on-chain agent registry with capability claims. EAS enables verifiable third-party attestations. Immutable delivery records and stake/slashing give reputation economic weight.
@@ -58,6 +66,10 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 ### 3 · Capability / Interoperability
 
 **Core question:** How do AI agents, tools, and on-chain systems compose across open interfaces without collapsing into closed ecosystems?
+
+**Real user:** A developer whose system needs agents from different providers or frameworks to interoperate without writing a custom adapter for every combination — and needs those invocations to be auditable and payable without a central broker in the middle.
+
+**Best learning form:** **Developer tooling** — building a reference implementation that shows two heterogeneous agents (e.g., one MCP-based, one A2A-based) composing a task end-to-end, with on-chain provenance, is more instructive than studying the protocol specs in isolation. A protocol/standard contribution is possible if the goal shifts toward proposing a missing interface spec.
 
 **AI role:** Orchestrates across agents and tools. Translates between capability formats (MCP, A2A), composes multi-agent workflows from individual capability primitives, maps natural language goals to structured tool call sequences, and resolves ambiguity when multiple agents could satisfy a sub-task.
 
@@ -73,6 +85,10 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 
 **Core question:** When an agent holds on-chain authority, what controls prevent unscoped execution, unauthorized signing, and zombie permissions?
 
+**Real user:** A developer integrating agent execution into a product who needs to grant an agent limited, auditable on-chain authority without exposing full wallet control — and needs a reliable revocation path and immutable audit trail when something goes wrong.
+
+**Best learning form:** **Risk model leading to a product demo** — the design decisions (what to scope, what triggers a human gate, how revocation works, what the audit log must contain) are inherently a risk-modeling exercise. Working through the threat model first produces a better implementation than starting with code. The demo then validates the model with a real Pact-style authorization flow on testnet.
+
 **AI role:** Classifies risk and translates intent into permission specifications. Interprets transaction simulation results in plain language, detects spending pattern anomalies, converts natural-language task descriptions into structured authorization scopes, and identifies when a write action crosses a risk threshold requiring human confirmation (the 8-step pattern's Step 7).
 
 **Web3 mechanism:** Enforces permissions at the cryptographic layer. ERC-4337 smart accounts replace simple EOAs with programmable execution logic. Session keys provide task-scoped, time-bounded signing authority. EIP-7702 lets EOAs temporarily gain smart-account behavior. Revocable Pact authorization (Cobo model) binds agent execution to explicit intent + budget + time window + completion conditions. On-chain execution logs are immutable.
@@ -87,6 +103,10 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 
 **Core question:** When an agent holds credentials, keys, and budgets, what prevents adversarial input from compromising execution — and what gives users verifiable control over their own data?
 
+**Real user:** A security engineer or developer building agent systems that handle credentials, private keys, or sensitive user data — who needs to define, communicate, and continuously validate the system's threat model before any real assets are involved.
+
+**Best learning form:** **Risk model** — this direction is fundamentally about attack surface mapping and control design before a line of production code is written. A structured risk model (asset inventory → attack surfaces → controls → sovereignty checklist) is the most honest and transferable output. A product demo risks glossing over the hard parts; a research memo that documents the threat model in depth is the form most likely to survive contact with a real system.
+
 **AI role:** Detects semantic and behavioral threats. Identifies prompt injection attempts, classifies attack surfaces (tool call abuse, forged transaction descriptions, phishing links, model hallucinations), monitors audit logs for behavioral anomalies, and builds threat models specific to AI agent workflows. Importantly: AI reflection is a quality mechanism, not a safety mechanism — code-enforced guardrails remain essential.
 
 **Web3 mechanism:** Provides cryptographic proof and sovereign infrastructure. Zero-knowledge proofs enable privacy-preserving computation (prove correctness without revealing inputs). TEEs provide confidential execution environments. On-chain audit trails cannot be retroactively deleted. User key ownership enables full data portability and censorship resistance without vendor dependency.
@@ -100,6 +120,10 @@ A direction is only genuinely AI × Web3 if **both domains are indispensable**: 
 ### 6 · Governance / Coordination / Public Goods
 
 **Core question:** Can AI help DAOs and communities organize information and surface decisions — and can Web3 make those decisions binding, transparent, and trustlessly executable?
+
+**Real user:** A DAO contributor, core team member, or community manager managing governance participation fatigue — someone who needs structured, AI-synthesized governance briefs that link directly to verifiable on-chain records and don't require reading every forum thread to participate meaningfully.
+
+**Best learning form:** **Product demo** — a narrow scope (ingest a Snapshot space + governance forum → output a structured brief with proposal summary, key trade-offs, action items, and vote record links) is buildable in a week, clearly demonstrates both AI and Web3 roles in a single flow, and the hard constraint (AI must not initiate or pass governance actions) writes the risk boundaries almost automatically.
 
 **AI role:** Reduces information overload and surfaces actionable structure. Summarizes governance proposals, synthesizes community sentiment across discussion threads, converts meeting notes into action items with owners and deadlines, models budget impact, and tracks contribution records. Hard boundary: AI can assist deliberation but cannot make value judgments, approve budgets, or initiate irreversible governance actions.
 

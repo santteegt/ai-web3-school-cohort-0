@@ -88,3 +88,127 @@ On user-agent and agent-agent systems, coordination is crucial, and requires pro
 | Hardest risk | Stale or gamed reputation data | AI output being mistaken for authoritative decision |
 
 ---
+
+## Direction Evaluation Matrix
+
+> Applied from the AI × Web3 School Handbook — Problem Space & Direction Map framework.  
+> Five criteria used to validate whether a direction is worth pursuing in depth and building toward a Hackathon proposal.
+
+---
+
+### Main Track — Identity / Reputation / Capability / Interoperability
+
+#### Structural Demand
+
+**Verdict: Strong — long-term, infrastructure-level demand.**
+
+The problem is not tied to any single project cycle. Every multi-agent system — regardless of which LLM framework, chain, or deployment model is in use — faces the same underlying question: *how do I know which agent to call, whether it can actually do what it claims, and whether I should trust it based on past behavior?* As agent ecosystems grow more heterogeneous (MCP servers, A2A agents, on-chain execution environments, third-party capability providers), the discovery and trust problem compounds. The structural demand predates any specific hot project and will persist as long as agents are composed from heterogeneous, third-party sources — which is the architectural direction the industry is clearly moving toward.
+
+**Countercheck:** Would this problem disappear if a dominant agent marketplace (e.g., an OpenAI agent store) wins? Partially — but only within that closed ecosystem. The open, cross-platform version of the problem (agents from different providers, chains, and frameworks composing trustlessly) would still exist and would be the more valuable infrastructure to address.
+
+#### Verifiability
+
+**Verdict: High — multiple validation paths available at different levels of effort.**
+
+- **Flowchart / diagram**: A capability discovery and trust-scoring flow can be mapped in one session (already partially done via the mental model and problem map).
+- **Reference implementation**: Query an existing ERC-8004-compatible registry (or mock one), apply semantic matching against a user goal, return a ranked shortlist with a trust score derived from on-chain delivery records. This is a self-contained demo that validates the core value proposition.
+- **Transaction records**: On-chain attestations (EAS), registry reads, and delivery log references all produce verifiable artifacts.
+- **User interviews**: An agent developer integrating third-party tools is the clearest user — asking them "how do you currently discover and evaluate agents?" would surface the pain quickly.
+
+The direction passes the verifiability test at every level: paper, code, and on-chain evidence.
+
+#### Minimal Entry Point
+
+**Verdict: Clear — buildable within one week at proof-of-concept level.**
+
+The interface layer above ERC-8004/A2A is the entry point, not the standards themselves. A minimal prototype can:
+1. Read or mock an on-chain agent registry (ERC-8004 schema)
+2. Accept a natural language user goal as input
+3. Semantically match the goal against registered capability manifests
+4. Return a ranked shortlist annotated with a trust score derived from available on-chain attestations (EAS) or mock delivery records
+
+This does not require deploying a new standard or writing a new smart contract — the registry and attestation infrastructure exists. The week-one deliverable is the matching and scoring logic, which can be written in Python or TypeScript with an LLM call and a few JSON-RPC reads. A repo skeleton, flowchart, and one working query are sufficient to validate the concept before Hackathon week.
+
+#### Risk Boundaries
+
+**Verdict: Present but manageable — identity and reputation data are the primary risks, not funds or keys.**
+
+This direction does involve sensitive system concerns:
+- **Identity claims**: A malicious agent could publish false capability claims to a registry. The risk is misrouting tasks to unqualified or adversarial agents, not direct fund loss.
+- **Reputation gaming**: Sybil attacks on reputation systems (fake delivery records, self-attestation loops) are a known hard problem. The mitigation is stake/slashing (economic cost to fake reputation) and third-party attestations — both of which the ERC-8004/EAS stack supports.
+- **No private keys or funds in the minimal entry point**: The initial developer tooling layer (semantic matching + trust scoring) is read-only. It does not require wallet signing or asset transfers. This keeps the risk surface low for the prototype phase.
+
+The direction does **not** require handling private keys, transaction signing, or funds at the layer being targeted for the Hackathon. Risk escalates only if the scope expands to include on-chain registration writes or payment-for-capability flows — both of which are extensions, not core requirements.
+
+#### Follow-Through
+
+**Verdict: Excellent — feeds directly into Week 3 proposal, Hackathon build, and long-term reference material.**
+
+- **Week 3 proposal**: The problem breakdown (stakeholders, flow, AI role, Web3 mechanism, automation boundaries) is already partially scaffolded. A full proposal can be written from the existing direction selection document in one session.
+- **Hackathon challenge**: The minimal prototype (agent discovery + trust scoring) is a standalone Hackathon deliverable. Extensions (on-chain registration, payment-for-capability, governance integration via the secondary track) are natural Week 4–5 additions.
+- **Handbook / research backlog**: The capability matching and reputation scoring design questions are open enough to generate handbook feedback entries, a reference implementation writeup, and potentially a contribution to the ERC-8004 or A2A discussion. Long-term research value is high.
+- **Secondary track integration**: The Governance direction connects naturally — agent identity and reputation are prerequisites for multi-agent coordination and on-chain governance participation. The main and secondary tracks reinforce rather than compete.
+
+---
+
+### Secondary Track — Governance / Coordination
+
+#### Structural Demand
+
+**Verdict: Solid — participation fatigue is a chronic, not cyclical, problem.**
+
+DAO governance participation rates have been declining since 2021 across most major protocols, independent of market cycles. The root cause is persistent: governance proposals are long, technical, and numerous; participants lack the time and context to evaluate each one; and abstention is the path of least resistance. This is a structural information asymmetry problem, not a temporary one caused by a specific bull or bear market. AI-assisted synthesis directly addresses the root cause. The Web3 mechanism (binding on-chain votes, transparent treasury) provides the enforcement layer that makes AI-assisted summaries actionable rather than advisory.
+
+**Countercheck:** Would better UX alone (e.g., Snapshot improvements) solve this? No — better UX reduces friction but does not reduce the cognitive load of evaluating complex proposals. The synthesis and summarization layer requires AI.
+
+#### Verifiability
+
+**Verdict: High — the demo output is self-evident.**
+
+A governance brief agent produces an output (structured summary + action items + vote record links) that any DAO participant can immediately evaluate for accuracy against the source forum posts and Snapshot proposals. Validation requires no special tooling: a reader can compare the brief against the original thread and judge whether the summary is accurate, balanced, and actionable. Transaction records (on-chain vote history, treasury execution logs) provide ground truth for the Web3 side. A reference implementation can be tested against any live DAO with public Snapshot data.
+
+#### Minimal Entry Point
+
+**Verdict: Very low barrier — can prototype with existing public APIs in a few hours.**
+
+- Snapshot has a public GraphQL API — no authentication required to read proposals, votes, and spaces.
+- Governance forums (Commonwealth, Discourse) are publicly readable.
+- The minimal prototype: ingest a Snapshot space → summarize the top active proposals → output a structured brief with summary, for/against arguments, vote deadline, and a link to the on-chain record.
+
+No smart contract deployment required. No wallet integration at the prototype stage. The entire initial build runs on LLM + Snapshot API + a structured output template. This is the lowest barrier to a working demo of any direction in the problem map.
+
+#### Risk Boundaries
+
+**Verdict: Well-defined and bounded — the hard constraint is also the clearest design spec.**
+
+The primary risk is explicit and well-understood: AI output being mistaken for an authoritative governance recommendation, leading participants to vote without reading the source material. This risk is addressed by design: every AI-generated brief must link to primary sources, include uncertainty markers, and carry a clear disclaimer that the summary is an input to deliberation, not a substitute for it.
+
+Other risks:
+- **Selective summarization**: AI may over- or under-represent certain arguments. Mitigation: structured output format that requires capturing both sides of every proposal.
+- **Stale data**: Governance forums update continuously. Mitigation: timestamp every summary and link to the live source.
+
+No private keys, funds, or irreversible actions are involved at any stage of this direction. The governance execution layer (treasury transfers, on-chain votes) is read-only from the agent's perspective — the agent surfaces and summarizes; humans vote and execute.
+
+#### Follow-Through
+
+**Verdict: Good as secondary — complements the main track without competing for scope.**
+
+- **Week 3 / Hackathon**: A governance brief agent is a standalone demo with clear user value. It can be scoped to a single DAO and a single session's worth of proposals without losing the demonstration of both AI and Web3 roles.
+- **Integration with main track**: Agent identity and reputation (main track) are natural prerequisites for multi-agent governance coordination. An agent participating in governance on behalf of a user needs a verifiable identity (ERC-8004) and a trust score that participants can inspect before accepting its summaries. This makes the secondary track a natural extension of the main track rather than a separate thread.
+- **Long-term research value**: The governance direction raises open questions (where is the AI/human deliberation boundary? how should AI-generated governance briefs be attributed on-chain?) that feed into handbook feedback and research backlog entries.
+
+---
+
+### Evaluation Summary
+
+| Criterion | Identity / Capability (Main) | Governance (Secondary) |
+|---|---|---|
+| **Structural demand** | ✅ Infrastructure-level, pre-dates hot projects | ✅ Chronic participation fatigue, not cyclical |
+| **Verifiability** | ✅ Demo, flowchart, on-chain records, user interviews | ✅ Self-evident output, public Snapshot data |
+| **Minimal entry point** | ✅ Read-only registry + LLM matching, week-one build | ✅ Snapshot API + LLM, few-hour prototype |
+| **Risk boundaries** | ✅ Read-only prototype; no keys or funds at entry layer | ✅ No keys or funds; hard constraint writes the spec |
+| **Follow-through** | ✅ Week 3 proposal, Hackathon build, standards backlog | ✅ Standalone demo + natural extension of main track |
+
+Both directions pass all five criteria. The main track scores higher on follow-through depth and standards contribution potential; the secondary track scores higher on entry point speed and demo clarity. Together they form a coherent scope: **open agent discovery and trust** (main) + **AI-assisted governance coordination** (secondary, as an applied scenario that uses the main track's identity/reputation layer).
+
+---
