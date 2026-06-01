@@ -7,7 +7,7 @@
 
 ## Section 1 — Execution Flow: Automated vs Human-Confirmed Steps
 
-The flow below maps the Requester Agent's DeFi yield deposit task as described in `tasks/AIxWeb3_WORKFLOW.md` — from task receipt to final verification — with every step classified by who controls it and what mechanism enforces that control.
+The flow below maps the Requester Agent's DeFi yield deposit task as described in [AIxWeb3_WORKFLOW.md](/tasks/AIxWeb3_WORKFLOW.md) — from task receipt to final verification — with every step classified by who controls it and what mechanism enforces that control.
 
 ### Numbered Step List
 
