@@ -1,4 +1,4 @@
 {
-  "covered": ["defi-lending", "ai-agent", "instruction", "mcp", "agent-wallet", "overfitting", "chain-aware-context", "delivery-proof"],
+  "covered": ["defi-lending", "ai-agent", "instruction", "mcp", "agent-wallet", "overfitting", "chain-aware-context", "delivery-proof", "prompt-design", "on-chain-data", "hash-function", "zkml", "vector-database", "agent-workflow"],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
