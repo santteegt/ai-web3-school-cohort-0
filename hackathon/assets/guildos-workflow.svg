@@ -1,0 +1,313 @@
+<svg viewBox="0 0 1080 860" xmlns="http://www.w3.org/2000/svg" font-family="'Inter',system-ui,sans-serif">
+<title>GuildOS — MVP Workflow (Hackathon)</title>
+<desc>Swimlane: 9-step GuildOS flow across Human Founder, Orchestrator Agent, Specialist Agent, AgentFightClub, On-chain/ERC-8004.</desc>
+
+<!-- background -->
+<rect width="1080" height="860" fill="#f8fafc"/>
+
+<!-- title -->
+<text x="540" y="22" font-size="13.5" font-weight="700" fill="#1a1a2e" text-anchor="middle">GuildOS — MVP Workflow · Hackathon Demo</text>
+
+<!-- legend -->
+<rect x="130" y="32" width="11" height="11" rx="2" fill="#3b82f6"/>
+<text x="145" y="41" font-size="9.5" fill="#374151">Human Founder</text>
+<rect x="240" y="32" width="11" height="11" rx="2" fill="#7c3aed"/>
+<text x="255" y="41" font-size="9.5" fill="#374151">Orchestrator Agent</text>
+<rect x="375" y="32" width="11" height="11" rx="2" fill="#059669"/>
+<text x="390" y="41" font-size="9.5" fill="#374151">Specialist Agent</text>
+<rect x="490" y="32" width="11" height="11" rx="2" fill="#d97706"/>
+<text x="505" y="41" font-size="9.5" fill="#374151">AgentFightClub</text>
+<rect x="597" y="32" width="11" height="11" rx="2" fill="#b45309"/>
+<text x="612" y="41" font-size="9.5" fill="#374151">On-chain / ERC-8004</text>
+<text x="780" y="41" font-size="9" fill="#6b7280">[H]=Human confirm  [!]=Risk  [A2A]=Protocol msg  [OK]=Verified</text>
+
+<!-- ════ LANE HEADERS ════ -->
+<rect x="130" y="54" width="190" height="36" rx="6" fill="#3b82f6"/>
+<text x="225" y="77" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.3">HUMAN FOUNDER</text>
+<rect x="320" y="54" width="190" height="36" rx="6" fill="#7c3aed"/>
+<text x="415" y="77" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.3">ORCHESTRATOR AGENT</text>
+<rect x="510" y="54" width="190" height="36" rx="6" fill="#059669"/>
+<text x="605" y="77" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.3">SPECIALIST AGENT</text>
+<rect x="700" y="54" width="190" height="36" rx="6" fill="#d97706"/>
+<text x="795" y="71" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.3">AGENTFIGHT</text>
+<text x="795" y="84" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.3">CLUB</text>
+<rect x="890" y="54" width="190" height="36" rx="6" fill="#b45309"/>
+<text x="985" y="71" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.3">ON-CHAIN /</text>
+<text x="985" y="84" font-size="10.5" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.3">ERC-8004</text>
+
+<!-- lane separators -->
+<line x1="0"    y1="90"  x2="1080" y2="90"  stroke="#e2e8f0" stroke-width="1"/>
+<line x1="320"  y1="90"  x2="320"  y2="850" stroke="#e2e8f0" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.6"/>
+<line x1="510"  y1="90"  x2="510"  y2="850" stroke="#e2e8f0" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.6"/>
+<line x1="700"  y1="90"  x2="700"  y2="850" stroke="#e2e8f0" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.6"/>
+<line x1="890"  y1="90"  x2="890"  y2="850" stroke="#e2e8f0" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.6"/>
+
+<!-- row separators -->
+<line x1="0" y1="170" x2="1080" y2="170" stroke="#e2e8f0" stroke-width="0.8"/>
+<line x1="0" y1="250" x2="1080" y2="250" stroke="#e2e8f0" stroke-width="0.8"/>
+<line x1="0" y1="330" x2="1080" y2="330" stroke="#e2e8f0" stroke-width="0.8"/>
+<line x1="0" y1="410" x2="1080" y2="410" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="6,3"/><!-- human gate row -->
+<line x1="0" y1="490" x2="1080" y2="490" stroke="#e2e8f0" stroke-width="0.8"/>
+<line x1="0" y1="570" x2="1080" y2="570" stroke="#e2e8f0" stroke-width="0.8"/>
+<line x1="0" y1="650" x2="1080" y2="650" stroke="#e2e8f0" stroke-width="0.8"/>
+<line x1="0" y1="730" x2="1080" y2="730" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="6,3"/><!-- human gate row -->
+<line x1="0" y1="850" x2="1080" y2="850" stroke="#e2e8f0" stroke-width="0.8"/>
+
+<!-- arrowhead defs -->
+<defs>
+  <marker id="ah-blue"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0.5 6,3.5 0,6.5" fill="#3b82f6"/></marker>
+  <marker id="ah-purple" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0.5 6,3.5 0,6.5" fill="#7c3aed"/></marker>
+  <marker id="ah-green"  markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0.5 6,3.5 0,6.5" fill="#059669"/></marker>
+  <marker id="ah-amber"  markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0.5 6,3.5 0,6.5" fill="#d97706"/></marker>
+  <marker id="ah-gray"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0.5 6,3.5 0,6.5" fill="#94a3b8"/></marker>
+  <filter id="shadow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/></filter>
+</defs>
+
+<!-- ════════════════════════════════════════════
+     ROW 1 — FOUND  (center y=130)
+     ════════════════════════════════════════════ -->
+<text x="127" y="124" font-size="10" font-weight="700" fill="#374151" text-anchor="end">1 · FOUND</text>
+<text x="127" y="138" font-size="9" fill="#3b82f6" text-anchor="end">Initiator</text>
+
+<!-- Human: Set Mandate -->
+<rect x="140" y="97" width="170" height="64" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="225" y="116" font-size="11" font-weight="700" fill="#1e40af" text-anchor="middle">Set Mandate</text>
+<text x="225" y="131" font-size="9.5" fill="#1e40af" text-anchor="middle" opacity="0.85">Fund Treasury</text>
+<rect x="177" y="149" width="96" height="10" rx="2" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.5"/>
+<text x="225" y="157" font-size="8.5" font-weight="700" fill="#1e40af" text-anchor="middle">INITIATOR</text>
+
+<!-- AgentFightClub: Deploy Club -->
+<rect x="710" y="97" width="170" height="64" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="795" y="116" font-size="11" font-weight="700" fill="#92400e" text-anchor="middle">Deploy Club</text>
+<text x="795" y="131" font-size="9.5" fill="#92400e" text-anchor="middle" opacity="0.85">Open Treasury</text>
+<rect x="741" y="149" width="108" height="10" rx="2" fill="#fef9c3" stroke="#fde047" stroke-width="0.5"/>
+<text x="795" y="157" font-size="8.5" font-weight="700" fill="#854d0e" text-anchor="middle">CHAIN OP</text>
+
+<!-- On-chain: Guild contract deployed -->
+<rect x="900" y="97" width="170" height="64" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="985" y="116" font-size="11" font-weight="700" fill="#78350f" text-anchor="middle">Guild Contract</text>
+<text x="985" y="131" font-size="9.5" fill="#78350f" text-anchor="middle" opacity="0.85">Deployed</text>
+<rect x="936" y="149" width="98" height="10" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.5"/>
+<text x="985" y="157" font-size="8.5" font-weight="700" fill="#166534" text-anchor="middle">CHAIN STATE</text>
+
+<!-- Arrow: Human → AgentFightClub (long, over empty lanes) -->
+<line x1="312" y1="129" x2="708" y2="129" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-blue)"/>
+
+<!-- ════════════════════════════════════════════
+     ROW 2 — REGISTER  (center y=210)
+     ════════════════════════════════════════════ -->
+<text x="127" y="204" font-size="10" font-weight="700" fill="#374151" text-anchor="end">2 · REGISTER</text>
+<text x="127" y="218" font-size="9" fill="#7c3aed" text-anchor="end">AI auto</text>
+
+<!-- Orchestrator: Register ERC-8004 -->
+<rect x="330" y="177" width="170" height="64" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="415" y="196" font-size="11" font-weight="700" fill="#5b21b6" text-anchor="middle">Register Profile</text>
+<text x="415" y="211" font-size="9.5" fill="#5b21b6" text-anchor="middle" opacity="0.85">ERC-8004</text>
+<rect x="365" y="229" width="100" height="10" rx="2" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.5"/>
+<text x="415" y="237" font-size="8.5" font-weight="700" fill="#5b21b6" text-anchor="middle">IDENTITY</text>
+
+<!-- On-chain: Profile written to registry -->
+<rect x="900" y="177" width="170" height="64" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="985" y="196" font-size="11" font-weight="700" fill="#78350f" text-anchor="middle">Profile Written</text>
+<text x="985" y="211" font-size="9.5" fill="#78350f" text-anchor="middle" opacity="0.85">to Registry</text>
+<rect x="936" y="229" width="98" height="10" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.5"/>
+<text x="985" y="237" font-size="8.5" font-weight="700" fill="#166534" text-anchor="middle">CHAIN STATE</text>
+
+<!-- Arrow: Orchestrator → On-chain -->
+<line x1="502" y1="209" x2="898" y2="209" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-purple)"/>
+
+<!-- ════════════════════════════════════════════
+     ROW 3 — APPLY  (center y=290)
+     ════════════════════════════════════════════ -->
+<text x="127" y="284" font-size="10" font-weight="700" fill="#374151" text-anchor="end">3 · APPLY</text>
+<text x="127" y="298" font-size="9" fill="#059669" text-anchor="end">AI auto</text>
+
+<!-- Specialist: Discover + Propose -->
+<rect x="520" y="257" width="170" height="64" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="605" y="276" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">Discover Mandate</text>
+<text x="605" y="291" font-size="9.5" fill="#065f46" text-anchor="middle" opacity="0.85">Submit Proposal</text>
+<rect x="557" y="309" width="96" height="10" rx="2" fill="#d1fae5" stroke="#6ee7b7" stroke-width="0.5"/>
+<text x="605" y="317" font-size="8.5" font-weight="700" fill="#065f46" text-anchor="middle">A2A CARD READ</text>
+
+<!-- AgentFightClub: Proposal Registered -->
+<rect x="710" y="257" width="170" height="64" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="795" y="276" font-size="11" font-weight="700" fill="#92400e" text-anchor="middle">Proposal</text>
+<text x="795" y="291" font-size="9.5" fill="#92400e" text-anchor="middle" opacity="0.85">Registered</text>
+<rect x="741" y="309" width="108" height="10" rx="2" fill="#fef9c3" stroke="#fde047" stroke-width="0.5"/>
+<text x="795" y="317" font-size="8.5" font-weight="700" fill="#854d0e" text-anchor="middle">CHAIN OP</text>
+
+<!-- Arrow: Specialist → AgentFightClub -->
+<line x1="692" y1="289" x2="708" y2="289" stroke="#059669" stroke-width="1.5" marker-end="url(#ah-green)"/>
+
+<!-- ════════════════════════════════════════════
+     ROW 4 — APPROVE  (center y=370)  [HUMAN GATE]
+     ════════════════════════════════════════════ -->
+<!-- human gate bg highlight -->
+<rect x="0" y="330" width="1080" height="80" fill="#fef9c3" opacity="0.35"/>
+<text x="127" y="364" font-size="10" font-weight="700" fill="#374151" text-anchor="end">4 · APPROVE</text>
+<text x="127" y="378" font-size="9" fill="#dc2626" text-anchor="end" font-weight="700">HUMAN GATE</text>
+
+<!-- Human: Review + Vote -->
+<rect x="140" y="337" width="170" height="64" rx="5" fill="#eff6ff" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+<text x="225" y="352" font-size="9" fill="#b91c1c" font-weight="700" text-anchor="end">! [H]</text>
+<text x="225" y="356" font-size="11" font-weight="700" fill="#1e40af" text-anchor="middle">Review Profile</text>
+<text x="225" y="371" font-size="9.5" fill="#1e40af" text-anchor="middle" opacity="0.85">Vote to Approve</text>
+<rect x="162" y="389" width="126" height="10" rx="2" fill="#fee2e2" stroke="#fca5a5" stroke-width="0.5"/>
+<text x="225" y="397" font-size="8.5" font-weight="700" fill="#991b1b" text-anchor="middle">HUMAN CONFIRMATION</text>
+
+<!-- AgentFightClub: Vote Settled -->
+<rect x="710" y="337" width="170" height="64" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="795" y="356" font-size="11" font-weight="700" fill="#92400e" text-anchor="middle">Vote Settled</text>
+<text x="795" y="371" font-size="9.5" fill="#92400e" text-anchor="middle" opacity="0.85">Member Added</text>
+<rect x="741" y="389" width="108" height="10" rx="2" fill="#fef9c3" stroke="#fde047" stroke-width="0.5"/>
+<text x="795" y="397" font-size="8.5" font-weight="700" fill="#854d0e" text-anchor="middle">CHAIN OP</text>
+
+<!-- On-chain: Membership on-chain -->
+<rect x="900" y="337" width="170" height="64" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="985" y="356" font-size="11" font-weight="700" fill="#78350f" text-anchor="middle">Membership</text>
+<text x="985" y="371" font-size="9.5" fill="#78350f" text-anchor="middle" opacity="0.85">On-chain</text>
+<rect x="936" y="389" width="98" height="10" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.5"/>
+<text x="985" y="397" font-size="8.5" font-weight="700" fill="#166534" text-anchor="middle">CHAIN STATE</text>
+
+<!-- Arrow: Human → AgentFightClub -->
+<line x1="312" y1="369" x2="708" y2="369" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+
+<!-- ════════════════════════════════════════════
+     ROW 5 — DELEGATE  (center y=450)
+     ════════════════════════════════════════════ -->
+<text x="127" y="444" font-size="10" font-weight="700" fill="#374151" text-anchor="end">5 · DELEGATE</text>
+<text x="127" y="458" font-size="9" fill="#7c3aed" text-anchor="end">AI auto</text>
+
+<!-- Orchestrator: Send task via A2A -->
+<rect x="330" y="417" width="170" height="64" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="415" y="436" font-size="11" font-weight="700" fill="#5b21b6" text-anchor="middle">Assign Task</text>
+<text x="415" y="451" font-size="9.5" fill="#5b21b6" text-anchor="middle" opacity="0.85">via A2A →</text>
+<rect x="365" y="469" width="100" height="10" rx="2" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.5"/>
+<text x="415" y="477" font-size="8.5" font-weight="700" fill="#5b21b6" text-anchor="middle">A2A MSG</text>
+
+<!-- Specialist: Receive task -->
+<rect x="520" y="417" width="170" height="64" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="605" y="436" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">← Receive Task</text>
+<text x="605" y="451" font-size="9.5" fill="#065f46" text-anchor="middle" opacity="0.85">A2A Protocol</text>
+<rect x="557" y="469" width="96" height="10" rx="2" fill="#d1fae5" stroke="#6ee7b7" stroke-width="0.5"/>
+<text x="605" y="477" font-size="8.5" font-weight="700" fill="#065f46" text-anchor="middle">A2A MSG</text>
+
+<!-- Arrow: Orchestrator → Specialist -->
+<line x1="502" y1="449" x2="518" y2="449" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#ah-purple)"/>
+
+<!-- ════════════════════════════════════════════
+     ROW 6 — EXECUTE  (center y=530)
+     ════════════════════════════════════════════ -->
+<text x="127" y="524" font-size="10" font-weight="700" fill="#374151" text-anchor="end">6 · EXECUTE</text>
+<text x="127" y="538" font-size="9" fill="#059669" text-anchor="end">AI auto</text>
+
+<!-- Specialist: Long-horizon execution -->
+<rect x="520" y="497" width="170" height="64" rx="5" fill="#ecfdf5" stroke="#059669" stroke-width="2" filter="url(#shadow)"/>
+<text x="605" y="516" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">Decompose Task</text>
+<text x="605" y="531" font-size="9.5" fill="#065f46" text-anchor="middle" opacity="0.85">GLM-5.1 Execution</text>
+<rect x="549" y="549" width="112" height="10" rx="2" fill="#d1fae5" stroke="#059669" stroke-width="0.8"/>
+<text x="605" y="557" font-size="8.5" font-weight="700" fill="#065f46" text-anchor="middle">LONG-HORIZON TASK</text>
+
+<!-- ════════════════════════════════════════════
+     ROW 7 — DELIVER  (center y=610)
+     ════════════════════════════════════════════ -->
+<text x="127" y="604" font-size="10" font-weight="700" fill="#374151" text-anchor="end">7 · DELIVER</text>
+<text x="127" y="618" font-size="9" fill="#059669" text-anchor="end">AI auto</text>
+
+<!-- Orchestrator: Receive A2A result -->
+<rect x="330" y="577" width="170" height="64" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="415" y="596" font-size="11" font-weight="700" fill="#5b21b6" text-anchor="middle">← Receive</text>
+<text x="415" y="611" font-size="9.5" fill="#5b21b6" text-anchor="middle" opacity="0.85">A2A Result</text>
+<rect x="365" y="629" width="100" height="10" rx="2" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.5"/>
+<text x="415" y="637" font-size="8.5" font-weight="700" fill="#5b21b6" text-anchor="middle">A2A MSG</text>
+
+<!-- Specialist: Hash + send result -->
+<rect x="520" y="577" width="170" height="64" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="605" y="592" font-size="9.5" fill="#b91c1c" font-weight="700" text-anchor="end">!</text>
+<text x="605" y="596" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">Hash Deliverable</text>
+<text x="605" y="611" font-size="9.5" fill="#065f46" text-anchor="middle" opacity="0.85">Send A2A Result →</text>
+<rect x="549" y="629" width="112" height="10" rx="2" fill="#d1fae5" stroke="#6ee7b7" stroke-width="0.5"/>
+<text x="605" y="637" font-size="8.5" font-weight="700" fill="#065f46" text-anchor="middle">HASH + A2A MSG</text>
+
+<!-- On-chain: deliveryHash committed -->
+<rect x="900" y="577" width="170" height="64" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="985" y="596" font-size="11" font-weight="700" fill="#78350f" text-anchor="middle">deliveryHash</text>
+<text x="985" y="611" font-size="9.5" fill="#78350f" text-anchor="middle" opacity="0.85">Committed</text>
+<rect x="936" y="629" width="98" height="10" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.5"/>
+<text x="985" y="637" font-size="8.5" font-weight="700" fill="#166534" text-anchor="middle">CHAIN STATE</text>
+
+<!-- Arrow: Specialist → Orchestrator (backward / result return) -->
+<line x1="518" y1="609" x2="502" y2="609" stroke="#059669" stroke-width="1.5" marker-end="url(#ah-green)"/>
+<!-- Arrow: Specialist → On-chain (hash commit, long) -->
+<line x1="692" y1="621" x2="898" y2="621" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-green)"/>
+
+<!-- ════════════════════════════════════════════
+     ROW 8 — ACCEPT  (center y=690)  [HUMAN GATE]
+     ════════════════════════════════════════════ -->
+<!-- human gate bg highlight -->
+<rect x="0" y="650" width="1080" height="80" fill="#fef9c3" opacity="0.35"/>
+<text x="127" y="684" font-size="10" font-weight="700" fill="#374151" text-anchor="end">8 · ACCEPT</text>
+<text x="127" y="698" font-size="9" fill="#dc2626" text-anchor="end" font-weight="700">HUMAN GATE</text>
+
+<!-- Human: Accept work -->
+<rect x="140" y="657" width="170" height="64" rx="5" fill="#eff6ff" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+<text x="225" y="672" font-size="9" fill="#b91c1c" font-weight="700" text-anchor="end">[H]</text>
+<text x="225" y="676" font-size="11" font-weight="700" fill="#1e40af" text-anchor="middle">Accept Work</text>
+<text x="225" y="691" font-size="9.5" fill="#1e40af" text-anchor="middle" opacity="0.85">Approve Deliverable</text>
+<rect x="162" y="709" width="126" height="10" rx="2" fill="#fee2e2" stroke="#fca5a5" stroke-width="0.5"/>
+<text x="225" y="717" font-size="8.5" font-weight="700" fill="#991b1b" text-anchor="middle">HUMAN CONFIRMATION</text>
+
+<!-- Orchestrator: Present to human -->
+<rect x="330" y="657" width="170" height="64" rx="5" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="415" y="676" font-size="11" font-weight="700" fill="#5b21b6" text-anchor="middle">Present Result</text>
+<text x="415" y="691" font-size="9.5" fill="#5b21b6" text-anchor="middle" opacity="0.85">to Human</text>
+<rect x="365" y="709" width="100" height="10" rx="2" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.5"/>
+<text x="415" y="717" font-size="8.5" font-weight="700" fill="#5b21b6" text-anchor="middle">REVIEW</text>
+
+<!-- AgentFightClub: settle triggered -->
+<rect x="710" y="657" width="170" height="64" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="795" y="676" font-size="11" font-weight="700" fill="#92400e" text-anchor="middle">settle()</text>
+<text x="795" y="691" font-size="9.5" fill="#92400e" text-anchor="middle" opacity="0.85">Triggered</text>
+<rect x="741" y="709" width="108" height="10" rx="2" fill="#fef9c3" stroke="#fde047" stroke-width="0.5"/>
+<text x="795" y="717" font-size="8.5" font-weight="700" fill="#854d0e" text-anchor="middle">CHAIN OP</text>
+
+<!-- Arrow: Orchestrator → Human (backward) -->
+<line x1="328" y1="689" x2="312" y2="689" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#ah-purple)"/>
+<!-- Arrow: Human → AgentFightClub (approval triggers settle) -->
+<line x1="312" y1="675" x2="708" y2="675" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+
+<!-- ════════════════════════════════════════════
+     ROW 9 — SETTLE  (center y=790)
+     ════════════════════════════════════════════ -->
+<text x="127" y="784" font-size="10" font-weight="700" fill="#374151" text-anchor="end">9 · SETTLE</text>
+<text x="127" y="798" font-size="9" fill="#d97706" text-anchor="end">Automated</text>
+
+<!-- Specialist: Payment received -->
+<rect x="520" y="757" width="170" height="64" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="605" y="776" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">Payment</text>
+<text x="605" y="791" font-size="9.5" fill="#065f46" text-anchor="middle" opacity="0.85">Received</text>
+<rect x="549" y="809" width="112" height="10" rx="2" fill="#bbf7d0" stroke="#4ade80" stroke-width="0.8"/>
+<text x="605" y="817" font-size="8.5" font-weight="700" fill="#166534" text-anchor="middle">OK — SETTLED</text>
+
+<!-- AgentFightClub: Release payment -->
+<rect x="710" y="757" width="170" height="64" rx="5" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="795" y="776" font-size="11" font-weight="700" fill="#92400e" text-anchor="middle">Release Payment</text>
+<text x="795" y="791" font-size="9.5" fill="#92400e" text-anchor="middle" opacity="0.85">to Specialist</text>
+<rect x="741" y="809" width="108" height="10" rx="2" fill="#fef9c3" stroke="#fde047" stroke-width="0.5"/>
+<text x="795" y="817" font-size="8.5" font-weight="700" fill="#854d0e" text-anchor="middle">CHAIN OP</text>
+
+<!-- On-chain: Reputation updated -->
+<rect x="900" y="757" width="170" height="64" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="1.5" filter="url(#shadow)"/>
+<text x="985" y="776" font-size="11" font-weight="700" fill="#78350f" text-anchor="middle">Reputation</text>
+<text x="985" y="791" font-size="9.5" fill="#78350f" text-anchor="middle" opacity="0.85">Record Updated</text>
+<rect x="936" y="809" width="98" height="10" rx="2" fill="#f0fdf4" stroke="#86efac" stroke-width="0.5"/>
+<text x="985" y="817" font-size="8.5" font-weight="700" fill="#166534" text-anchor="middle">CHAIN STATE</text>
+
+<!-- Arrow: AgentFightClub → Specialist (backward) -->
+<line x1="708" y1="789" x2="692" y2="789" stroke="#d97706" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+<!-- Arrow: AgentFightClub → On-chain -->
+<line x1="882" y1="789" x2="898" y2="789" stroke="#d97706" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+
+<!-- footer note -->
+<text x="540" y="848" font-size="9" fill="#94a3b8" text-anchor="middle">Yellow rows = Human confirmation gates · Dashed arrows = cross-lane calls · Solid arrows = adjacent handoffs</text>
+</svg>
