@@ -1,4 +1,29 @@
 {
-  "covered": ["defi-lending", "ai-agent", "instruction", "mcp", "agent-wallet", "overfitting", "chain-aware-context", "delivery-proof", "prompt-design", "on-chain-data", "hash-function", "zkml", "vector-database", "agent-workflow"],
+  "covered": [
+    "defi-lending",
+    "ai-agent",
+    "instruction",
+    "mcp",
+    "agent-wallet",
+    "overfitting",
+    "chain-aware-context",
+    "delivery-proof",
+    "prompt-design",
+    "on-chain-data",
+    "hash-function",
+    "zkml",
+    "vector-database",
+    "agent-workflow",
+    "tool-calling",
+    "rpc-tool",
+    "compute-market",
+    "settlement-and-escrow",
+    "guard",
+    "ai-oracle",
+    "few-shot-prompting",
+    "ai-coding",
+    "ai-security",
+    "smart-contract"
+  ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
