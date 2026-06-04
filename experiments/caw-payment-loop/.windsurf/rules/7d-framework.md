@@ -1,0 +1,43 @@
+---
+trigger: always_on
+---
+
+# 7D Framework (Level 1) — CAW Payment Loop
+
+TypeScript prototype: autonomous agent requests human-approved Cobo Pact budget, calls an x402-protected API stub, CAW executes the micropayment on Base Sepolia, audit trail logged.
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `Product.md` | Backlog (P-001–P-005), requirements, design decisions — read before coding |
+| `Tech.md` | Stack, conventions, fix log — read before adding packages |
+| `src/authRequest.ts` | P-001: terminal approval flow |
+| `src/pactConfig.ts` | P-002: CAW WalletOperator + Pact init |
+| `src/stubServer.ts` | P-003: x402 Express stub |
+| `src/paymentLoop.ts` | P-004: core payment execution |
+| `src/auditLog.ts` | P-005: audit trail |
+
+## Before Building
+1. Read `Product.md` — confirm P-ID status and acceptance criteria
+2. Read `Tech.md` — confirm stack and conventions
+3. Check Fix Log in `Tech.md` for known errors
+
+## While Building
+- Each `src/*.ts` file = one P-ID; orchestration only in `index.ts`
+- Env vars via `src/config.ts` only
+- `async/await` only — no callbacks
+- No `any` type; Base Sepolia only (chain ID 84532)
+- x402: use `x402-axios` interceptor — don't hand-roll headers
+
+## After Building
+- `npm run typecheck` before marking done
+- Update P-ID status in `Product.md`
+- Log new errors to Fix Log in `Tech.md`
+
+## Don't
+- Don't use `any`
+- Don't read `process.env` outside `src/config.ts`
+- Don't hardcode addresses, keys, or RPC URLs
+- Don't connect to mainnet
+- Don't skip the Pact budget check in `paymentLoop.ts`
