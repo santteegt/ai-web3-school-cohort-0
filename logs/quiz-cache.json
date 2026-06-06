@@ -23,7 +23,21 @@
     "few-shot-prompting",
     "ai-coding",
     "ai-security",
-    "smart-contract"
+    "smart-contract",
+    "hallucination",
+    "retrieval-augmented-generation",
+    "openzeppelin",
+    "context-window",
+    "dispute",
+    "simulation",
+    "escrow",
+    "agent-planning",
+    "a2a-protocol",
+    "five-layer-agent-context",
+    "tokens",
+    "embeddings",
+    "transformer-architecture",
+    "tool-abuse"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
