@@ -37,7 +37,11 @@
     "tokens",
     "embeddings",
     "transformer-architecture",
-    "tool-abuse"
+    "tool-abuse",
+    "proof-of-inference",
+    "mcp-permission-model",
+    "verifiable-compute",
+    "agent-trust-and-reputation"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }

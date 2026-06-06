@@ -215,7 +215,9 @@ No file writes are needed during the quiz — only at the end (Step 9 cache upda
 
 ## Model guidance
 
-Run this skill with **Sonnet**. Question generation requires factual grounding in the wiki page, plausible distractor construction, and multi-turn state tracking. Do not use Haiku for this skill.
+Run this skill with **Haiku**. Question generation requires factual grounding in the wiki page, plausible distractor construction, and multi-turn state tracking.
+
+NEVER participate on a quiz autonomously. This is to test human knowledge.
 
 ---
 
