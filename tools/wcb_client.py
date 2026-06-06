@@ -392,6 +392,7 @@ def cmd_tasks_upcoming(api_key: str) -> None:
             upcoming.append({
                 "id": t.get("id"),
                 "title": t.get("title"),
+                "description": t.get("description"),
                 "status": t.get("status"),
                 "points": t.get("points"),
                 "deadline": dl.isoformat(),
