@@ -119,6 +119,17 @@ export async function requestAndSubmitPact(): Promise<PactConfig> {
           },
         },
       },
+      {
+        // Required for EIP-712 messageSign workaround (Cobo node indexing issue)
+        name: 'x402-eip712-signing',
+        type: 'message_sign',
+        rules: {
+          effect: 'allow',
+          when: {
+            chain_in: [config.caw.chainId],
+          },
+        },
+      },
     ],
     completion_conditions: [
       { type: 'time_elapsed', threshold: String(windowSeconds) },

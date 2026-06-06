@@ -11,13 +11,14 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@cobo/agentic-wallet": "latest",
-    "@x402/core": "latest",
-    "@x402/evm": "latest",
-    "@x402/express": "latest",
+    "@cobo/agentic-wallet": "^0.1.7",
+    "@x402/core": "^2.14.0",
+    "@x402/evm": "^2.14.0",
+    "@x402/express": "^2.14.0",
     "axios": "^1.7.0",
     "dotenv": "^16.0.0",
-    "express": "^4.19.0"
+    "express": "^4.19.0",
+    "viem": "^2.52.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",

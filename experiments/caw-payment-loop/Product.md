@@ -102,11 +102,11 @@ Human          Agent Client        CAW / Pact          x402 Server        Base S
 
 | ID    | Feature                        | Status   | Priority    |
 |-------|--------------------------------|----------|-------------|
-| P-001 | x402 Service Provider          | Building | Must Have   |
-| P-002 | CAW Pact Authorization         | Building | Must Have   |
-| P-003 | Agent Consumer Loop            | Building | Must Have   |
-| P-004 | Auditable Settlement Records   | Building | Must Have   |
-| P-005 | Demo Package                   | Todo     | Should Have |
+| P-001 | x402 Service Provider          | Done     | Must Have   |
+| P-002 | CAW Pact Authorization         | Done     | Must Have   |
+| P-003 | Agent Consumer Loop            | Done     | Must Have   |
+| P-004 | Auditable Settlement Records   | Done     | Must Have   |
+| P-005 | Demo Package                   | Done     | Should Have |
 
 > Status: Todo → Building → Done
 > Priority: Must Have / Should Have / Nice to Have

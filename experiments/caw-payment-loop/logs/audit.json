@@ -1,0 +1,42 @@
+[
+  {
+    "timestamp": "2026-06-06T21:38:24.388Z",
+    "pactId": "0e18183c-eec6-4271-9699-9e31468bbbd9",
+    "endpoint": "http://localhost:3402/api/inference",
+    "amountPaidUsd": "0.001",
+    "txHash": null,
+    "receiverAddress": "0x10136Fa41B6522E4DBd068C6F7D80373aBbCFBe6",
+    "responseStatus": 200,
+    "resultSnippet": "Decentralized trust enables autonomous coordination without intermediaries."
+  },
+  {
+    "timestamp": "2026-06-06T21:38:27.355Z",
+    "pactId": "0e18183c-eec6-4271-9699-9e31468bbbd9",
+    "endpoint": "http://localhost:3402/api/inference",
+    "amountPaidUsd": "0.001",
+    "txHash": null,
+    "receiverAddress": "0x10136Fa41B6522E4DBd068C6F7D80373aBbCFBe6",
+    "responseStatus": 200,
+    "resultSnippet": "Machine-to-machine payments unlock composable service markets."
+  },
+  {
+    "timestamp": "2026-06-06T21:38:30.351Z",
+    "pactId": "0e18183c-eec6-4271-9699-9e31468bbbd9",
+    "endpoint": "http://localhost:3402/api/inference",
+    "amountPaidUsd": "0.001",
+    "txHash": null,
+    "receiverAddress": "0x10136Fa41B6522E4DBd068C6F7D80373aBbCFBe6",
+    "responseStatus": 200,
+    "resultSnippet": "Decentralized trust enables autonomous coordination without intermediaries."
+  },
+  {
+    "timestamp": "2026-06-06T21:58:34.869Z",
+    "pactId": "0e18183c-eec6-4271-9699-9e31468bbbd9",
+    "endpoint": "http://localhost:3402/api/inference",
+    "amountPaidUsd": "0.001",
+    "txHash": "0x516b86265ed6d6f151be9c93f7b7c2a7060c2c4a4ffc6fcea2e97f4f44d9284c",
+    "receiverAddress": "0x10136Fa41B6522E4DBd068C6F7D80373aBbCFBe6",
+    "responseStatus": 200,
+    "resultSnippet": "Decentralized trust enables autonomous coordination without intermediaries."
+  }
+]

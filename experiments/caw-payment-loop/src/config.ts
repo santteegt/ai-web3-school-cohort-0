@@ -13,6 +13,8 @@ export const config = {
     walletId: requireEnv('AGENT_WALLET_WALLET_ID'),
     // Cobo chain ID for Base Sepolia (TBASE_SETH) — confirmed via Cobo's chain registry
     chainId: process.env.CAW_CHAIN_ID ?? 'TBASE_SETH',
+    // EVM address of the Cobo MPC wallet — required for EIP-712 `from` field
+    walletAddress: requireEnv('AGENT_WALLET_ADDRESS') as `0x${string}`,
   },
   stub: {
     port: parseInt(process.env.STUB_SERVER_PORT ?? '3402', 10),
@@ -30,5 +32,11 @@ export const config = {
   audit: {
     basescanUrl: process.env.BASESCAN_URL ?? 'https://sepolia.basescan.org',
     logPath: './logs/audit.json',
+  },
+  localSigner: {
+    // Set USE_LOCAL_SIGNER=true to bypass CAW messageSign (dev/test only).
+    // Provide a funded Base Sepolia test key via LOCAL_SIGNER_PRIVATE_KEY.
+    enabled: process.env.USE_LOCAL_SIGNER === 'true',
+    privateKey: (process.env.LOCAL_SIGNER_PRIVATE_KEY ?? '0x0') as `0x${string}`,
   },
 } as const;
