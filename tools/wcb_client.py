@@ -5,8 +5,8 @@ wcb_client.py — WCB Agent API CLI for Sensei
 Zero external dependencies (stdlib only).
 
 Usage:
-  python tools/wcb_client.py status              # today's tasks + events + check-in status
-  python tools/wcb_client.py checkin list        # pending check-ins
+  python tools/wcb_client.py status              # today's events + tasks due today
+  python tools/wcb_client.py checkin list        # all pending + recently submitted tasks
   python tools/wcb_client.py tasks upcoming      # deadlines in the next 3 days
   python tools/wcb_client.py catalog             # dump live procedure catalog
   python tools/wcb_client.py call <procedure> [json_input]  # raw procedure call
@@ -18,7 +18,8 @@ API key resolution order (first non-empty wins):
 
 Program/track resolution order:
   1. WCB_PROGRAM_ID / WCB_TRACK_ID environment variables
-  2. Auto-discovered from users.getProfile (first enrollment)
+  2. programId: auto-discovered from users.getProfile (first ACCEPTED application)
+  3. trackId: auto-discovered from program.getById -> curriculumWeeks[0].trackId
 """
 
 import datetime
@@ -137,7 +138,7 @@ def _get_catalog(api_key: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Program resolution
+# Program + track resolution
 # ---------------------------------------------------------------------------
 
 def _resolve_program(api_key: str) -> str:
@@ -161,11 +162,44 @@ def _resolve_program(api_key: str) -> str:
     return ""
 
 
+def _resolve_track(program_id: str, api_key: str) -> str:
+    """
+    Return trackId.
+
+    Sources (first non-empty wins):
+      1. WCB_TRACK_ID env var
+      2. curriculumWeeks[0].trackId from program.getById
+         (tracks.mySelection and tracks.listForProgram are not exposed to agent calls)
+    """
+    track_id = os.environ.get("WCB_TRACK_ID", "").strip()
+    if track_id:
+        return track_id
+
+    result = _post("program.getById", {"idOrSlug": program_id}, api_key)
+    if result.get("ok"):
+        for week in result.get("result", {}).get("curriculumWeeks", []):
+            tid = week.get("trackId", "").strip()
+            if tid:
+                return tid
+
+    return ""
+
+
 # ---------------------------------------------------------------------------
-# Event + task helpers
+# Task helpers
 # ---------------------------------------------------------------------------
 
-_TASK_BATCH = 50  # max taskIds per listForLearnerByIds call
+def _get_all_tasks(program_id: str, track_id: str, api_key: str) -> list:
+    """
+    Fetch the complete learner task list via tasks.listForLearner.
+    This returns ALL tasks (including bonus/standalone tasks not linked to events).
+    """
+    res = _post(
+        "tasks.listForLearner",
+        {"programId": program_id, "trackId": track_id, "locale": "en"},
+        api_key,
+    )
+    return res.get("result", []) if res.get("ok") else []
 
 
 def _get_events(program_id: str, range_start: str, range_end: str, api_key: str) -> list:
@@ -176,36 +210,6 @@ def _get_events(program_id: str, range_start: str, range_end: str, api_key: str)
         api_key,
     )
     return res.get("result", []) if res.get("ok") else []
-
-
-def _get_tasks_for_events(events: list, program_id: str, api_key: str) -> list:
-    """
-    Collect unique taskIds from events, fetch via listForLearnerByIds (batched),
-    return deduplicated task list.
-    """
-    seen: set = set()
-    task_ids: list = []
-    for ev in events:
-        for tid in ev.get("taskIds", []):
-            if tid not in seen:
-                seen.add(tid)
-                task_ids.append(tid)
-
-    if not task_ids:
-        return []
-
-    tasks: list = []
-    for i in range(0, len(task_ids), _TASK_BATCH):
-        batch = task_ids[i : i + _TASK_BATCH]
-        res = _post(
-            "tasks.listForLearnerByIds",
-            {"programId": program_id, "taskIds": batch},
-            api_key,
-        )
-        if res.get("ok") and isinstance(res.get("result"), list):
-            tasks.extend(res["result"])
-
-    return tasks
 
 
 def _utc_str(dt: datetime.datetime) -> str:
@@ -228,27 +232,83 @@ def _is_done(task: dict) -> bool:
     )
 
 
+def _slim_task(task: dict) -> dict:
+    """Return a compact task representation for output."""
+    return {
+        "id": task.get("id"),
+        "title": task.get("title"),
+        "status": task.get("status"),
+        "points": task.get("points"),
+        "validTo": task.get("validTo"),
+        "available": task.get("available"),
+        "proofRequired": task.get("proofRequired"),
+    }
+
+
+def _slim_submitted(task: dict) -> dict:
+    sub = task.get("latestSubmission") or {}
+    return {
+        "id": task.get("id"),
+        "title": task.get("title"),
+        "status": task.get("status"),
+        "points": task.get("points"),
+        "latestSubmission": {
+            "id": sub.get("id"),
+            "status": sub.get("status"),
+            "createdAt": sub.get("createdAt"),
+            "reviewedAt": sub.get("reviewedAt"),
+            "rejectionReason": sub.get("rejectionReason"),
+        } if sub else None,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
 
 def cmd_status(api_key: str) -> None:
-    """Today's events + linked tasks with their current submission status."""
+    """
+    Today's events (with meeting URLs) + tasks that are either linked to
+    today's events or have a deadline falling today.
+    """
     program_id = _resolve_program(api_key)
+    track_id = _resolve_track(program_id, api_key)
     now_utc = datetime.datetime.utcnow()
 
-    today_start = _utc_str(now_utc.replace(hour=0, minute=0, second=0, microsecond=0))
-    today_end = _utc_str(now_utc.replace(hour=23, minute=59, second=59, microsecond=0))
+    today_start = now_utc.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = now_utc.replace(hour=23, minute=59, second=59, microsecond=0)
 
-    events_today = _get_events(program_id, today_start, today_end, api_key)
-    tasks = _get_tasks_for_events(events_today, program_id, api_key)
+    # Fetch today's events for meeting URLs
+    events_today = _get_events(
+        program_id, _utc_str(today_start), _utc_str(today_end), api_key
+    )
+    event_task_ids = {
+        tid
+        for ev in events_today
+        for tid in ev.get("taskIds", [])
+    }
 
-    pending = [t for t in tasks if not _is_done(t)]
-    done = [t for t in tasks if _is_done(t)]
+    # Fetch all tasks directly — catches standalone/bonus tasks not linked to events
+    all_tasks = _get_all_tasks(program_id, track_id, api_key)
+
+    tasks_pending = []
+    tasks_done = []
+    for t in all_tasks:
+        tid = t.get("id")
+        dl = _parse_deadline(t)
+        is_event_task = tid in event_task_ids
+        deadline_today = dl and today_start <= dl <= today_end
+        if not (is_event_task or deadline_today):
+            continue
+        if _is_done(t):
+            tasks_done.append(_slim_submitted(t))
+        else:
+            tasks_pending.append(_slim_task(t))
 
     output = {
         "date": now_utc.date().isoformat(),
         "program_id": program_id or None,
+        "track_id": track_id or None,
         "events_today": [
             {
                 "title": e.get("title"),
@@ -260,53 +320,54 @@ def cmd_status(api_key: str) -> None:
             }
             for e in events_today
         ],
-        "tasks_pending": pending,
-        "tasks_done": done,
+        "tasks_pending": tasks_pending,
+        "tasks_done": tasks_done,
     }
     print(json.dumps(output, indent=2, default=str))
 
 
 def cmd_checkin_list(api_key: str) -> None:
     """
-    Pending vs. submitted tasks across a rolling 14-day window (past week + next week).
-    Tasks carry status and latestSubmission directly — no separate history call needed.
+    All available pending tasks + tasks submitted in the last 14 days.
+    Uses tasks.listForLearner directly so standalone/bonus tasks are included.
     """
     program_id = _resolve_program(api_key)
+    track_id = _resolve_track(program_id, api_key)
     now_utc = datetime.datetime.utcnow()
+    submission_window_start = now_utc - datetime.timedelta(days=14)
 
-    window_start = _utc_str(now_utc - datetime.timedelta(days=7))
-    window_end = _utc_str(now_utc + datetime.timedelta(days=7))
+    all_tasks = _get_all_tasks(program_id, track_id, api_key)
 
-    events = _get_events(program_id, window_start, window_end, api_key)
-    tasks = _get_tasks_for_events(events, program_id, api_key)
+    pending = []
+    submitted = []
 
-    pending = [t for t in tasks if not _is_done(t) and t.get("available")]
-    submitted = [t for t in tasks if _is_done(t)]
+    for t in all_tasks:
+        if _is_done(t):
+            # Include submitted tasks with activity in the last 14 days
+            sub = t.get("latestSubmission") or {}
+            sub_at_str = sub.get("createdAt") or sub.get("reviewedAt") or ""
+            try:
+                sub_at = datetime.datetime.fromisoformat(
+                    sub_at_str.replace("Z", "+00:00")
+                ).replace(tzinfo=None)
+                if sub_at >= submission_window_start:
+                    submitted.append(_slim_submitted(t))
+            except (ValueError, AttributeError):
+                pass
+        else:
+            if not t.get("available"):
+                continue
+            dl = _parse_deadline(t)
+            # Include tasks that haven't expired yet
+            if dl is None or dl >= now_utc:
+                pending.append(_slim_task(t))
 
     output = {
-        "window": {"from": window_start, "to": window_end},
-        "total_tasks_in_window": len(tasks),
-        "pending": [
-            {
-                "id": t.get("id"),
-                "title": t.get("title"),
-                "status": t.get("status"),
-                "points": t.get("points"),
-                "validTo": t.get("validTo"),
-                "available": t.get("available"),
-            }
-            for t in pending
-        ],
-        "submitted": [
-            {
-                "id": t.get("id"),
-                "title": t.get("title"),
-                "status": t.get("status"),
-                "points": t.get("points"),
-                "latestSubmission": t.get("latestSubmission"),
-            }
-            for t in submitted
-        ],
+        "as_of": now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "total_pending": len(pending),
+        "total_submitted_last_14d": len(submitted),
+        "pending": pending,
+        "submitted": submitted,
     }
     print(json.dumps(output, indent=2, default=str))
 
@@ -314,18 +375,17 @@ def cmd_checkin_list(api_key: str) -> None:
 def cmd_tasks_upcoming(api_key: str) -> None:
     """Tasks with deadlines in the next 3 days that are not yet completed."""
     program_id = _resolve_program(api_key)
+    track_id = _resolve_track(program_id, api_key)
     now_utc = datetime.datetime.utcnow()
     cutoff = now_utc + datetime.timedelta(days=3)
 
-    window_start = _utc_str(now_utc)
-    window_end = _utc_str(cutoff)
-
-    events = _get_events(program_id, window_start, window_end, api_key)
-    tasks = _get_tasks_for_events(events, program_id, api_key)
+    all_tasks = _get_all_tasks(program_id, track_id, api_key)
 
     upcoming = []
-    for t in tasks:
+    for t in all_tasks:
         if _is_done(t):
+            continue
+        if not t.get("available"):
             continue
         dl = _parse_deadline(t)
         if dl and now_utc <= dl <= cutoff:
@@ -356,7 +416,7 @@ def cmd_catalog(api_key: str) -> None:
     print(json.dumps(result, indent=2, default=str))
 
 
-def cmd_call(api_key: str, rest: list[str]) -> None:
+def cmd_call(api_key: str, rest: list) -> None:
     """Raw call: call <procedure> [json_input]"""
     if not rest:
         _die('Usage: python tools/wcb_client.py call <procedure> [\'{"key":"value"}\']')
