@@ -1,0 +1,52 @@
+name: "Definition — Requirements"
+description: "Specify implementation requirements for a discovery item"
+labels: ["7d:definition", "status:defining"]
+body:
+  - type: input
+    id: discovery_link
+    attributes:
+      label: "Discovery issue"
+      placeholder: "#12"
+    validations:
+      required: true
+
+  - type: textarea
+    id: functional_requirements
+    attributes:
+      label: "Functional requirements"
+      description: "Use D-NNN-F01 format. Each requirement must include an acceptance criterion."
+      value: |
+        - [ ] **D-NNN-F01:** [Requirement] → Acceptance: [How to verify]
+        - [ ] **D-NNN-F02:** [Requirement] → Acceptance: [How to verify]
+    validations:
+      required: true
+
+  - type: textarea
+    id: nonfunctional
+    attributes:
+      label: "Non-functional requirements"
+      value: |
+        - [ ] **D-NNN-N01:** [Requirement] → Metric: [Measurable target]
+
+  - type: textarea
+    id: edge_cases
+    attributes:
+      label: "Edge cases / failure modes"
+      placeholder: |
+        - What happens if the A2A endpoint is unreachable?
+        - What if `giveFeedback()` reverts?
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: "Constraints"
+      placeholder: |
+        - Must only call on Base Sepolia testnet
+        - Human gate must halt execution — never auto-proceed
+
+  - type: textarea
+    id: validation_check
+    attributes:
+      label: "Validation plan reference"
+      description: "Which section of docs/VALIDATION_PLAN.md covers this?"
+      placeholder: "Section 4 — A2A Protocol, checks 4.3–4.5"

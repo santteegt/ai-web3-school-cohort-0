@@ -1,0 +1,63 @@
+name: "Discovery — Feature / Integration"
+description: "Add a new feature or integration to the GuildOS backlog"
+labels: ["7d:discovery", "status:backlog"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: "One-line summary"
+      placeholder: "e.g. A2A task/quote round-trip between Orchestrator and Specialist"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "P0 — Submission blocker"
+        - "P1 — Demo quality"
+        - "P2 — Judging evidence"
+        - "P3 — Presentation polish"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: sprint_day
+    attributes:
+      label: Sprint Day
+      options:
+        - "Day 8 — Validation (Jun 8)"
+        - "Day 9 — Wallets + Identity (Jun 9)"
+        - "Day 10 — A2A + Execution (Jun 10)"
+        - "Day 11 — Settlement + Reputation (Jun 11)"
+        - "Day 12 — Demo Prep (Jun 12)"
+        - "Day 13 — Submission (Jun 13)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: "Which MVP flow step does this belong to? Reference docs/MVP_FLOW.md"
+      placeholder: "e.g. Step 4 — Orchestrator invites Specialist; Specialist quotes"
+
+  - type: textarea
+    id: real_or_mock
+    attributes:
+      label: Real or Mock?
+      description: "Is this a real integration or a mock? Justify."
+      placeholder: "Real — A2A v1.0.0 is rated GREEN from pre-research"
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      placeholder: "What this is NOT (prevents scope creep)"
+
+  - type: textarea
+    id: open_questions
+    attributes:
+      label: Open questions
+      placeholder: "Any blockers or unknowns to resolve before Definition"

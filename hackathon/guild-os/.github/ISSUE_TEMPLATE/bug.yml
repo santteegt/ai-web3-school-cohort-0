@@ -1,0 +1,71 @@
+name: "Bug / Blocker"
+description: "Integration failure, on-chain revert, or A2A error blocking the build sprint"
+labels: ["type:bug", "status:in-progress"]
+body:
+  - type: input
+    id: error
+    attributes:
+      label: "Error message or symptom"
+      placeholder: "e.g. giveFeedback() reverts with 'Caller is not authorized'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: "Steps to reproduce"
+      value: |
+        1.
+        2.
+        3.
+
+  - type: textarea
+    id: expected_actual
+    attributes:
+      label: "Expected vs. Actual"
+      value: |
+        **Expected:**
+        **Actual:**
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - "P0 — Blocks demo loop (triggers fallback)"
+        - "P1 — Degrades demo quality"
+        - "P2 — Evidence / polish issue"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - "AgentFightClub"
+        - "ERC-8004"
+        - "A2A"
+        - "ZeroDev / Wallet"
+        - "GLM-5.1"
+        - "Base Sepolia RPC"
+        - "OrchestratorTools"
+        - "SpecialistAgent"
+        - "HumanGates"
+
+  - type: textarea
+    id: fallback
+    attributes:
+      label: "Fallback triggered (if P0)"
+      description: "Which fallback from docs/RISKS.md applies? What was the decision?"
+      placeholder: "F1 — Switching to DAOhaus SDK; estimated recovery 4h"
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      value: |
+        - Sprint Day: Day N (Jun N)
+        - Network: Base Sepolia
+        - Python:
+        - Relevant tx hash (if any):
