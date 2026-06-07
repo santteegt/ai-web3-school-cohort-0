@@ -6,7 +6,7 @@
 **Event:** [AI × Web3 Agentic Builders Hackathon](https://casualhackathon.com/hackathons/cmpsjubkg0003p80kxuzrdyjy)  
 **Deadline:** 2026-06-13 12:00 UTC+8 · **Demo Day:** 2026-06-14  
 **Network:** Base Sepolia testnet  
-**Team:** Santiago Hernandez ([@santteegt](https://github.com/santteegt)) — Solo
+**Team:** Santiago ([@santteegt](https://github.com/santteegt)) — Solo
 
 ---
 

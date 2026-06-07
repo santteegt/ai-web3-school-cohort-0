@@ -108,7 +108,7 @@ Full memo: [`hackathon/notes/project-one-liner.md`](../hackathon/notes/project-o
 
 | Role | Person | GitHub |
 |---|---|---|
-| Human Founder / Developer | Santiago Hernandez | [@santteegt](https://github.com/santteegt) |
+| Human Founder / Developer | Santiago | [@santteegt](https://github.com/santteegt) |
 | Orchestrator Agent | Sensei (Claude via Cowork / Claude Code) | — |
 | Specialist Agent | GLM-5.1 (Z.AI) via Python service | — |
 
