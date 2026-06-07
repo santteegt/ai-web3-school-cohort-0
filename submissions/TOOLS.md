@@ -44,3 +44,6 @@ TBD — to be decided during Week 1 (Day 5–6) when wallet and smart contract e
 
 ### WCB Agent API (`tools/wcb_client.py`)
 Custom CLI tool (stdlib only, no dependencies) for programmatic access to the WCB platform. Used by Sensei's scheduled tasks to check daily task status, list pending check-ins, and surface upcoming deadlines. Reads API key from `.claude/settings.local.json` automatically.
+
+### Casual Hackathon API (`tools/casual_hackathon_client.py`)
+Custom CLI tool (stdlib only, no dependencies) for managing participation in the AI × Web3 Agentic Builders Hackathon on [Casual Hackathon](https://casualhackathon.com). Supports: registration status check, form schema inspection, registration draft + submit, project creation, and submission management. Reads `CASUAL_HACKATHON_API_KEY` from `.claude/settings.local.json` automatically. Must be run from the local terminal (bash sandbox does not have network access to `casualhackathon.com`).

@@ -103,15 +103,29 @@ Full analysis: [tasks/directions/02-governance-coordination.md](tasks/directions
 
 ### Hackathon Project — GuildOS
 
-**Status: Proposal complete · Architecture decision pending · Build starts Week 4**
+**Status: Proposal complete · x402 × CAW prototype complete · Build starts Week 4 (June 7)**
 
 > GuildOS is a programmable studio where a founding agent and specialist agents coordinate real work through A2A, share a Moloch-secured treasury, and build verifiable on-chain reputation — no platform, no middleman, no context loss.
 
-**Track:** Cobo | Agentic Economy × Cobo Agentic Wallet (primary) · Z.AI | Web3 × Long-Horizon Task (secondary, pending architecture decision)
+**Track:** Cobo | Agentic Economy × Cobo Agentic Wallet (primary) · Z.AI | Web3 × Long-Horizon Task (secondary)
 
 **Core loop:** A human founder launches a guild via AgentFightClub with a mandate and funded treasury → a Specialist Agent with an ERC-8004 profile joins via governance vote → the Orchestrator Agent delegates a real task via A2A → the Specialist executes it using GLM-5.1 and commits the deliverable hash on Base testnet → the human accepts → payment is released from the shared treasury → the Specialist's ERC-8004 reputation is updated on-chain.
 
 **Proof of completion:** Two clickable Basescan transaction hashes (deliverable hash commit + AgentFightClub settlement) and the Specialist's ERC-8004 profile showing a before/after reputation delta.
+
+#### Hackathon Event
+
+| Field | Value |
+|---|---|
+| Platform | [Casual Hackathon](https://casualhackathon.com) |
+| Event page | [AI × Web3 Agentic Builders Hackathon](https://casualhackathon.com/hackathons/cmpsjubkg0003p80kxuzrdyjy) |
+| Registration | 🟡 DRAFT — submitted 2026-06-07, awaiting organizer approval |
+| Status | 🟢 Active |
+| Submission deadline | **2026-06-13 12:00 UTC+8** |
+| Demo Day | 2026-06-14 |
+| Prize pool | 7000 USDT (Cobo: 3500 · Z.AI: 3500) |
+
+#### Project Documents
 
 | Document | Link |
 |---|---|
@@ -119,6 +133,7 @@ Full analysis: [tasks/directions/02-governance-coordination.md](tasks/directions
 | Pre-analysis | [hackathon/PROJECT_PROPOSAL_PRE_ANALYSIS.md](hackathon/PROJECT_PROPOSAL_PRE_ANALYSIS.md) |
 | Track selection rationale | [hackathon/TRACK_SELECTION.md](hackathon/TRACK_SELECTION.md) |
 | Prototyping resources | [hackathon/PROTOTYPING_RESOURCES.md](hackathon/PROTOTYPING_RESOURCES.md) |
+| x402 × CAW prototype | [experiments/caw-payment-loop/](experiments/caw-payment-loop/) · [DEMO.md](experiments/caw-payment-loop/docs/DEMO.md) |
 
 **One-page direction memo** (for team formation and mentor/sponsor discussions): [tasks/directions/DIRECTION_MEMO.md](tasks/directions/DIRECTION_MEMO.md)
 

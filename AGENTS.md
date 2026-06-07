@@ -388,4 +388,110 @@ Context produced during Santiago's first two weeks. A new agent session should r
 
 ---
 
-*Last updated: 2026-06-02 | Agent: Sensei (Claude via Cowork) | v1.6 — added Section 15: Generated Learning Resources*
+---
+
+## 16. Hackathon Platform — Casual Hackathon
+
+Santiago is registered/participating in the **AI × Web3 Agentic Builders Hackathon** hosted on [Casual Hackathon](https://casualhackathon.com).
+
+### Event Reference
+
+| Field | Value |
+|---|---|
+| Event name | AI × Web3 Agentic Builders Hackathon |
+| Platform | https://casualhackathon.com |
+| Event page | https://casualhackathon.com/hackathons/cmpsjubkg0003p80kxuzrdyjy |
+| Event ID | `cmpsjubkg0003p80kxuzrdyjy` |
+| Registration page | https://casualhackathon.com/registrations?eventId=cmpsjubkg0003p80kxuzrdyjy |
+| Submission page | https://casualhackathon.com/submissions?eventId=cmpsjubkg0003p80kxuzrdyjy |
+| Platform llms.txt | https://casualhackathon.com/llms.txt |
+| Platform API docs | https://casualhackathon.com/llms/api.md |
+| Status | **Active** |
+| Build period | 2026-06-01 — 2026-06-12 |
+| Submission deadline | **2026-06-13 12:00 UTC+8 (04:00 UTC)** |
+| Demo Day | 2026-06-14 |
+| Results | 2026-06-17 |
+| Prize pool | 7000 USDT total (Cobo: 3500 USDT · Z.AI: 3500 USDT) |
+
+### Tracks
+
+| Track | Slug | Focus |
+|---|---|---|
+| Cobo \| Agentic Economy × Cobo Agentic Wallet | `cobo-agentic-economy-cobo-agentic-wallet` | Agent-native payments, trustless work agreements, agent resource procurement, autonomous trading, A2A economy |
+| Z.AI \| Web3 × Long-Horizon Task | `z-ai-web3-long-horizon-task` | Agentic dev tools, 3D world building, creator economy — all powered by GLM-5.1 for long-horizon autonomous execution |
+
+### CLI Tool
+
+**`tools/casual_hackathon_client.py`** — stdlib-only CLI for all participation management. Must be run from the local terminal (the bash sandbox cannot reach `casualhackathon.com`).
+
+```bash
+python tools/casual_hackathon_client.py status          # registration + project + submission status
+python tools/casual_hackathon_client.py form-schema     # active registration & submission schemas
+python tools/casual_hackathon_client.py tracks          # list tracks with IDs and slugs
+python tools/casual_hackathon_client.py register        # draft + submit registration
+python tools/casual_hackathon_client.py project         # create/update GuildOS project
+python tools/casual_hackathon_client.py submit          # draft + submit project submission
+python tools/casual_hackathon_client.py raw GET /api/partner/participations?eventId=...
+```
+
+### Registration & Participation API
+
+The platform exposes public reads (no auth) via tRPC at `/api/trpc` and authenticated reads/writes via `/api/partner/*` with a Personal Access Key (`chp_user_` prefix, created at `https://casualhackathon.com/profile`).
+
+**To enable agent-managed participation (one-time setup):**
+1. Go to https://casualhackathon.com/profile → create a Personal Access Key
+2. Required scopes: `registration:read registration:write project:read project:write submission:read submission:write`
+3. Store as `CASUAL_HACKATHON_API_KEY` in `.claude/settings.local.json` (gitignored)
+
+**Key API endpoints (bearer token required):**
+
+```bash
+# Check registration status
+GET /api/partner/participations?eventId=cmpsjubkg0003p80kxuzrdyjy
+
+# Submit registration (enters DRAFT — organizer must approve)
+POST /api/partner/participations
+{ "eventId": "cmpsjubkg0003p80kxuzrdyjy", "answers": { ... } }
+
+# Create / update project
+POST /api/partner/projects
+{ "eventId": "cmpsjubkg0003p80kxuzrdyjy", "title": "GuildOS", "trackIds": ["<track-id>"] }
+
+# Submit project
+POST /api/partner/submissions
+{ "eventId": "cmpsjubkg0003p80kxuzrdyjy", "projectId": "<id>", "payload": { ... } }
+```
+
+**Registration flow:**
+1. POST → enters `DRAFT` (requires organizer review before `REGISTERED`)
+2. Once `REGISTERED`, teams unlock and project submission opens
+3. Project submission open until event `endsAt` (2026-06-13 04:00 UTC)
+
+### Agent Rules for Hackathon Management
+
+| Action | Behavior |
+|---|---|
+| Check registration status | Query `/api/partner/participations?eventId=...` if key is available; otherwise direct Santiago to the event page |
+| Draft registration answers | Show draft to Santiago before any POST — never auto-submit |
+| Draft project submission | Show full payload to Santiago for review — never auto-submit |
+| Withdraw registration | Show exact action and get explicit confirmation first |
+| Manage submission | Fetch form schema first; pre-fill from `hackathon/PROJECT_PROPOSAL.md`; show Santiago the rendered payload |
+| Submission deadline reminder | Always include the deadline (2026-06-13 12:00 UTC+8) when discussing hackathon tasks |
+
+### Key Submission Requirements (from platform)
+
+1. Project name + one-sentence description
+2. GitHub Repo with README (problem, architecture, run instructions, API/SDK used)
+3. Demo link or video (3–5 min recommended)
+4. On-chain / testnet evidence (contract addresses, tx hashes, agent wallet address, screenshots)
+5. Team info (members, roles, wallet addresses, contact)
+6. For Cobo track: CAW key code/config, wallet address, proof of funds execution
+7. For Z.AI track: GLM-5.1 usage, long-horizon task run log, Web3 proof
+
+### Submission Checklist Location
+
+Track submission readiness in: `hackathon/SUBMISSION_CHECKLIST.md` (to be created before June 12)
+
+---
+
+*Last updated: 2026-06-06 | Agent: Sensei (Claude via Cowork) | v1.7 — added Section 16: Casual Hackathon platform management*
