@@ -217,7 +217,7 @@ No file writes are needed during the quiz — only at the end (Step 9 cache upda
 
 Run this skill with **Haiku**. Question generation requires factual grounding in the wiki page, plausible distractor construction, and multi-turn state tracking.
 
-NEVER participate on a quiz autonomously. This is to test human knowledge.
+You should assist in the quiz creation but NEVER participate by answering the quiz by yourself. This is to test the human knowledge.
 
 ---
 

@@ -3,6 +3,7 @@
 > Track: Cobo | Agentic Economy × Cobo Agentic Wallet (primary)
 > Directions: Identity / Capability (main) · Governance / Coordination (secondary)
 > Built: 2026-06-01 | Cohort 0 · AI × Web3 School
+> Prelimary analysis: [Report](./PROJECT_PROPOSAL_PRE_ANALYSIS.md)
 
 ---
 

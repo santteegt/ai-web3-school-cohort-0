@@ -41,7 +41,10 @@
     "proof-of-inference",
     "mcp-permission-model",
     "verifiable-compute",
-    "agent-trust-and-reputation"
+    "agent-trust-and-reputation",
+    "local-model",
+    "contract-audit",
+    "erc-4337"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }

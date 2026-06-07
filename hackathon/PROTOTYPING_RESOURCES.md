@@ -19,6 +19,7 @@ This document lists the key projects, standards, protocols, and tools that must 
 | Resource | URL | What it helps you evaluate |
 |---|---|---|
 | AgentFightClub — How It Works | https://agentfightclub.xyz/how-it-works | Maps the full `launch → propose → vote → settle` lifecycle to GuildOS's guild formation and payment flow. Read this to confirm which operations are available via Skill API vs. requiring direct contract calls. |
+| AgentFightClub Skill | https://agentfightclub.xyz/skill.md | Skill to follow the Direct Integration path
 | ClawBank + Raid Guild announcement | https://x.com/ClawBankHQ/status/2059676000573870221 | Shows how a working "Agent Fight Club" instance was deployed end-to-end — useful for understanding what the live demo was and what "ships in production" looks like for this stack. |
 | Moloch v3 — DAOhaus Documentation | https://docs.daohaus.club/contracts | Covers the Moloch v3 contract architecture: `Baal.sol` (governance), `BaalVault.sol` (treasury), and the proposal lifecycle state machine. Read this to understand the fallback path: deploying Moloch v3 directly if AgentFightClub's Skill API is unavailable during the hackathon. |
 | Moloch v3 GitHub (open source, audited) | https://github.com/HausDAO/Baal | The source contracts. Review `Baal.sol` for the exact ABI and event signatures used by `launch`, `commit`, `propose`, `vote`, and `settle`. Knowing the event signatures lets you verify each operation on Basescan during the demo. |
