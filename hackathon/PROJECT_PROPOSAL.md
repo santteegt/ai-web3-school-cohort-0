@@ -4,6 +4,7 @@
 > Directions: Identity / Capability (main) · Governance / Coordination (secondary)
 > Built: 2026-06-01 | Cohort 0 · AI × Web3 School
 > Prelimary analysis: [Report](./PROJECT_PROPOSAL_PRE_ANALYSIS.md)
+> Meeting 2: [Notes](./PROJECT_PROPOSAL_ANALYSIS_2.md)
 > Team: Santiago ([@santteegt](https://github.com/santteegt)) — Solo
 
 ---
@@ -98,7 +99,7 @@ A founding agent launches a GuildOS guild via AgentFightClub with a mandate and 
 | Human review + acceptance | **Real (minimal CLI)** | Text interface; sufficient for demo |
 | Capability matching across registry | **Mocked** | Hardcoded agent pair; full matching is post-hackathon |
 | Guild context store (shared memory) | **Mocked** | JSON file per guild; OSS integration if time allows |
-| Agent wallet provider (Cobo CAW vs. Wiretap) | **TBD** | Decided in architecture phase; does not block proposal |
+| Agent wallet provider | **Real (Cobo CAW)** | Pact-scoped API key; x402 + ERC-3009; local signer bypass while Cobo node indexing recovers |
 | Multiple concurrent guild members | **Mocked** | Demo shows one agent pair; architecture supports N |
 | ERC-8004 talent query (capability matching) | **Mocked** | Hardcoded Specialist profile for MVP; full registry query + LLM ranking is post-hackathon |
 | A2A quote message (Specialist → Orchestrator) | **Real** | Specialist responds with scope, cost, and timeline before execution |
@@ -240,7 +241,7 @@ Without Web3: reputation is a database row on a platform; payment depends on the
 
 GuildOS's core story is economic coordination at machine speed: a shared treasury funds a mandate, a specialist agent is paid for verified work, and capital moves programmatically on acceptance — not on trust or a platform's release schedule. This maps directly to the Cobo track's "Agentic Economy" framing and explicitly aligns with the track's listed demo directions: "agent-to-agent work protocols" and the "A2A Economy." The individual agent execution wallet (pending architecture decision) will use a scoped smart account enforcing per-task spending limits and contract allowlists — the "controllable" dimension of Cobo's thesis. Z.AI's GLM-5.1 is integrated as the execution engine for the Specialist Agent, but the economic coordination layer — treasury, governance, settlement, and reputation — is the primary demonstration surface.
 
-**Architecture note:** If the wallet architecture decision lands on Wiretap (AgentFightClub's embedded wallet provider) rather than Cobo CAW, the Z.AI long-horizon task track becomes the natural primary. This decision is deferred to the architecture phase and will be finalized before Day 1 of the hackathon.
+**Architecture note:** Agent execution wallets use Cobo CAW with pact-scoped API keys enforcing per-task spending limits. Z.AI's GLM-5.1 is integrated as the Specialist Agent's execution engine, making this project eligible for both tracks; Cobo's economic coordination layer (treasury, settlement, reputation) is the primary demonstration surface.
 
 ---
 
@@ -340,9 +341,10 @@ Because the Orchestrator's tools are defined as MCP schemas, adapting them for O
 | Agent protocol | A2A SDK v1.0.0 | Cross-harness task delegation + result return |
 | On-chain (coordination) | AgentFightClub (Moloch v3) | Guild treasury, governance, settlement |
 | On-chain (identity) | ERC-8004 registry (Base Sepolia) | Agent identity, capability claims, reputation |
-| On-chain (payment) | Cobo CAW / Wiretap (TBD) | Per-task scoped wallet; final choice post-architecture validation |
+| On-chain (payment) | Cobo CAW | Pact-scoped API key; per-task spending ceiling; x402 payment protocol |
 | Language | Python (primary) | Agent services, CLI tools, A2A handlers |
 | Smart contract tooling | Foundry / ethers.py | Contract calls; no custom Solidity for MVP |
+| Network | Base Sepolia testnet | All on-chain operations: treasury, deliverable hash, reputation, settlement |
 | RPC | Alchemy / Base Sepolia RPC | Transaction submission and event reading |
 | Identity API | 8004scan API | ERC-8004 profile reads and registry queries |
 
@@ -359,3 +361,4 @@ Because the Orchestrator's tools are defined as MCP schemas, adapting them for O
 |---|---|---|
 | 1.0 | 2026-06-01 | Initial proposal |
 | 1.1 | 2026-06-07 | Added talent hunting via ERC-8004 pull model (Steps 3–4 expanded); full A2A commerce protocol: quoting, acceptance message, evaluator pre-check, dispute stub; concrete ERC-8004 reputation write (6 fields + trigger); four human confirmation gates (Gate 0, 0.5, 1, 2); harness architecture decision (hybrid MCP pack — Section 13); tech stack placeholder (Section 14); team declared solo; changelog added |
+| 1.2 | 2026-06-07 | Tech stack: wallet provider locked to Cobo CAW (Wiretap removed); Base Sepolia added as explicit network row; Track Alignment note updated; Mock vs Real wallet row resolved to Real |

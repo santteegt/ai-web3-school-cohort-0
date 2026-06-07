@@ -1,0 +1,295 @@
+# GuildOS — Week 4 Sprint Plan
+
+> Build window: **2026-06-08 (Mon) → 2026-06-13 12:00 UTC+8 (submission)**  
+> Network: Base Sepolia testnet  
+> Team: Solo (Santiago)  
+> Deadline: **2026-06-13 12:00 UTC+8 (04:00 UTC)**  
+> Reference: [SCOPE_REVIEW.md](SCOPE_REVIEW.md) · [RISK_ASSUMPTION_MEMO.md](RISK_ASSUMPTION_MEMO.md) · [TECHNICAL_VALIDATION_PLAN.md](TECHNICAL_VALIDATION_PLAN.md)
+
+---
+
+## Week Overview
+
+| Day | Date | Theme | P0 Gate |
+|---|---|---|---|
+| Day 8 | Mon Jun 8 | **Validation** — confirm all live integrations pass or trigger fallbacks | AgentFightClub `launch` live · A2A test suite green · GLM-5.1 task type locked |
+| Day 9 | Tue Jun 9 | **Wallets + Identity** — agent wallets operational, ERC-8004 agents registered, guild funded | Both agent addresses on-chain · Guild funded with mandate |
+| Day 10 | Wed Jun 10 | **A2A + Execution** — full A2A flow + GLM-5.1 task + deliverable hash on-chain | `task/delivered` received · Hash committed to Base Sepolia · Basescan tx #1 saved |
+| Day 11 | Thu Jun 11 | **Settlement + Reputation + End-to-End** — close the loop | `settle()` tx · ERC-8004 delta visible · Full loop smoke test passes |
+| Day 12 | Fri Jun 12 | **Demo Prep + Evidence** — README, submission artifacts, demo script | Repo submission-ready · All Basescan tx hashes saved |
+| Day 13 | Sat Jun 13 | **Submission** — demo video + form submit | Submitted before 12:00 UTC+8 |
+
+---
+
+## Day 8 — Monday, June 8 · Validation Day
+
+**Theme:** Before writing integration code, confirm every live dependency actually works. Make fallback decisions before noon so the rest of the week builds on solid ground.
+
+### Morning (4h): Integration probes
+
+| Task | What to do | Real or Mock |
+|---|---|---|
+| **AgentFightClub `launch` probe** | Run `AGENTFIGHTCLUB_DAY1_TEST.py` — call `launch` with a test mandate string. Confirm a tx hash is returned and visible on Basescan. | **Real** — if it works, proceed. If it fails or errors after 2h of debugging → **trigger F1 fallback**: switch to DAOhaus SDK direct Moloch v3 deploy. |
+| **A2A connection test** | Run `A2A_DAY1_TEST.py` — all 5 gates (agent card, send, quote, deliver, accept). | **Real** — A2A is rated GREEN from research. Expect pass. If metadata field rejected → switch to text-body JSON encoding (15-min fix). |
+| **GLM-5.1 task type selection** | Test three candidate prompts against Z.AI GLM-5.1 API: (1) Python function generation, (2) smart contract spec, (3) security analysis checklist. Pick the one with most consistent structured output. | **Real** — lock the winner. If all three fail → deterministic fallback: "Write a Python SHA-256 utility function" (any LLM returns consistent output). |
+| **ZeroDev smart account deploy** | Deploy one ERC-4337 Kernel v3.3 account on Base Sepolia via TypeScript bridge. Confirm address. | **Real** — if session key policy config takes >3h → **trigger F4 fallback**: use basic signing (no session key scoping) + document the intended policy as a code exhibit. |
+
+### Afternoon (3h): Decision log + skeleton
+
+| Task | Output |
+|---|---|
+| Update `RISK_ASSUMPTION_MEMO.md` Decision Log with today's results | All `⏳` rows become `✅` or `❌ → fallback` |
+| Scaffold repo directory: `src/orchestrator/`, `src/specialist/`, `src/shared/` | Empty Python modules + `requirements.txt` |
+| Write `guild_context.json` schema (fields: `guild_address`, `mandate`, `treasury_wei`, `member_list`, `task_state`, `deliverable_hash`) | **Mock** — JSON file is the guild context store for entire hackathon |
+
+### Day 8 Deliverables
+
+- [ ] AgentFightClub decision: live API or DAOhaus fallback — **decided and noted**
+- [ ] A2A test suite: all 5 gates passing
+- [ ] GLM-5.1 demo task type: **locked** (written in Decision Log)
+- [ ] ZeroDev decision: session keys or basic signing — **decided and noted**
+- [ ] Repo scaffold created and pushed
+
+### What is Mocked Today
+
+Everything except the probes. No integration code is written yet — only tested.
+
+---
+
+## Day 9 — Tuesday, June 9 · Wallets + Identity
+
+**Theme:** Agent wallets live on Base Sepolia. Both agents registered on ERC-8004. Guild deployed and funded. End-of-day: the economic container exists on-chain.
+
+### Morning (4h): Agent wallets + ERC-8004 registration
+
+| Task | Real or Mock | Evidence |
+|---|---|---|
+| Initialize Orchestrator Agent wallet (ZeroDev or local signer) | **Real** | Wallet address printed; Base Sepolia balance > 0 (faucet) |
+| Initialize Specialist Agent wallet | **Real** | Same |
+| Call `ERC-8004.register(agentURI)` for Orchestrator | **Real** | ERC-721 agentId minted; Basescan event `AgentRegistered` |
+| Call `ERC-8004.register(agentURI)` for Specialist | **Real** | Same |
+| Capture Specialist **before-state** snapshot | **Real** | Save to `hackathon/notes/erc8004_specialist_before.json` |
+| Publish Orchestrator A2A Agent Card at `localhost:10000/.well-known/agent.json` | **Real** | Validate with `curl` |
+| Publish Specialist A2A Agent Card at `localhost:10001/.well-known/agent.json` | **Real** | Same |
+
+### Afternoon (3h): Guild formation
+
+| Task | Real or Mock | Evidence |
+|---|---|---|
+| AgentFightClub `launch(mandate_string, treasury_address)` | **Real** (or DAOhaus fallback) | Guild contract address on Basescan |
+| AgentFightClub `commit(guild_address, 0.001 ETH)` | **Real** | Treasury balance readable; Basescan tx |
+| AgentFightClub `propose(specialist_erc8004_id)` | **Real** | Proposal ID returned; Basescan `ProposalSubmitted` event |
+| AgentFightClub `vote(proposal_id, approve=True)` | **Real** — this is **Gate 1** (human founds guild) | Proposal state → `Passed` on Basescan |
+| Write guild state to `guild_context.json` | **Real (JSON file)** | Fields: `guild_address`, `mandate`, `treasury_wei`, `member_list: [orchestrator, specialist]`, `task_state: ACTIVE` |
+
+### Day 9 Deliverables
+
+- [ ] Orchestrator + Specialist wallet addresses (save to `submissions/tx_hashes.md`)
+- [ ] ERC-8004 agentIds for both agents (with Basescan links)
+- [ ] Guild contract address + `commit` tx hash (save to `submissions/tx_hashes.md`)
+- [ ] `propose` + `vote` tx hashes saved
+- [ ] `erc8004_specialist_before.json` committed to `hackathon/notes/`
+
+### What is Mocked Today
+
+- ERC-8004 talent query / shortlist — Orchestrator uses the hardcoded Specialist profile from `erc8004_specialist_before.json`. No live registry query. **Gate 0** (candidate selection) is a CLI prompt that prints the cached profile and asks `y/N`.
+- Session key policy (if ZeroDev fallback triggered): shown as code exhibit only.
+
+---
+
+## Day 10 — Wednesday, June 10 · A2A + Execution
+
+**Theme:** The full A2A conversation runs. GLM-5.1 executes the locked demo task. Deliverable is hashed and committed to chain. End-of-day: Basescan tx #1 (deliverable hash) is in hand.
+
+### Morning (4h): A2A flow + GLM-5.1 execution
+
+| Task | Real or Mock | Evidence |
+|---|---|---|
+| Orchestrator sends A2A `task/invite` to Specialist | **Real** | Logged in A2A trace; Specialist receives and parses |
+| Specialist responds with A2A `task/quote` (scope, `estimated_cost_wei`, `deadline_iso`) | **Real** | Quote logged; Orchestrator surfaces to human. **Gate 0.5**: CLI `Accept quote? [y/N]` |
+| Orchestrator sends A2A `task/send` (full task: description, input, acceptance criteria, deadline, budget) | **Real** | Full payload logged; message ID captured |
+| Specialist decomposes task into ≥3-step plan using GLM-5.1 | **Real** | Plan logged before execution begins |
+| GLM-5.1 executes task (multi-step; tool use loop) | **Real** | Output file written; structured and non-empty |
+| Execution trace logged | **Real** | Save to `hackathon/notes/glm_trace_<date>.json` |
+| Specialist computes SHA-256 of deliverable | **Real** | Hash string printed and confirmed |
+
+### Afternoon (3h): On-chain hash + A2A delivery
+
+| Task | Real or Mock | Evidence |
+|---|---|---|
+| Specialist sends SHA-256 hash to guild contract via `eth_sendTransaction` (Base Sepolia) | **Real** | **Basescan tx #1** — deliverable hash commit. Save to `submissions/tx_hashes.md` |
+| Contract storage read: confirm hash is readable post-commit (`eth_call`) | **Real** | Returned hash matches Specialist's value |
+| Specialist sends A2A `task/delivered` to Orchestrator (deliverable reference + hash) | **Real** | Message logged; hash in message matches on-chain hash |
+| Orchestrator automated pre-check: hash present ✅ · format valid ✅ · size > 0 ✅ | **Real (minimal)** | Pre-check report printed |
+| Orchestrator presents deliverable + pre-check report to human. **Gate 2**: `Accept deliverable? [y/N]` | **Real** | CLI prompt halts; execution waits |
+| Export A2A trace log | **Real** | Save `hackathon/notes/a2a_trace_<date>.json` (all 7 message events) |
+
+### Day 10 Deliverables
+
+- [ ] **Basescan tx #1**: deliverable hash commit link — saved to `submissions/tx_hashes.md`
+- [ ] `a2a_trace_<date>.json` — all 7 A2A events present
+- [ ] `glm_trace_<date>.json` — plan + tool calls + output visible
+- [ ] Deliverable file in repo (non-zero, structured output)
+- [ ] Pre-check report: all three checks passing
+
+### What is Mocked Today
+
+- Third-party evaluator agent: Orchestrator's pre-check covers hash + format only. Full evaluator is post-hackathon.
+- Multiple task iterations: single task, single round-trip. Parallelism is out of scope.
+
+---
+
+## Day 11 — Thursday, June 11 · Settlement + Reputation + End-to-End
+
+**Theme:** Close the loop. Human accepts. Payment released. ERC-8004 reputation written. Full smoke test. End-of-day: Basescan tx #2 (settlement) in hand and the before/after ERC-8004 delta is visible.
+
+### Morning (4h): Settlement + reputation write-back
+
+| Task | Real or Mock | Evidence |
+|---|---|---|
+| On Gate 2 acceptance: Orchestrator sends A2A `task/accepted` to Specialist | **Real** | Message logged; closes A2A transaction loop |
+| Orchestrator calls AgentFightClub `settle(guild_address, specialist_wallet)` | **Real** | **Basescan tx #2** — treasury release. Save to `submissions/tx_hashes.md` |
+| Confirm Specialist wallet balance increased by expected amount | **Real** | `eth_getBalance` before/after diff |
+| Orchestrator calls `ERC-8004.giveFeedback()` with 6 fields: task_type, deliverable_hash, acceptance_timestamp, payment_wei, guild_address, a2a_task_id | **Real** | Basescan `DeliveryRecorded` event emitted |
+| **Caller note**: `giveFeedback()` must be called from Marco's EOA or the guild contract — NOT from the Specialist wallet. Verify caller before submitting. | — | If it reverts → switch to Marco's EOA (F2 fallback) |
+| Capture Specialist ERC-8004 **after-state** | **Real** | Save to `hackathon/notes/erc8004_specialist_after.json` |
+| Generate before/after delta (side-by-side CLI output or script) | **Real** | Confirm: delivery_count +1, all 6 fields present |
+| Update `guild_context.json`: `task_state: SETTLED` | **Real (JSON file)** | — |
+
+### Afternoon (3h): Dispute stub + smoke test
+
+| Task | Real or Mock | Evidence |
+|---|---|---|
+| Implement dispute stub: Gate 2 rejection path sets `task_state: DISPUTED` in `guild_context.json` | **Stub** — JSON only. No ragequit call executed. | `guild_context.json` shows `DISPUTED` state |
+| Document ragequit exit path in README (Moloch v3 ragequit is standard; cite DAOhaus docs) | **Documentation only** | — |
+| **Full loop smoke test (Run 1)**: fresh guild, fresh agents, full sequence start to finish | **Real** | Terminal output from mandate → settlement → reputation delta |
+| **Full loop smoke test (Run 2)**: different task input | **Real** | Confirms repeatability |
+| Confirm two primary Basescan tx hashes clickable: (1) deliverable hash · (2) settlement | **Real** | Both resolve on Basescan |
+
+### Day 11 Deliverables
+
+- [ ] **Basescan tx #2**: AgentFightClub settlement link — saved to `submissions/tx_hashes.md`
+- [ ] `erc8004_specialist_after.json` committed to `hackathon/notes/`
+- [ ] Before/after delta: delivery_count delta + all 6 fields visible
+- [ ] Smoke test Run 1: passes end-to-end
+- [ ] Smoke test Run 2: passes (different input)
+- [ ] Dispute stub: `DISPUTED` state in JSON confirmed
+
+### What is Mocked Today
+
+- Ragequit execution: documented only, no on-chain call.
+- Multiple guild members: architecture supports N; demo confirms 2.
+- Semantic capability matching: hardcoded pair throughout.
+
+### Tier B Trigger Point
+
+> If by **EOD Day 11** AgentFightClub AND ERC-8004 writes are both failing with no resolution path, switch to Tier B (A2A + raw hash commit + GLM-5.1 trace as demo surface). Do not attempt to fix both in the final 48 hours. See `RISK_ASSUMPTION_MEMO.md §3` for Tier B scope.
+
+---
+
+## Day 12 — Friday, June 12 · Demo Prep + Evidence Assembly
+
+**Theme:** Nothing new is built. The code is done. Today is about making the work legible to judges and assembling every submission artifact.
+
+### Morning (3h): README + run instructions
+
+| Task | Output |
+|---|---|
+| Write `README.md`: problem statement, architecture diagram (text or Mermaid), run instructions, API/SDK used | Submission-ready README |
+| Add Mermaid swimlane or ASCII architecture diagram (9-step flow from proposal) | Embedded in README |
+| Document two primary Basescan tx hashes prominently in README | Clickable links |
+| Document ERC-8004 before/after delta in README (or link to JSON files) | Judge-readable |
+| Document Cobo CAW / ZeroDev session key config (or fallback design exhibit) | Cobo track requirement |
+| Document GLM-5.1 long-horizon run evidence (link to `glm_trace_*.json`) | Z.AI track evidence |
+
+### Afternoon (3h): Demo script + submission evidence
+
+| Task | Output |
+|---|---|
+| Write demo script (2 pages): what to say at each step, which terminal to show, pre-staged steps checklist | `hackathon/notes/DEMO_SCRIPT.md` |
+| Create `submissions/tx_hashes.md`: all Basescan links, agent wallet addresses, ERC-8004 agentIds | Submission artifact |
+| Pre-stage the demo: run the membership proposal + vote steps so only the final 3 txs happen live | State saved in `guild_context.json` |
+| Fallback evidence assembled: pre-recorded Basescan screenshots for each critical tx | `hackathon/notes/screenshots/` |
+| Final git status: `git add . && git commit -m "Week 4 build complete — submission ready" && git push` | Clean repo on GitHub |
+
+### Day 12 Deliverables
+
+- [ ] `README.md` with architecture, run instructions, SDK evidence, tx hashes
+- [ ] `hackathon/notes/DEMO_SCRIPT.md`
+- [ ] `submissions/tx_hashes.md` complete
+- [ ] Pre-staged demo state ready (guild live, proposal passed, ready to delegate)
+- [ ] All fallback screenshots saved
+- [ ] Repo pushed and clean
+
+### What is Mocked Today
+
+Nothing new is mocked today. The scope is locked.
+
+---
+
+## Day 13 — Saturday, June 13 · Submission (≤ 12:00 UTC+8)
+
+**Theme:** Record, submit, done.
+
+| Task | Deadline |
+|---|---|
+| Record demo video (3–5 min): show mandate → A2A flow → GLM-5.1 output → hash commit on Basescan → settlement → ERC-8004 delta | Before 10:00 UTC+8 |
+| Fill Casual Hackathon submission form: project name, description, GitHub link, demo link, tx hashes, team info | Before 11:30 UTC+8 |
+| Santiago reviews and confirms payload before submitting | **Manual submission — Sensei does NOT auto-submit** |
+| Post-submission: save confirmation link/ID to `submissions/` | After submit |
+
+**Submission deadline: 2026-06-13 12:00 UTC+8 (04:00 UTC). No late submissions accepted.**
+
+---
+
+## Mock vs. Real — Full Week Summary
+
+| Component | Status for Demo | Fallback |
+|---|---|---|
+| AgentFightClub `launch` + `commit` | **Real** | DAOhaus SDK direct deploy |
+| AgentFightClub `propose` + `vote` + `settle` | **Real** | Same fallback |
+| ERC-8004 register + before/after read | **Real** | Cached JSON if 8004scan down |
+| ERC-8004 reputation write-back (6 fields) | **Real** | Route via Marco's EOA if guild contract reverts |
+| A2A task flow (all 7 message events) | **Real** | Text-body JSON if metadata rejected |
+| GLM-5.1 long-horizon task execution | **Real** | Deterministic fallback prompt |
+| On-chain deliverable hash commit | **Real** | Always real — one `eth_sendTransaction` |
+| ZeroDev session key policy | **Real if TypeScript bridge <3h** | Basic signing + policy as code exhibit |
+| Human gate CLI prompts (Gates 0, 0.5, 1, 2) | **Real** | — |
+| Orchestrator automated pre-check | **Real (minimal)** | — |
+| ERC-8004 talent query / shortlist | **Mocked** — hardcoded Specialist profile | — |
+| Guild context store | **Mocked** — JSON file per session | — |
+| Multiple concurrent guild members | **Mocked** — one agent pair | — |
+| Third-party evaluator agent | **Mocked** — Orchestrator hash + format check | — |
+| Dispute ragequit on-chain call | **Stub** — `DISPUTED` state in JSON only | — |
+| Polished web UI | **Cut** — two terminal windows | — |
+| Persistent shared memory (Mem0 / LangChain) | **Cut** — JSON file | — |
+
+---
+
+## Daily Scope Creep Checks
+
+Before ending each day, confirm none of these are in progress:
+
+- [ ] Building a second specialist agent path (one pair is the demo)
+- [ ] Integrating Mem0 or LangChain memory (JSON is the stub — ship it)
+- [ ] Querying the live ERC-8004 registry for real (hardcoded profile is correct)
+- [ ] Building any frontend UI (terminal is the demo surface)
+- [ ] Implementing ragequit on-chain (document only)
+- [ ] Deploying on mainnet (Base Sepolia only)
+
+---
+
+## If Things Slip: Priority Order
+
+If time pressure forces cuts, drop in this order:
+
+1. **Drop last**: Two Basescan tx hashes (deliverable hash + settlement) — judges must be able to click these.
+2. **Drop last**: ERC-8004 reputation delta (before/after) — second key verification proof.
+3. **Drop before those**: ZeroDev session keys → fall back to design exhibit.
+4. **Drop before those**: A2A quote round-trip (Gate 0.5) → collapse into a single task/send if needed.
+5. **Never drop**: GLM-5.1 real execution (Z.AI track requires it); on-chain hash commit; AgentFightClub settle.
+
+---
+
+*Sprint Plan v1.0 · 2026-06-07 · Agent: Sensei (Claude via Cowork)*  
+*Sources: PROJECT_PROPOSAL.md v1.2 · SCOPE_REVIEW.md · RISK_ASSUMPTION_MEMO.md · TECHNICAL_VALIDATION_PLAN.md*

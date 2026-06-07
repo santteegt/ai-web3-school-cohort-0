@@ -1,0 +1,471 @@
+#!/usr/bin/env python3
+"""
+GuildOS — AgentFightClub Day 1 Integration Test
+================================================
+Run this script on Day 1 of the hackathon to validate the highest-risk
+AgentFightClub/Moloch v3 operations before building the full stack.
+
+Prerequisites:
+  npm install -g @raidguild/meta-clawtel
+  export PRIVATE_KEY=0x...
+  export RPC_URL=https://sepolia.base.org  # or https://mainnet.base.org
+  export MOLOCH_SERVICE_URL=https://moloch-service-production.up.railway.app
+
+Usage:
+  python AGENTFIGHTCLUB_DAY1_TEST.py           # run all tests
+  python AGENTFIGHTCLUB_DAY1_TEST.py --test 1  # run specific test
+  python AGENTFIGHTCLUB_DAY1_TEST.py --dry-run # print commands without executing
+
+Tests:
+  1. Hosted service health check
+  2. DAO summon on target network (highest risk)
+  3. Membership proposal full lifecycle (mint-shares → sponsor → vote → process)
+  4. Payment proposal full lifecycle (payment → sponsor → vote → process)
+  5. Signal proposal with deliverable hash
+"""
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# Config
+# ---------------------------------------------------------------------------
+
+DRY_RUN = False
+GUILD_ADDR = os.environ.get("TEST_GUILD_ADDR", "")  # Set after summon, or pre-stage
+SPECIALIST_ADDR = os.environ.get("SPECIALIST_ADDR", "0x0000000000000000000000000000000000000001")
+MOLOCH_CLI = "moloch-agent"
+
+# Short periods for demo/testing — override if DAO was summoned differently
+VOTING_PERIOD_SEC = 65   # slightly over 60s summon param
+GRACE_PERIOD_SEC = 65
+
+SUMMON_PARAMS = {
+    "name": "GuildOS-Test-Guild",
+    "tokenName": "GUILDTEST",
+    "tokenSymbol": "GT",
+    "lootTokenName": "GUILDTEST-LOOT",
+    "lootTokenSymbol": "GTL",
+    "votingPeriod": 60,
+    "gracePeriod": 60,
+    "quorum": 1,
+    "minRetention": 66,
+    "sponsorThreshold": 0,
+    "newOffering": 0,
+    # memberAddresses and memberShares populated at runtime from 'moloch-agent account'
+}
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def run(cmd: str, capture: bool = True) -> tuple[int, str, str]:
+    """Run a shell command. Returns (returncode, stdout, stderr)."""
+    print(f"\n  $ {cmd}")
+    if DRY_RUN:
+        print("  [DRY RUN — not executed]")
+        return 0, "", ""
+    result = subprocess.run(cmd, shell=True, capture_output=capture, text=True)
+    if result.stdout.strip():
+        print(f"  → {result.stdout.strip()[:500]}")
+    if result.stderr.strip():
+        print(f"  ✗ stderr: {result.stderr.strip()[:300]}")
+    return result.returncode, result.stdout, result.stderr
+
+
+def cli(args: str, capture: bool = True) -> tuple[int, str, str]:
+    return run(f"{MOLOCH_CLI} {args}", capture=capture)
+
+
+def check(condition: bool, label: str):
+    if condition:
+        print(f"  ✅ PASS: {label}")
+    else:
+        print(f"  ❌ FAIL: {label}")
+    return condition
+
+
+def section(title: str):
+    print(f"\n{'='*60}")
+    print(f"  TEST: {title}")
+    print(f"{'='*60}")
+
+
+def wait(seconds: int, reason: str = ""):
+    msg = f"  ⏳ Waiting {seconds}s{' — ' + reason if reason else ''}..."
+    print(msg)
+    if not DRY_RUN:
+        time.sleep(seconds)
+
+
+def load_state(path: Path) -> dict:
+    if path.exists():
+        return json.loads(path.read_text())
+    return {}
+
+
+def save_state(path: Path, state: dict):
+    path.write_text(json.dumps(state, indent=2))
+    print(f"  💾 State saved to {path}")
+
+
+# ---------------------------------------------------------------------------
+# Test 1 — Hosted service health check
+# ---------------------------------------------------------------------------
+
+def test_health() -> bool:
+    section("1. Hosted Service Health Check")
+    print("  Verifying moloch-agent CLI is installed and hosted service is reachable.")
+
+    rc, out, _ = cli("--version")
+    if not check(rc == 0, "moloch-agent CLI installed"):
+        print("  Fix: npm install -g @raidguild/meta-clawtel")
+        return False
+
+    rc, out, _ = cli("health")
+    ok_health = check(rc == 0, "health endpoint responds")
+
+    rc, out, _ = cli("capabilities")
+    ok_graph = check("graph.configured" in out and '"true"' in out.replace(": true", ':"true"').replace(":true", ':"true"'),
+                     "graph.configured: true")
+    ok_pinning = check("pinning.configured" in out, "pinning.configured visible")
+    ok_signing = check("handledByService" in out, "signing.handledByService reported")
+
+    rc, out, _ = cli("account")
+    ok_account = check(rc == 0 and "0x" in out, "signer account readable")
+    if ok_account:
+        # Extract address for use in summon params
+        lines = [l for l in out.splitlines() if "0x" in l and len(l.strip()) >= 42]
+        if lines:
+            addr = [w for w in lines[0].split() if w.startswith("0x") and len(w) == 42]
+            if addr:
+                print(f"  → Signer address: {addr[0]}")
+                os.environ["FOUNDER_ADDR"] = addr[0]
+
+    return all([ok_health, ok_graph, ok_account])
+
+
+# ---------------------------------------------------------------------------
+# Test 2 — DAO Summon (highest risk: network support)
+# ---------------------------------------------------------------------------
+
+def test_summon(state_path: Path) -> bool:
+    section("2. DAO Summon on Target Network (HIGHEST RISK)")
+    print(f"  Network: {os.environ.get('RPC_URL', 'default (Base mainnet)')}")
+    print("  Risk: Baal Summoner factory may not be deployed on Base Sepolia.")
+    print("  If this fails, switch to Base mainnet (https://mainnet.base.org).")
+
+    founder = os.environ.get("FOUNDER_ADDR", "")
+    if not founder:
+        print("  ⚠️  FOUNDER_ADDR not set — run test 1 first")
+        return False
+
+    params = dict(SUMMON_PARAMS)
+    params["memberAddresses"] = [founder]
+    params["memberShares"] = ["1000000000000000000"]  # 1 share in base units
+    params["memberLoot"] = ["0"]
+
+    params_file = Path("/tmp/guildos-test-summon.json")
+    params_file.write_text(json.dumps(params, indent=2))
+    print(f"  Summon params written to {params_file}")
+    print(f"  votingPeriod: {params['votingPeriod']}s | gracePeriod: {params['gracePeriod']}s")
+
+    rc, out, err = cli(f"summon --params {params_file}")
+
+    # Try to extract DAO address from output
+    dao_addr = ""
+    for line in (out + err).splitlines():
+        tokens = [t for t in line.split() if t.startswith("0x") and len(t) == 42]
+        if tokens:
+            dao_addr = tokens[0]
+            break
+
+    ok_summon = check(rc == 0, "summon command succeeded")
+    ok_addr = check(bool(dao_addr), f"DAO address returned: {dao_addr or '(none)'}")
+
+    if ok_summon and ok_addr:
+        state = load_state(state_path)
+        state["guild_addr"] = dao_addr
+        state["network"] = os.environ.get("RPC_URL", "mainnet")
+        save_state(state_path, state)
+        print(f"\n  → DAO deployed at: {dao_addr}")
+        print(f"  → Basescan: https://sepolia.basescan.org/address/{dao_addr}")
+        global GUILD_ADDR
+        GUILD_ADDR = dao_addr
+
+    if not ok_summon:
+        print("\n  ⚠️  FALLBACK OPTIONS:")
+        print("  Option A: Set RPC_URL=https://mainnet.base.org and retry")
+        print("  Option B: Deploy Baal Summoner factory to Base Sepolia via HausDAO/Baal repo")
+        print("  Option C: Use a pre-deployed DAO address (set TEST_GUILD_ADDR env var)")
+
+    return ok_summon and ok_addr
+
+
+# ---------------------------------------------------------------------------
+# Test 3 — Membership proposal full lifecycle
+# ---------------------------------------------------------------------------
+
+def test_membership(state_path: Path) -> bool:
+    section("3. Membership Proposal Full Lifecycle")
+    print("  Flow: mint-shares → sponsor → vote → wait → process-ready")
+
+    state = load_state(state_path)
+    guild = GUILD_ADDR or state.get("guild_addr", "")
+    if not guild:
+        print("  ⚠️  No guild address. Run test 2 first, or set TEST_GUILD_ADDR env var.")
+        return False
+
+    specialist = SPECIALIST_ADDR
+    print(f"  Guild:      {guild}")
+    print(f"  Specialist: {specialist}")
+
+    # Create membership proposal
+    rc, out, _ = cli(
+        f'mint-shares --dao {guild} --to {specialist} --amount 10 '
+        f'--title "Specialist Agent Membership Test" '
+        f'--description "Day1 test | ERC-8004: placeholder | capabilities: security-audit"'
+    )
+    ok_propose = check(rc == 0, "mint-shares proposal submitted")
+    if not ok_propose:
+        return False
+
+    # Extract proposal ID
+    proposal_id = None
+    for line in out.splitlines():
+        if "proposal" in line.lower() and any(c.isdigit() for c in line):
+            digits = [t for t in line.split() if t.isdigit()]
+            if digits:
+                proposal_id = digits[0]
+                break
+
+    if proposal_id is None:
+        print("  ⚠️  Could not parse proposal ID from output. Check output above.")
+        print("  Attempting to read from proposals list...")
+        rc2, out2, _ = cli(f"proposals --dao {guild}")
+        print(f"  Proposals: {out2[:500]}")
+        proposal_id = "0"  # fallback assumption
+
+    print(f"  → Proposal ID: {proposal_id}")
+
+    # Sponsor
+    rc, out, _ = cli(f"sponsor --dao {guild} --proposal {proposal_id}")
+    ok_sponsor = check(rc == 0, "sponsor succeeded")
+
+    # Vote
+    rc, out, _ = cli(
+        f'vote --dao {guild} --proposal {proposal_id} --approved true '
+        f'--reason "Day 1 test — approving specialist membership"'
+    )
+    ok_vote = check(rc == 0, "vote submitted")
+
+    # Wait for voting + grace period
+    wait(VOTING_PERIOD_SEC + GRACE_PERIOD_SEC, "voting + grace periods")
+
+    # Process
+    rc, out, _ = cli(f"process-ready --dao {guild}")
+    ok_process = check(rc == 0, "process-ready succeeded")
+
+    # Verify membership
+    rc, out, _ = cli(f"members --dao {guild}")
+    ok_member = check(specialist.lower() in out.lower(), f"Specialist appears in members list")
+
+    if ok_member:
+        print(f"  ✅ Full membership lifecycle works end-to-end")
+        state["membership_proposal_id"] = proposal_id
+        save_state(state_path, state)
+    else:
+        print("  ⚠️  Membership not confirmed in members list — check graph indexing lag")
+
+    return all([ok_propose, ok_sponsor, ok_vote, ok_process])
+
+
+# ---------------------------------------------------------------------------
+# Test 4 — Payment proposal full lifecycle
+# ---------------------------------------------------------------------------
+
+def test_payment(state_path: Path) -> bool:
+    section("4. Payment Proposal Full Lifecycle")
+    print("  Flow: payment → sponsor → vote → wait → process-ready")
+    print("  NOTE: Requires funded treasury. Funding with 0.01 ETH for test.")
+
+    state = load_state(state_path)
+    guild = GUILD_ADDR or state.get("guild_addr", "")
+    if not guild:
+        print("  ⚠️  No guild address. Run test 2 first.")
+        return False
+
+    # Fund treasury with minimal test amount
+    print("  Funding treasury with 0.01 WETH...")
+    rc, _, _ = cli("wrap-eth --amount 0.01")
+    check(rc == 0, "wrap-eth succeeded")
+
+    # Approve WETH (Base Sepolia WETH address — verify before use)
+    weth_base_sepolia = "0x4200000000000000000000000000000000000006"
+    rc, _, _ = cli(f"approve-token --token {weth_base_sepolia} --amount 0.01")
+    check(rc == 0, "approve-token succeeded")
+
+    # Tribute (fund treasury)
+    rc, _, _ = cli(
+        f"tribute --dao {guild} --token {weth_base_sepolia} "
+        f"--amount 10000000000000000 --shares 0"
+    )
+    check(rc == 0, "tribute (fund treasury) succeeded")
+
+    # Payment proposal
+    rc, out, _ = cli(
+        f'payment --dao {guild} --recipient {SPECIALIST_ADDR} '
+        f'--amount 0.005 '
+        f'--title "Test payment: T001 accepted" '
+        f'--description "sha256:PLACEHOLDER_HASH | task:TEST-T001"'
+    )
+    ok_payment = check(rc == 0, "payment proposal submitted")
+    if not ok_payment:
+        return False
+
+    # Extract proposal ID
+    proposal_id = "1"  # fallback
+    for line in out.splitlines():
+        if "proposal" in line.lower():
+            digits = [t for t in line.split() if t.isdigit()]
+            if digits:
+                proposal_id = digits[0]
+                break
+
+    print(f"  → Payment proposal ID: {proposal_id}")
+
+    rc, _, _ = cli(f"sponsor --dao {guild} --proposal {proposal_id}")
+    ok_sponsor = check(rc == 0, "sponsor succeeded")
+
+    rc, _, _ = cli(
+        f'vote --dao {guild} --proposal {proposal_id} --approved true '
+        f'--reason "Deliverable accepted; releasing payment"'
+    )
+    ok_vote = check(rc == 0, "vote submitted")
+
+    wait(VOTING_PERIOD_SEC + GRACE_PERIOD_SEC, "voting + grace periods")
+
+    rc, out, _ = cli(f"process-ready --dao {guild}")
+    ok_process = check(rc == 0, "process-ready (settlement) succeeded")
+
+    if ok_process:
+        print("  ✅ Payment settlement works end-to-end")
+        print("  → Find the process tx on Basescan — this is proof point #2 for judges")
+
+    return all([ok_payment, ok_sponsor, ok_vote, ok_process])
+
+
+# ---------------------------------------------------------------------------
+# Test 5 — Signal proposal with deliverable hash
+# ---------------------------------------------------------------------------
+
+def test_hash_signal(state_path: Path) -> bool:
+    section("5. Deliverable Hash Commitment via Signal Proposal")
+    print("  This is the simplest on-chain proof path for the deliverable hash.")
+    print("  Hash goes into proposal description — permanent on-chain record.")
+
+    state = load_state(state_path)
+    guild = GUILD_ADDR or state.get("guild_addr", "")
+    if not guild:
+        print("  ⚠️  No guild address. Run test 2 first.")
+        return False
+
+    test_hash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+    rc, out, _ = cli(
+        f'signal --dao {guild} '
+        f'--title "Deliverable hash TEST-T001" '
+        f'--description "sha256:{test_hash} | task:TEST-T001 | deliverable:ipfs://QmTest"'
+    )
+    ok_signal = check(rc == 0, "signal proposal submitted")
+
+    if ok_signal:
+        print("  ✅ Signal proposal works — hash is permanently on-chain")
+        print("  → Find the signal tx on Basescan — this is proof point #1 for judges")
+        print(f"  → Verify: the hash {test_hash[:16]}... appears in tx calldata")
+
+    return ok_signal
+
+
+# ---------------------------------------------------------------------------
+# Main runner
+# ---------------------------------------------------------------------------
+
+def main():
+    global DRY_RUN, GUILD_ADDR
+
+    parser = argparse.ArgumentParser(description="GuildOS AFC Day 1 Integration Tests")
+    parser.add_argument("--test", type=int, help="Run specific test number (1-5)")
+    parser.add_argument("--dry-run", action="store_true", help="Print commands without executing")
+    parser.add_argument("--guild", help="Use existing guild address (skip summon)")
+    args = parser.parse_args()
+
+    if args.dry_run:
+        DRY_RUN = True
+        print("  [DRY RUN MODE — commands will be printed but not executed]")
+
+    if args.guild:
+        GUILD_ADDR = args.guild
+        os.environ["TEST_GUILD_ADDR"] = args.guild
+        print(f"  Using existing guild: {GUILD_ADDR}")
+
+    state_path = Path("/tmp/guildos-day1-state.json")
+    if state_path.exists():
+        saved = json.loads(state_path.read_text())
+        if saved.get("guild_addr") and not GUILD_ADDR:
+            GUILD_ADDR = saved["guild_addr"]
+            print(f"  Loaded guild from previous run: {GUILD_ADDR}")
+
+    print("\n🏟️  GuildOS — AgentFightClub Day 1 Integration Tests")
+    print(f"   Network: {os.environ.get('RPC_URL', 'default (Base mainnet)')}")
+    print(f"   Service: {os.environ.get('MOLOCH_SERVICE_URL', 'default')}")
+    print(f"   Specialist: {SPECIALIST_ADDR}")
+
+    results: dict[int, bool] = {}
+
+    tests = {
+        1: ("Hosted service health", lambda: test_health()),
+        2: ("DAO summon", lambda: test_summon(state_path)),
+        3: ("Membership lifecycle", lambda: test_membership(state_path)),
+        4: ("Payment lifecycle", lambda: test_payment(state_path)),
+        5: ("Hash signal", lambda: test_hash_signal(state_path)),
+    }
+
+    target = args.test
+    for num, (name, fn) in tests.items():
+        if target is not None and num != target:
+            continue
+        try:
+            results[num] = fn()
+        except Exception as e:
+            print(f"\n  💥 Test {num} raised exception: {e}")
+            results[num] = False
+
+    # Summary
+    print(f"\n{'='*60}")
+    print("  RESULTS SUMMARY")
+    print(f"{'='*60}")
+    all_pass = True
+    for num, (name, _) in tests.items():
+        if num in results:
+            icon = "✅" if results[num] else "❌"
+            print(f"  {icon} Test {num}: {name}")
+            if not results[num]:
+                all_pass = False
+
+    if all_pass and results:
+        print("\n  🟢 All tests passed. Integration path is validated. Start building.")
+    elif results:
+        print("\n  🔴 Some tests failed. Review failures before building on top of AFC.")
+        print("     See AGENTFIGHTCLUB_ANALYSIS.md for gap analysis and alternatives.")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
