@@ -44,7 +44,11 @@
     "agent-trust-and-reputation",
     "local-model",
     "contract-audit",
-    "erc-4337"
+    "erc-4337",
+    "evm",
+    "session-key",
+    "cobo-pact",
+    "contribution-graph"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
