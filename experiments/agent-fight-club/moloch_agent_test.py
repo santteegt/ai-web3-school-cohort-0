@@ -12,9 +12,9 @@ Prerequisites:
   export MOLOCH_SERVICE_URL=https://moloch-service-production.up.railway.app
 
 Usage:
-  python AGENTFIGHTCLUB_DAY1_TEST.py           # run all tests
-  python AGENTFIGHTCLUB_DAY1_TEST.py --test 1  # run specific test
-  python AGENTFIGHTCLUB_DAY1_TEST.py --dry-run # print commands without executing
+  python moloch_agent_test.py           # run all tests
+  python moloch_agent_test.py --test 1  # run specific test
+  python moloch_agent_test.py --dry-run # print commands without executing
 
 Tests:
   1. Hosted service health check
