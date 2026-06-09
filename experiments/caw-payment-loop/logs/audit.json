@@ -38,5 +38,25 @@
     "receiverAddress": "0x10136Fa41B6522E4DBd068C6F7D80373aBbCFBe6",
     "responseStatus": 200,
     "resultSnippet": "Decentralized trust enables autonomous coordination without intermediaries."
+  },
+  {
+    "timestamp": "2026-06-08T23:03:58.489Z",
+    "pactId": "d208f7bd-2a52-4afb-b5c9-2007924c807d",
+    "endpoint": "http://localhost:3402/api/inference",
+    "amountPaidUsd": "0.001",
+    "txHash": "0x397dc933be12143c21522902302953b4b6521a1861021c5b9f38ee96ead752b6",
+    "receiverAddress": "0x10136Fa41B6522E4DBd068C6F7D80373aBbCFBe6",
+    "responseStatus": 200,
+    "resultSnippet": "Machine-to-machine payments unlock composable service markets."
+  },
+  {
+    "timestamp": "2026-06-09T03:31:31.477Z",
+    "pactId": "4c4aee30-beeb-4ef2-81ef-0fdde38e77b2",
+    "endpoint": "http://localhost:3402/api/inference",
+    "amountPaidUsd": "0.001",
+    "txHash": "0xca0ec110c83b257db9c06fea56f4f48068ffb6e35fbc243a88c8a662a269cbeb",
+    "receiverAddress": "0x10136Fa41B6522E4DBd068C6F7D80373aBbCFBe6",
+    "responseStatus": 200,
+    "resultSnippet": "Agentic systems require economic rails as much as they require intelligence."
   }
 ]
