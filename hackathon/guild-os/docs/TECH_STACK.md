@@ -1,6 +1,6 @@
 # Tech Stack — GuildOS
 
-> Stack is locked as of 2026-06-07. Changes require updating this file first and noting the reason in the Decision Log below.
+> Stack is locked as of 2026-06-08. Changes require updating this file first and noting the reason in the Decision Log below.
 
 ---
 
@@ -10,16 +10,16 @@
 |-------|--------|---------|-------|
 | Language | Python | 3.11+ | Primary — agent services, CLI, A2A handlers |
 | Agent protocol | A2A SDK | v1.0.0 | `pip install "a2a-sdk[http-server]"` — cross-harness task delegation |
-| LLM execution | Z.AI GLM-5.1 | API | Specialist Agent long-horizon planning; task type locked Day 8 |
+| LLM execution | Z.AI GLM-5.1 | API | Specialist Agent long-horizon planning; task type locked Day 9 |
 | Orchestrator harness | Claude Code (MCP server) | — | 7 tools registered; entry point `src/orchestrator/server.py` |
-| Smart account | ZeroDev Kernel | v3.3 | ERC-4337 on Base Sepolia; session key policies via TypeScript SDK |
-| Session key bridge | `@zerodev/sdk` (TypeScript) | v5.x | Thin Python→TypeScript subprocess bridge for session key config |
-| Treasury + governance | AgentFightClub (Moloch v3) | — | ClawBank API (primary); DAOhaus SDK (fallback — see RISKS.md F1) |
-| Agent identity | ERC-8004 Registry | Base Sepolia | IdentityRegistry: `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
-| Reputation | ERC-8004 ReputationRegistry | Base Sepolia | `0x8004B663056A597Dffe9eCcC1965A193B7388713`; caller constraint applies |
-| Chain interaction | `web3.py` | 6.x | All Base Sepolia RPC calls; transaction submission and event reads |
-| RPC | Alchemy | Base Sepolia | Primary; Infura as backup endpoint |
-| Network | Base Sepolia | chain_id 84532 | Testnet only — no mainnet calls |
+| Agent wallet | Cobo CAW | TSS local node | x402 pipeline working end-to-end; Pact-scoped spending ceiling per task |
+| Session key fallback | ZeroDev Kernel v3.3 | v3.3 | Demoted to design exhibit if CAW issues recur; TypeScript SDK |
+| Treasury + governance | AgentFightClub (Moloch v3) | — | ClawBank API (primary — live, timing issue being fixed); DAOhaus SDK (fallback — see RISKS.md F1) |
+| Agent identity | ERC-8004 Registry | Base mainnet | IdentityRegistry: `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
+| Reputation | ERC-8004 ReputationRegistry | Base mainnet | `0x8004B663056A597Dffe9eCcC1965A193B7388713`; caller constraint applies |
+| Chain interaction | `web3.py` | 6.x | All Base mainnet RPC calls; transaction submission and event reads |
+| RPC | Alchemy | Base mainnet | Primary; Infura as backup endpoint |
+| Network | **Base mainnet** | chain_id 8453 | AFC has no Base Sepolia support (no contracts, no subgraph); mainnet required |
 | Linting | ruff | latest | `ruff check src/` |
 | Testing | pytest | 8.x | `pytest tests/` |
 | Identity API | 8004scan API | — | ERC-8004 profile reads; cached JSON fallback if API down |
@@ -151,6 +151,8 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 | 2026-06-06 | Testnet | Base Sepolia (chain_id 84532) | ZeroDev confirmed; ERC-8004 deployed; AgentFightClub targets Base |
 | 2026-06-07 | Orchestrator harness | Claude Code (MCP server) | Hybrid approach — demo two heterogeneous stacks communicating via A2A |
 | 2026-06-07 | A2A SDK version | v1.0.0 (stable, Linux Foundation) | Green from pre-research; not 0.3 |
-| — | AgentFightClub API vs DAOhaus | TBD Day 8 | Validate `launch` call first; switch immediately if ClawBank fails |
-| — | GLM-5.1 demo task type | TBD Day 8 | Test 3 prompts; lock the winner |
-| — | ZeroDev session keys | TBD Day 9 | Live if TypeScript bridge < 3h; else design exhibit |
+| 2026-06-08 | Agent wallet provider | **Cobo CAW restored** (replacing ZeroDev) | TSS local node restart fixed signing; full x402 pipeline working end-to-end |
+| 2026-06-08 | Network | **Base mainnet (chain_id 8453)** | AFC moloch-agent has no Base Sepolia support — no contracts, no service, no subgraph deployed |
+| 2026-06-08 | AgentFightClub API | ✅ Functional (ClawBank API live) | Probe script confirms working; proposal sponsorship timing issue — fix in progress Day 9 |
+| — | GLM-5.1 demo task type | TBD Day 9 | Test 3 prompts; lock the winner |
+| — | ZeroDev session keys | Demoted to design exhibit | CAW is primary wallet; ZeroDev kept as fallback reference only |

@@ -48,7 +48,16 @@
     "evm",
     "session-key",
     "cobo-pact",
-    "contribution-graph"
+    "contribution-graph",
+    "malicious-context",
+    "re-ranking",
+    "multimodal",
+    "verification-chain",
+    "web3-dev-stack",
+    "large-language-model",
+    "erc-8004",
+    "smart-account",
+    "payment-and-commerce"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }

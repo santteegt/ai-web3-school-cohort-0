@@ -1,10 +1,13 @@
 # GuildOS — Week 4 Sprint Plan
 
 > Build window: **2026-06-08 (Mon) → 2026-06-13 12:00 UTC+8 (submission)**  
-> Network: Base Sepolia testnet  
+> Network: **Base mainnet (chain_id 8453)** — AFC has no Base Sepolia support  
+> Wallet: **Cobo CAW** (TSS local node restored; x402 pipeline confirmed working 2026-06-08)  
 > Team: Solo (Santiago)  
 > Deadline: **2026-06-13 12:00 UTC+8 (04:00 UTC)**  
 > Reference: [SCOPE_REVIEW.md](SCOPE_REVIEW.md) · [RISK_ASSUMPTION_MEMO.md](RISK_ASSUMPTION_MEMO.md) · [TECHNICAL_VALIDATION_PLAN.md](TECHNICAL_VALIDATION_PLAN.md)
+>
+> **⚠️ Network change (2026-06-08):** All "Base Sepolia" references in this plan now mean **Base mainnet**. Explorer: https://basescan.org. Real ETH required — pre-fund agent wallets Day 9 morning before build starts.
 
 ---
 
@@ -21,51 +24,40 @@
 
 ---
 
-## Day 8 — Monday, June 8 · Validation Day
+## Day 8 — Monday, June 8 · Validation Day ✅ COMPLETE
 
 **Theme:** Before writing integration code, confirm every live dependency actually works. Make fallback decisions before noon so the rest of the week builds on solid ground.
 
-### Morning (4h): Integration probes
+### Results Summary
 
-| Task | What to do | Real or Mock |
+| Task | Result | Decision |
 |---|---|---|
-| **AgentFightClub `launch` probe** | Run `AGENTFIGHTCLUB_DAY1_TEST.py` — call `launch` with a test mandate string. Confirm a tx hash is returned and visible on Basescan. | **Real** — if it works, proceed. If it fails or errors after 2h of debugging → **trigger F1 fallback**: switch to DAOhaus SDK direct Moloch v3 deploy. |
-| **A2A connection test** | Run `A2A_DAY1_TEST.py` — all 5 gates (agent card, send, quote, deliver, accept). | **Real** — A2A is rated GREEN from research. Expect pass. If metadata field rejected → switch to text-body JSON encoding (15-min fix). |
-| **GLM-5.1 task type selection** | Test three candidate prompts against Z.AI GLM-5.1 API: (1) Python function generation, (2) smart contract spec, (3) security analysis checklist. Pick the one with most consistent structured output. | **Real** — lock the winner. If all three fail → deterministic fallback: "Write a Python SHA-256 utility function" (any LLM returns consistent output). |
-| **ZeroDev smart account deploy** | Deploy one ERC-4337 Kernel v3.3 account on Base Sepolia via TypeScript bridge. Confirm address. | **Real** — if session key policy config takes >3h → **trigger F4 fallback**: use basic signing (no session key scoping) + document the intended policy as a code exhibit. |
+| **CAW wallet** | ✅ Restored — TSS node restart fixed signing; x402 pipeline end-to-end working | **CAW is primary wallet** — ZeroDev demoted to design exhibit |
+| **AgentFightClub** | ✅ Functional — probe script at `experiments/agent-fight-club/moloch_agent_test.py` | ClawBank API live; timing issue with proposal sponsorship → fix Day 9 |
+| **Network** | ⚠️ **Base Sepolia → Base mainnet** — AFC has no Base Sepolia support | All on-chain ops move to Base mainnet (chain_id 8453) |
+| **A2A + GLM-5.1** | ⏳ Deferred to Day 9 morning | Day 8 scope filled by CAW/AFC validation |
 
-### Afternoon (3h): Decision log + skeleton
+### Day 8 Deliverables — Status
 
-| Task | Output |
-|---|---|
-| Update `RISK_ASSUMPTION_MEMO.md` Decision Log with today's results | All `⏳` rows become `✅` or `❌ → fallback` |
-| Scaffold repo directory: `src/orchestrator/`, `src/specialist/`, `src/shared/` | Empty Python modules + `requirements.txt` |
-| Write `guild_context.json` schema (fields: `guild_address`, `mandate`, `treasury_wei`, `member_list`, `task_state`, `deliverable_hash`) | **Mock** — JSON file is the guild context store for entire hackathon |
-
-### Day 8 Deliverables
-
-- [ ] AgentFightClub decision: live API or DAOhaus fallback — **decided and noted**
-- [ ] A2A test suite: all 5 gates passing
-- [ ] GLM-5.1 demo task type: **locked** (written in Decision Log)
-- [ ] ZeroDev decision: session keys or basic signing — **decided and noted**
-- [ ] Repo scaffold created and pushed
-
-### What is Mocked Today
-
-Everything except the probes. No integration code is written yet — only tested.
+- [x] AgentFightClub decision: ✅ live API (ClawBank) — timing issue fix in progress
+- [x] Wallet decision: ✅ Cobo CAW (not ZeroDev)
+- [x] Network decision: ✅ Base mainnet
+- [ ] A2A test suite → **moved to Day 9 morning**
+- [ ] GLM-5.1 task type locked → **moved to Day 9 morning**
+- [ ] Repo scaffold → carry to Day 9
 
 ---
 
-## Day 9 — Tuesday, June 9 · Wallets + Identity
+## Day 9 — Tuesday, June 9 · Wallets + Identity + A2A/GLM
 
-**Theme:** Agent wallets live on Base Sepolia. Both agents registered on ERC-8004. Guild deployed and funded. End-of-day: the economic container exists on-chain.
+**Theme:** Agent wallets live on **Base mainnet**. Both agents registered on ERC-8004. Guild deployed and funded. A2A test suite + GLM-5.1 task type locked (carried from Day 8). AFC proposal sponsorship timing fix. End-of-day: the economic container exists on-chain and all integrations validated.
 
 ### Morning (4h): Agent wallets + ERC-8004 registration
 
 | Task | Real or Mock | Evidence |
 |---|---|---|
-| Initialize Orchestrator Agent wallet (ZeroDev or local signer) | **Real** | Wallet address printed; Base Sepolia balance > 0 (faucet) |
-| Initialize Specialist Agent wallet | **Real** | Same |
+| Initialize Orchestrator Agent wallet (Cobo CAW) | **Real** | Wallet address printed; Base mainnet balance > 0 (fund manually — no faucet) |
+| Initialize Specialist Agent wallet (Cobo CAW or EOA) | **Real** | Same |
 | Call `ERC-8004.register(agentURI)` for Orchestrator | **Real** | ERC-721 agentId minted; Basescan event `AgentRegistered` |
 | Call `ERC-8004.register(agentURI)` for Specialist | **Real** | Same |
 | Capture Specialist **before-state** snapshot | **Real** | Save to `hackathon/notes/erc8004_specialist_before.json` |
@@ -253,7 +245,7 @@ Nothing new is mocked today. The scope is locked.
 | A2A task flow (all 7 message events) | **Real** | Text-body JSON if metadata rejected |
 | GLM-5.1 long-horizon task execution | **Real** | Deterministic fallback prompt |
 | On-chain deliverable hash commit | **Real** | Always real — one `eth_sendTransaction` |
-| ZeroDev session key policy | **Real if TypeScript bridge <3h** | Basic signing + policy as code exhibit |
+| Cobo CAW spending limit | **Real** — Pact-scoped per-task ceiling | ZeroDev session key policy as design exhibit only |
 | Human gate CLI prompts (Gates 0, 0.5, 1, 2) | **Real** | — |
 | Orchestrator automated pre-check | **Real (minimal)** | — |
 | ERC-8004 talent query / shortlist | **Mocked** — hardcoded Specialist profile | — |
@@ -275,7 +267,7 @@ Before ending each day, confirm none of these are in progress:
 - [ ] Querying the live ERC-8004 registry for real (hardcoded profile is correct)
 - [ ] Building any frontend UI (terminal is the demo surface)
 - [ ] Implementing ragequit on-chain (document only)
-- [ ] Deploying on mainnet (Base Sepolia only)
+- [ ] Deploying extra contracts beyond what the demo strictly needs (Base mainnet, keep it lean)
 
 ---
 

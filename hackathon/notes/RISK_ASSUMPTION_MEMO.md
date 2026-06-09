@@ -66,27 +66,35 @@ These are statements the project treats as true. If any prove false, the build p
 
 ---
 
-### A5 — ZeroDev Kernel session keys enforce per-task spending limits on Base Sepolia
+### A5 — Cobo CAW enforces per-task spending limits ✅ UPDATED 2026-06-08
 
-**What we assume:** The ZeroDev Kernel v3.3 TypeScript SDK creates an ERC-4337 smart account on Base Sepolia, sets call policy (AgentFightClub contract only) and gas policy (max 0.05 ETH), and the paymaster covers gas so no ETH is needed on the agent wallet during the demo.
+**Original assumption:** ZeroDev Kernel v3.3 session keys would handle agent wallet scoping (ZeroDev was chosen after CAW appeared broken on 2026-06-06).
 
-**Evidence for:** ZeroDev confirmed on Base Sepolia (chain_id 84532); 6M+ accounts; TypeScript SDK has full session key policies.
+**Updated (2026-06-08):** Cobo CAW is restored as the primary wallet. TSS local node restart resolved the signing failure. Full x402 pipeline confirmed working end-to-end. ZeroDev Kernel is demoted to design exhibit / fallback only.
 
-**Evidence against:** Python SDK is alpha — no session key support. TypeScript/Python interop adds a thin bridge layer. Cobo CAW was ruled out entirely (GitHub repo empty, x402 integration broken, signing API broken).
+**Current assumption:** CAW Pact API enforces per-task spending ceiling; TSS node remains stable for the build window (June 8–13).
 
-**Validation step:** Day 2 — deploy one smart account, configure session key, call AgentFightClub from it. Confirm gas is covered by paymaster.
+**Evidence for:** x402 + CAW pipeline live-tested and passing on 2026-06-08.
+
+**Evidence against:** CAW TSS node is local — a second failure would require the same restart. No redundancy.
+
+**Validation step:** ✅ Day 1 confirmed. Monitor TSS node stability; restart immediately if signing fails again.
 
 ---
 
-### A6 — Base Sepolia RPC is stable and finalizes within demo timing
+### A6 — Base mainnet RPC is stable and finalizes within demo timing ✅ UPDATED 2026-06-08
 
-**What we assume:** Alchemy / Base Sepolia RPC provides sub-10-second transaction finality for the demo sequence (AgentFightClub operations, deliverable hash commit, settlement, reputation write).
+**Original assumption:** Base Sepolia RPC provides sub-10-second finality for the demo sequence.
 
-**Evidence for:** Base Sepolia is a well-operated testnet; Alchemy is production-grade.
+**Updated (2026-06-08):** Network is now **Base mainnet (chain_id 8453)**. AFC moloch-agent has no Base Sepolia support — no contracts, no service, no subgraph deployed. All on-chain operations move to Base mainnet.
 
-**Evidence against:** Testnet RPCs can be flaky under load; congestion during demo window is possible.
+**Implication:** Real ETH required on Base mainnet for agent wallets and guild treasury. Gas costs are real (not testnet). Pre-fund agent wallets before Day 9 build.
 
-**Mitigation baked in:** Pre-stage the `propose` and `vote` steps before the live demo. Only `settle()`, hash commit, and reputation write happen live.
+**Evidence for:** Base mainnet is a production L2; Alchemy supports it; Basescan.org is the explorer.
+
+**Evidence against:** Real gas costs add complexity; pre-funding agent wallets requires manual steps before build begins.
+
+**Mitigation baked in:** Pre-stage governance steps (propose + vote) before live demo. Fund wallets Day 9 morning. Budget: ~0.01 ETH total should cover all demo transactions.
 
 ---
 
@@ -218,12 +226,14 @@ Track assumption validation and fallback triggers here as the build progresses.
 |---|---|---|---|
 | 2026-06-06 | Cobo CAW | ❌ Non-functional | Replaced with ZeroDev Kernel |
 | 2026-06-06 | ERC-8004 | ✅ Deployed, gotchas documented | Use with caller constraint workaround |
-| 2026-06-06 | A2A v1.0.0 | ✅ GREEN | Proceed; test Day 1 |
+| 2026-06-06 | A2A v1.0.0 | ✅ GREEN | Proceed; test Day 9 morning |
 | 2026-06-06 | ERC-8183 | ⚠️ Too new, no Base Sepolia deploy | Deferred post-hackathon as planned |
-| — | AgentFightClub | ⏳ Not yet tested | Validate Day 1 |
-| — | GLM-5.1 task types | ⏳ Not yet tested | Validate Day 1 |
-| — | ZeroDev session keys | ⏳ Not yet tested | Validate Day 2 |
+| 2026-06-08 | Cobo CAW | ✅ **Restored** — TSS node restart fixed signing | CAW is primary wallet again; ZeroDev demoted to design exhibit |
+| 2026-06-08 | AgentFightClub | ✅ Functional — probe script live | `experiments/agent-fight-club/moloch_agent_test.py` runs; timing issue with proposal sponsorship being fixed Day 9 |
+| 2026-06-08 | Network | ⚠️ **Base Sepolia → Base mainnet** | AFC has no Base Sepolia support (no contracts, no subgraph); all on-chain ops move to Base mainnet (chain_id 8453) |
+| — | A2A + GLM-5.1 | ⏳ Deferred to Day 9 morning | Day 8 scope shifted to CAW/AFC validation |
+| — | ZeroDev session keys | Demoted — design exhibit only | CAW restored; ZeroDev no longer on critical path |
 
 ---
 
-*Last updated: 2026-06-07 | Agent: Sensei*
+*Last updated: 2026-06-08 | Agent: Sensei*
