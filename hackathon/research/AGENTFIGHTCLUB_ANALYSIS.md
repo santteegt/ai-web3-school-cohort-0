@@ -7,7 +7,7 @@
 
 ## TL;DR
 
-AgentFightClub (AFC) **partially fits** GuildOS, covering about 40% of the MVP feature surface directly. The treasury, membership proposal/vote/process lifecycle, and payment settlement are all real and usable. However, three critical gaps exist: (1) the proposal uses AFC command names (`launch`, `commit`, `settle`) that don't match the actual API (`summon`, `tribute`, `process`); (2) AFC has zero ERC-8004 integration — agent identity is entirely external; (3) AFC has no native deliverable hash commitment operation. The fallback path (direct Moloch v3 via `moloch-agent` CLI) is not a fallback at all — it IS the recommended primary path, and it is more stable than ClawBank for a hackathon build. The ClawBank path adds Turnkey wallet provisioning complexity with no benefit for GuildOS's use case. Core recommendation: **use the direct integration path** (`moloch-agent` CLI via `@raidguild/meta-clawtel`) as primary, drop ClawBank entirely.
+AgentFightClub (AFC) **partially fits** GuildOS, covering about 40% of the MVP feature surface directly. The treasury, membership proposal/vote/process lifecycle, and payment settlement are all real and usable. Two critical gaps remain: (1) AFC has zero ERC-8004 integration — agent identity is entirely external; (2) AFC has no native deliverable hash commitment operation. The fallback path (direct Moloch v3 via `moloch-agent` CLI) is not a fallback at all — it IS the recommended primary path, and it is more stable than ClawBank for a hackathon build. The ClawBank path adds Turnkey wallet provisioning complexity with no benefit for GuildOS's use case. Core recommendation: **use the direct integration path** (`moloch-agent` CLI via `@raidguild/meta-clawtel`) as primary, drop ClawBank entirely.
 
 ---
 
@@ -16,7 +16,7 @@ AgentFightClub (AFC) **partially fits** GuildOS, covering about 40% of the MVP f
 | GuildOS MVP Feature (Proposal §5–6) | AFC / Moloch Operation | Status | Notes |
 |---|---|---|---|
 | Guild formation — mandate on-chain, treasury initialized | `moloch-agent summon --params guild.json` | ✅ | Deploys Baal.sol + Gnosis Safe. Mandate goes in DAO metadata `communityMemoryURI`. |
-| Fund treasury ("commit 0.3 ETH") | `wrap-eth` → `approve-token` → `tribute` | ✅ | Three commands, not one `commit`. ETH must be wrapped to WETH first. |
+| Fund treasury | `wrap-eth` → `approve-token` → `tribute` | ✅ | ETH must be wrapped to WETH first; three sequential commands. |
 | Membership proposal — Specialist joins | `mint-shares` (no tribute) or `join-dao` (with tribute) | ✅ | `mint-shares` for a zero-tribute membership grant; requires `--to 0xSPECIALIST`. |
 | Sponsor membership proposal | `moloch-agent sponsor --dao 0xGUILD --proposal <id>` | ✅ | Must sponsor before voting opens. |
 | Human votes to approve membership | `moloch-agent vote --dao 0xGUILD --proposal <id> --approved true` | ✅ | Works. Needs `sponsor` first and short `votingPeriod` for demo. |
@@ -37,29 +37,7 @@ AgentFightClub (AFC) **partially fits** GuildOS, covering about 40% of the MVP f
 
 ## Gaps and Alternatives
 
-### Gap 1 — Command naming mismatch (proposal terminology vs. actual API)
-
-**What GuildOS needs:** A single mental model that maps the proposal's `launch`, `commit`, `propose`, `vote`, `settle()` to real API calls.
-
-**What AFC provides:** The `how-it-works` page uses high-level names (`launch`, `commit`, `propose`, `vote`, `settle`). The actual API commands (both direct and ClawBank) use different names.
-
-**Real mapping:**
-
-| Proposal term | Actual command |
-|---|---|
-| `launch` | `summon` |
-| `commit` | `wrap-eth` + `approve-token` + `tribute` |
-| `propose` (membership) | `mint-shares` or `join-dao` |
-| `vote` | `sponsor` + `vote` |
-| `settle()` | `process` (after grace period) |
-
-**Delta:** Not a capability gap — just a documentation inconsistency that the proposal propagated. Fix: rewrite the integration spec with actual command names before Day 1.
-
-**Bridgeable?** Yes, immediately. No code workaround needed.
-
----
-
-### Gap 2 — ERC-8004 is entirely outside AFC's scope
+### Gap 1 — ERC-8004 is entirely outside AFC's scope
 
 **What GuildOS needs:** Read the Specialist Agent's ERC-8004 profile before membership approval; include the profile reference in the membership proposal; write a new delivery record after acceptance.
 
@@ -77,7 +55,7 @@ AgentFightClub (AFC) **partially fits** GuildOS, covering about 40% of the MVP f
 
 ---
 
-### Gap 3 — No native deliverable hash commitment
+### Gap 2 — No native deliverable hash commitment
 
 **What GuildOS needs:** Commit a SHA-256 hash of the deliverable to the guild contract before payment — tamper-proof, clickable on Basescan.
 
@@ -99,9 +77,9 @@ AgentFightClub (AFC) **partially fits** GuildOS, covering about 40% of the MVP f
 
 ---
 
-### Gap 4 — Proposal lifecycle timing breaks live demo
+### Gap 3 — Proposal lifecycle timing breaks live demo
 
-**What GuildOS needs:** A live demo that shows `propose → vote → settle` in real time without waiting hours.
+**What GuildOS needs:** A live demo that shows `mint-shares → sponsor → vote → process` in real time without waiting hours.
 
 **What AFC provides:** Default Moloch v3 voting periods are typically 7 days + 1 day grace. AFC's `summon` parameters include `votingPeriod` (in seconds) and `gracePeriod` (in seconds).
 
@@ -113,7 +91,7 @@ AgentFightClub (AFC) **partially fits** GuildOS, covering about 40% of the MVP f
 
 ---
 
-### Gap 5 — ClawBank path requires Turnkey wallet provisioning
+### Gap 4 — ClawBank path requires Turnkey wallet provisioning
 
 **What GuildOS needs:** An agent that can sign Moloch v3 transactions autonomously.
 
@@ -127,7 +105,7 @@ AgentFightClub (AFC) **partially fits** GuildOS, covering about 40% of the MVP f
 
 ---
 
-### Gap 6 — Base Sepolia support is unverified (open question)
+### Gap 5 — Base Sepolia support is unverified (open question)
 
 **What GuildOS needs:** All operations on Base testnet (Base Sepolia).
 

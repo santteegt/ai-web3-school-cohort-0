@@ -37,7 +37,7 @@ Marco is an independent smart contract developer. He has a client project: build
 
 A security-specialist agent registered on ERC-8004 discovers the mandate by reading the guild's Orchestrator Agent A2A card. It inspects the Orchestrator's capability manifest, checks the mandate scope, and submits a membership proposal through AgentFightClub. Marco reviews the agent's on-chain profile: twelve prior audit deliveries, 94% acceptance rate, most recent delivery three weeks ago. He votes to approve via AgentFightClub's governance flow. The agent is now a guild member.
 
-The Orchestrator Agent delegates the audit task to the Specialist Agent via a structured A2A task message: contract source, scope boundaries, acceptance criteria (OWASP checklist + no critical findings unmitigated), deadline, and budget. The Specialist Agent decomposes the task using GLM-5.1's long-horizon planning, runs static analysis, writes the audit report, and posts the SHA-256 deliverable hash to the guild contract on Base testnet. The result arrives back to the Orchestrator via A2A. Marco reviews the report in the GuildOS interface, accepts the deliverable, and AgentFightClub's `settle()` releases 0.3 ETH from the shared treasury to the Specialist Agent's wallet. The agent's ERC-8004 profile gains a new delivery record: task type, deliverable hash, acceptance timestamp, payment amount, guild address. The reputation is on-chain and portable to the next engagement.
+The Orchestrator Agent delegates the audit task to the Specialist Agent via a structured A2A task message: contract source, scope boundaries, acceptance criteria (OWASP checklist + no critical findings unmitigated), deadline, and budget. The Specialist Agent decomposes the task using GLM-5.1's long-horizon planning, runs static analysis, writes the audit report, and posts the SHA-256 deliverable hash to the guild contract on Base testnet. The result arrives back to the Orchestrator via A2A. Marco reviews the report in the GuildOS interface, accepts the deliverable, and AgentFightClub's `payment` proposal + `process` releases 0.3 ETH from the shared treasury to the Specialist Agent's wallet. The agent's ERC-8004 profile gains a new delivery record: task type, deliverable hash, acceptance timestamp, payment amount, guild address. The reputation is on-chain and portable to the next engagement.
 
 ---
 
@@ -51,20 +51,20 @@ A founding agent launches a GuildOS guild via AgentFightClub with a mandate and 
 
 ### MVP — Ships in 7 days
 
-- [ ] Guild formation via AgentFightClub: `launch` + `commit` (mandate on-chain, treasury open)
+- [ ] Guild formation via AgentFightClub: `summon` + `wrap-eth` + `approve-token` + `tribute` (mandate on-chain, treasury open)
 - [ ] ERC-8004 profile read for both agents (8004scan API; show profile in demo UI)
 - [ ] ERC-8004 talent query — Orchestrator surfaces shortlist of candidate agents for human review (mocked for MVP — hardcoded profile; full semantic ranking is post-hackathon)
 - [ ] A2A quote message — Specialist responds to invite with scope, cost, and timeline; human accepts before work begins
 - [ ] A2A acceptance message — Orchestrator sends `task/accepted` to Specialist after human approval at Gate 2
 - [ ] Automated deliverable pre-check — Orchestrator runs minimal evaluation (hash present, format valid) before presenting to human
 - [ ] Dispute stub — Gate 2 rejection records `DISPUTED` state in guild context store; manual ragequit path documented
-- [ ] Specialist Agent membership proposal + vote (AgentFightClub `propose` + `vote`)
+- [ ] Specialist Agent membership proposal + vote (AgentFightClub `mint-shares` + `sponsor` + `vote` + `process`)
 - [ ] A2A task delegation: Orchestrator Agent → Specialist Agent (structured task message)
 - [ ] A2A result return: Specialist → Orchestrator (deliverable reference + hash)
 - [ ] Real task execution by Specialist Agent using GLM-5.1 long-horizon capability
 - [ ] On-chain deliverable hash commitment (Base testnet — one `eth_sendTransaction`)
 - [ ] Human review + acceptance (minimal CLI or simple web form)
-- [ ] AgentFightClub treasury settlement on acceptance (`settle()` call)
+- [ ] AgentFightClub treasury settlement on acceptance (`payment` proposal → `sponsor` + `vote` + `process`)
 - [ ] ERC-8004 reputation write-back after acceptance (on-chain event emitted)
 - [ ] Guild context store — mock as JSON file per guild session
 
@@ -87,8 +87,8 @@ A founding agent launches a GuildOS guild via AgentFightClub with a mandate and 
 
 | Component | Status | Justification |
 |---|---|---|
-| AgentFightClub: `launch` + `commit` | **Real** | 2 deterministic Moloch v3 operations; core treasury setup |
-| AgentFightClub: `propose` + `vote` + `settle` | **Real** | Core governance + payment flow; use Skill API / ClawBank |
+| AgentFightClub: `summon` + `wrap-eth` + `approve-token` + `tribute` | **Real** | 4 Moloch v3 operations; core treasury setup |
+| AgentFightClub: `mint-shares` + `sponsor` + `vote` + `process` (membership); `payment` + `sponsor` + `vote` + `process` (settlement) | **Real** | Core governance + payment flow; use moloch-agent CLI (direct path) |
 | ERC-8004 profile — Orchestrator Agent | **Real** | 8004scan API read; display before state in demo |
 | ERC-8004 profile — Specialist Agent | **Real** | 8004scan API read; display before/after states |
 | A2A task message (Orchestrator → Specialist) | **Real** | Core interop surface; A2A 0.3.0 structured message |
@@ -126,13 +126,13 @@ A founding agent launches a GuildOS guild via AgentFightClub with a mandate and 
 
 ### Process Flow
 
-1. **Human founds guild** — Marco calls AgentFightClub `launch`: mandate string + treasury address initialized. Marco calls `commit`: 0.3 ETH enters shared treasury. Guild is live on-chain.
+1. **Human founds guild** — Marco calls AgentFightClub `summon`: DAO contract + Gnosis Safe treasury deployed with mandate in metadata. Marco calls `wrap-eth` + `approve-token` + `tribute`: 0.3 ETH enters shared treasury. Guild is live on-chain.
 2. **Orchestrator Agent registers** — Orchestrator publishes an ERC-8004 profile on Base testnet (name, capabilities, A2A endpoint, ERC-8004 token minted). Guild is now discoverable.
 3. **Orchestrator hunts for talent** — Orchestrator queries the ERC-8004 registry for agents whose capability claims match the mandate's task type. Filters by delivery count, acceptance rate, and recency. Returns a shortlist for human review. (MVP: hardcoded Specialist profile; full semantic LLM ranking is post-hackathon.)
 4. **Human reviews shortlist and selects a candidate** — Marco inspects the top-ranked agent's ERC-8004 profile: capability claims, prior deliveries, acceptance rate, most recent activity. Approves the invite. **[HUMAN GATE]**
 5. **Orchestrator invites Specialist; Specialist quotes** — Orchestrator sends an A2A invite to the selected Specialist. Specialist confirms availability and responds with a `task/quote`: confirmed scope, estimated cost, and timeline. Orchestrator surfaces the quote to Marco. Marco accepts the quote. **[HUMAN GATE — lightweight]**
-6. **Specialist submits membership proposal** — Specialist calls AgentFightClub `propose` with its ERC-8004 profile reference. Proposal recorded on-chain.
-7. **Human votes to approve membership** — Marco reads the Specialist's on-chain profile (delivery history, acceptance rate, stake). Calls AgentFightClub `vote` to approve. Vote settled on-chain; Specialist becomes a guild member. **[HUMAN GATE]**
+6. **Specialist submits membership proposal** — Specialist calls AgentFightClub `mint-shares` with its ERC-8004 profile reference in the proposal description. Proposal recorded on-chain.
+7. **Human votes to approve membership** — Marco reads the Specialist's on-chain profile (delivery history, acceptance rate, stake). Calls AgentFightClub `sponsor` + `vote` to approve. After voting and grace period, `process` executes on-chain; Specialist becomes a guild member. **[HUMAN GATE]**
 8. **Orchestrator delegates task via A2A** — Orchestrator sends a structured A2A task message to Specialist: task description, input data, acceptance criteria, deadline, and budget.
 9. **Specialist executes** — Specialist decomposes the task using GLM-5.1 long-horizon planning. Runs execution loop: plan → tool use → iteration → output.
 10. **Specialist delivers** — Specialist hashes the deliverable (SHA-256), commits the hash to the guild contract on Base testnet, and sends a `task/delivered` A2A message to Orchestrator with the deliverable reference.
@@ -141,7 +141,7 @@ A founding agent launches a GuildOS guild via AgentFightClub with a mandate and 
 13. **Human accepts or rejects** — Marco reviews the deliverable against the acceptance criteria. **[HUMAN GATE]**
     - *On acceptance:* Orchestrator sends a `task/accepted` A2A message to Specialist, triggering the settlement sequence.
     - *On rejection (dispute stub):* Orchestrator records a `DISPUTED` state in the guild context store. Funds remain locked in escrow (AgentFightClub treasury). Human can initiate ragequit to recover funds. Automated dispute agent: post-hackathon.
-14. **AgentFightClub settles** — Orchestrator calls `settle()`; Moloch v3 contracts release 0.3 ETH from the shared treasury to the Specialist Agent's wallet. Settlement recorded on-chain.
+14. **AgentFightClub settles** — Orchestrator submits a `payment` proposal; after `sponsor` + `vote` + grace period, `process` executes: Moloch v3 contracts release 0.3 ETH from the shared treasury to the Specialist Agent's wallet. Settlement recorded on-chain.
 15. **Reputation updated** — Orchestrator calls `ERC-8004.recordDelivery()` with six fields: (1) task type / capability ID, (2) deliverable SHA-256 hash, (3) acceptance block timestamp, (4) payment amount in wei, (5) guild contract address, (6) A2A task message ID. ERC-8004 `DeliveryRecorded` event emitted on-chain. Portable and readable by any subsequent guild or employer.
 
 ---
@@ -167,7 +167,7 @@ AI handles the execution loop completely (Steps 6–9). AI does not make economi
 
 Without Web3: reputation is a database row on a platform; payment depends on the platform releasing funds; the mandate is a Notion doc anyone can edit. Web3 makes these three properties enforceable at the protocol level, not the platform level.
 
-**ERC-8004 reputation record — six fields written on acceptance:** (1) task type / capability ID matching the mandate category; (2) deliverable SHA-256 hash committed to chain before acceptance; (3) acceptance block timestamp (on-chain, not wall-clock); (4) payment amount in wei; (5) guild contract address providing cross-guild traceability; (6) A2A task message ID for off-chain log linkage. Trigger: Orchestrator calls `ERC-8004.recordDelivery()` after `settle()` confirms on-chain. Emits `DeliveryRecorded` event readable by any subsequent guild, employer, or reputation aggregator.
+**ERC-8004 reputation record — six fields written on acceptance:** (1) task type / capability ID matching the mandate category; (2) deliverable SHA-256 hash committed to chain before acceptance; (3) acceptance block timestamp (on-chain, not wall-clock); (4) payment amount in wei; (5) guild contract address providing cross-guild traceability; (6) A2A task message ID for off-chain log linkage. Trigger: Orchestrator calls `ERC-8004.recordDelivery()` after `process` confirms on-chain. Emits `DeliveryRecorded` event readable by any subsequent guild, employer, or reputation aggregator.
 
 ---
 
@@ -199,7 +199,7 @@ Without Web3: reputation is a database row on a platform; payment depends on the
 
 **Gate 0.5 — Quote acceptance (Step 5):** Human reviews the Specialist's quote (scope, cost, timeline) before work is committed to. This gate locks the economic terms before the task begins. (Lightweight — y/N CLI prompt in MVP.)
 
-**Gate 1 — Membership (Step 7):** Human reviews the candidate Specialist Agent's ERC-8004 profile: delivery history, acceptance rate, task types, most recent activity, stake. Approves or rejects via AgentFightClub `vote`. This gate prevents unknown or low-reputation agents from accessing the guild treasury.
+**Gate 1 — Membership (Step 7):** Human reviews the candidate Specialist Agent's ERC-8004 profile: delivery history, acceptance rate, task types, most recent activity, stake. Approves or rejects via AgentFightClub `sponsor` + `vote` + `process`. This gate prevents unknown or low-reputation agents from accessing the guild treasury.
 
 **Gate 2 — Deliverable acceptance (Step 13):** Human reviews the delivered work and the Orchestrator's automated evaluation report against the mandate's acceptance criteria. This is the only point where the payment is unlocked. A rejection holds funds in escrow and produces a `DISPUTED` state (manual resolution via ragequit in v1; automated dispute agent is post-hackathon).
 
@@ -271,13 +271,13 @@ All four dimensions present. Passes the intersection test.
 ## 11. Scoping Answers
 
 **1. Is this an MVP completable in 7 days by one or two developers?**
-Yes, with the scope defined above. The key enabling decision was delegating governance and treasury entirely to AgentFightClub (Moloch v3) rather than building it. The remaining core — A2A communication, ERC-8004 reads, GLM-5.1 execution, one on-chain hash commit, and AgentFightClub settle — is 5 focused integration days with 2 days for wiring and polish.
+Yes, with the scope defined above. The key enabling decision was delegating governance and treasury entirely to AgentFightClub (Moloch v3) rather than building it. The remaining core — A2A communication, ERC-8004 reads, GLM-5.1 execution, one on-chain hash commit, and AgentFightClub `payment` + `process` — is 5 focused integration days with 2 days for wiring and polish.
 
 **2. What is the single minimum loop that must work?**
 One founding agent, one specialist agent, one real task executed via A2A + GLM-5.1, one deliverable hash on-chain, one payment released from treasury on acceptance.
 
 **3. What must be real vs. mocked?**
-Real: AgentFightClub launch/commit/settle, ERC-8004 profile reads, A2A task and result messages, GLM-5.1 task execution, on-chain deliverable hash, payment release, reputation write-back. Mocked: capability matching (hardcoded pair), shared memory (JSON file), multiple concurrent agents.
+Real: AgentFightClub summon/tribute/payment+process, ERC-8004 profile reads, A2A task and result messages, GLM-5.1 task execution, on-chain deliverable hash, payment release, reputation write-back. Mocked: capability matching (hardcoded pair), shared memory (JSON file), multiple concurrent agents.
 
 **4. How will judges know it is actually complete?**
 Two Basescan transaction hashes clickable during the demo: (1) the deliverable hash committed to the guild contract before acceptance, and (2) the AgentFightClub treasury settlement releasing payment to the Specialist Agent's wallet. Both visible on Base testnet. The Specialist Agent's ERC-8004 profile shows a delivery record delta: before (0 deliveries of this task type) → after (1 verified delivery with hash and timestamp).
@@ -289,8 +289,8 @@ Risk: AgentFightClub Skill API is alpha — endpoint may change or be unavailabl
 
 ## 12. Next Steps (Post-Hackathon Week)
 
-- **Architecture decision:** Finalize agent wallet provider — Cobo CAW vs. Wiretap — based on AgentFightClub API experience during the build
-- **Shared memory:** Integrate an OSS persistent memory solution (Mem0, LangChain memory) to eliminate the guild context store mock
+- **Architecture decision:** Finalize agent wallet provider — Cobo CAW vs. others — based on AgentFightClub API experience during the build
+- **Shared memory:** Integrate an OSS persistent memory solution (Mem0, LangChain memory, Cognee) to eliminate the guild context store mock. Memory should be member-gated.
 - **Capability matching:** Build the semantic ERC-8004 registry query + LLM ranking layer — this is the full Identity/Capability direction entry point
 - **Second guild member:** Demo with 2+ specialist agents in the same guild simultaneously
 - **Client-facing guild discovery:** A read-only UI showing active guild mandates, member profiles, and open applications
@@ -316,7 +316,7 @@ A2A protocol already handles harness independence at the communication layer. Be
 
 | Agent | Harness | Implementation |
 |---|---|---|
-| **Orchestrator Agent** | Claude Code (MCP server) | Tools registered as MCP tool manifest (JSON schema + Python handlers): `guild_launch`, `talent_query`, `task_invite`, `task_delegate`, `deliverable_review`, `settle`, `reputation_write` |
+| **Orchestrator Agent** | Claude Code (MCP server) | Tools registered as MCP tool manifest (JSON schema + Python handlers): `guild_summon`, `talent_query`, `task_invite`, `task_delegate`, `deliverable_review`, `guild_settle`, `reputation_write` |
 | **Specialist Agent** | Hermes / GLM-5.1 API | Runs as a separate Python service; receives A2A task messages; executes with GLM-5.1 long-horizon planning; returns deliverable via A2A |
 
 ### Why This Beats the Alternatives

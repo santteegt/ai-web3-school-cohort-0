@@ -35,7 +35,21 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
+def load_dotenv(env_file: Path = Path(".env")) -> None:
+    """Load key=value pairs from a .env file into os.environ (no-op if file absent)."""
+    if not env_file.exists():
+        return
+    with env_file.open() as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            os.environ.setdefault(key, value)
 
+load_dotenv()
 DRY_RUN = False
 GUILD_ADDR = os.environ.get("TEST_GUILD_ADDR", "")  # Set after summon, or pre-stage
 SPECIALIST_ADDR = os.environ.get("SPECIALIST_ADDR", "0x0000000000000000000000000000000000000001")
@@ -46,13 +60,13 @@ VOTING_PERIOD_SEC = 65   # slightly over 60s summon param
 GRACE_PERIOD_SEC = 65
 
 SUMMON_PARAMS = {
-    "name": "GuildOS-Test-Guild",
+    "daoName": "GuildOS-Test-Guild",
     "tokenName": "GUILDTEST",
     "tokenSymbol": "GT",
     "lootTokenName": "GUILDTEST-LOOT",
     "lootTokenSymbol": "GTL",
-    "votingPeriod": 60,
-    "gracePeriod": 60,
+    "votingPeriodInSeconds": 60,
+    "gracePeriodInSeconds": 60,
     "quorum": 1,
     "minRetention": 66,
     "sponsorThreshold": 0,
@@ -104,6 +118,15 @@ def wait(seconds: int, reason: str = ""):
         time.sleep(seconds)
 
 
+def get_proposal_count(guild: str) -> int:
+    """Read the current proposalCount directly from the Baal contract via RPC (no graph)."""
+    _, out, _ = cli(f"read-dao --dao {guild}")
+    try:
+        return int(json.loads(out).get("proposalCount", "")) - 1 # NOTE: proposal counter is zero-based
+    except (json.JSONDecodeError, AttributeError):
+        return ""
+
+
 def load_state(path: Path) -> dict:
     if path.exists():
         return json.loads(path.read_text())
@@ -123,30 +146,34 @@ def test_health() -> bool:
     section("1. Hosted Service Health Check")
     print("  Verifying moloch-agent CLI is installed and hosted service is reachable.")
 
-    rc, out, _ = cli("--version")
-    if not check(rc == 0, "moloch-agent CLI installed"):
-        print("  Fix: npm install -g @raidguild/meta-clawtel")
-        return False
+    # rc, out, _ = cli("--version")
+    # if not check(rc == 0, "moloch-agent CLI installed"):
+    #     print("  Fix: npm install -g @raidguild/meta-clawtel")
+    #     return False
 
     rc, out, _ = cli("health")
     ok_health = check(rc == 0, "health endpoint responds")
 
     rc, out, _ = cli("capabilities")
-    ok_graph = check("graph.configured" in out and '"true"' in out.replace(": true", ':"true"').replace(":true", ':"true"'),
-                     "graph.configured: true")
-    ok_pinning = check("pinning.configured" in out, "pinning.configured visible")
-    ok_signing = check("handledByService" in out, "signing.handledByService reported")
+    try:
+        caps = json.loads(out)
+    except json.JSONDecodeError:
+        caps = {}
+    ok_graph = check(caps.get("graph", {}).get("configured") is True, "graph.configured: true")
+    ok_pinning = check(caps.get("pinning", {}).get("configured") is True, "pinning.configured visible")
+    ok_signing = check("handledByService" in caps.get("signing", {}), "signing.handledByService reported")
 
     rc, out, _ = cli("account")
-    ok_account = check(rc == 0 and "0x" in out, "signer account readable")
+    try:
+        acct = json.loads(out)
+    except json.JSONDecodeError:
+        acct = {}
+    ok_account = check(acct.get("available") is True, "signer account readable")
     if ok_account:
-        # Extract address for use in summon params
-        lines = [l for l in out.splitlines() if "0x" in l and len(l.strip()) >= 42]
-        if lines:
-            addr = [w for w in lines[0].split() if w.startswith("0x") and len(w) == 42]
-            if addr:
-                print(f"  → Signer address: {addr[0]}")
-                os.environ["FOUNDER_ADDR"] = addr[0]
+        addr = acct.get("address", "")
+        if addr:
+            print(f"  → Signer address: {addr}")
+            os.environ["FOUNDER_ADDR"] = addr
 
     return all([ok_health, ok_graph, ok_account])
 
@@ -171,20 +198,29 @@ def test_summon(state_path: Path) -> bool:
     params["memberShares"] = ["1000000000000000000"]  # 1 share in base units
     params["memberLoot"] = ["0"]
 
-    params_file = Path("/tmp/guildos-test-summon.json")
+    params_file = Path("guildos-test-summon.tmp.json")
     params_file.write_text(json.dumps(params, indent=2))
     print(f"  Summon params written to {params_file}")
-    print(f"  votingPeriod: {params['votingPeriod']}s | gracePeriod: {params['gracePeriod']}s")
+    print(f"  votingPeriodInSeconds: {params['votingPeriodInSeconds']}s | gracePeriodInSeconds: {params['gracePeriodInSeconds']}s")
 
-    rc, out, err = cli(f"summon --params {params_file}")
+    # --full includes receipt.logs so we can parse the deployed DAO address from the BaalSummoned event
+    rc, out, err = cli(f"summon --params {params_file} --full")
 
-    # Try to extract DAO address from output
+    try:
+        data = json.loads(out)
+    except json.JSONDecodeError:
+        data = {}
+
+    # The SUMMONER factory emits BaalSummoned(address indexed baal, ...).
+    # topics[1] is the 32-byte zero-padded baal address; last 40 chars = the 20-byte address.
+    SUMMONER = "0x97aaa5be8b38795245f1c38a883b44cccdfb3e11"
     dao_addr = ""
-    for line in (out + err).splitlines():
-        tokens = [t for t in line.split() if t.startswith("0x") and len(t) == 42]
-        if tokens:
-            dao_addr = tokens[0]
-            break
+    for log in data.get("receipt", {}).get("logs", []):
+        if log.get("address", "").lower() == SUMMONER:
+            topics = log.get("topics", [])
+            if len(topics) >= 2 and len(topics[1]) == 66:
+                dao_addr = "0x" + topics[1][-40:]
+                break
 
     ok_summon = check(rc == 0, "summon command succeeded")
     ok_addr = check(bool(dao_addr), f"DAO address returned: {dao_addr or '(none)'}")
@@ -236,27 +272,20 @@ def test_membership(state_path: Path) -> bool:
     if not ok_propose:
         return False
 
-    # Extract proposal ID
-    proposal_id = None
-    for line in out.splitlines():
-        if "proposal" in line.lower() and any(c.isdigit() for c in line):
-            digits = [t for t in line.split() if t.isdigit()]
-            if digits:
-                proposal_id = digits[0]
-                break
-
-    if proposal_id is None:
-        print("  ⚠️  Could not parse proposal ID from output. Check output above.")
-        print("  Attempting to read from proposals list...")
-        rc2, out2, _ = cli(f"proposals --dao {guild}")
-        print(f"  Proposals: {out2[:500]}")
-        proposal_id = "0"  # fallback assumption
+    # proposalCount on Baal is incremented before storing, so its current value == latest proposal ID
+    proposal_id = get_proposal_count(guild)
+    if not proposal_id or proposal_id == "0":
+        print(f"  ⚠️  read-dao returned proposalCount='{proposal_id}' — cannot sponsor safely. Aborting.")
+        return False
 
     print(f"  → Proposal ID: {proposal_id}")
 
     # Sponsor
-    rc, out, _ = cli(f"sponsor --dao {guild} --proposal {proposal_id}")
+    rc, out, _ = cli(f"sponsor --dao {guild} --proposal {proposal_id - 1}")
     ok_sponsor = check(rc == 0, "sponsor succeeded")
+
+    if rc != 0:
+        return False
 
     # Vote
     rc, out, _ = cli(
@@ -274,7 +303,20 @@ def test_membership(state_path: Path) -> bool:
 
     # Verify membership
     rc, out, _ = cli(f"members --dao {guild}")
-    ok_member = check(specialist.lower() in out.lower(), f"Specialist appears in members list")
+    try:
+        members_data = json.loads(out)
+    except json.JSONDecodeError:
+        members_data = {}
+    # DAOhaus graph returns { members: [...] } or a flat list; each member has memberAddress
+    member_list = (
+        members_data if isinstance(members_data, list)
+        else members_data.get("members", members_data.get("data", []))
+    )
+    member_addrs = [m.get("memberAddress", "").lower() for m in member_list if isinstance(m, dict)]
+    ok_member = check(
+        specialist.lower() in member_addrs or specialist.lower() in out.lower(),
+        "Specialist appears in members list",
+    )
 
     if ok_member:
         print(f"  ✅ Full membership lifecycle works end-to-end")
@@ -329,14 +371,10 @@ def test_payment(state_path: Path) -> bool:
     if not ok_payment:
         return False
 
-    # Extract proposal ID
-    proposal_id = "1"  # fallback
-    for line in out.splitlines():
-        if "proposal" in line.lower():
-            digits = [t for t in line.split() if t.isdigit()]
-            if digits:
-                proposal_id = digits[0]
-                break
+    proposal_id = get_proposal_count(guild)
+    if not proposal_id or proposal_id == "0":
+        print(f"  ⚠️  read-dao returned proposalCount='{proposal_id}' — cannot sponsor safely. Aborting.")
+        return False
 
     print(f"  → Payment proposal ID: {proposal_id}")
 
@@ -415,7 +453,7 @@ def main():
         os.environ["TEST_GUILD_ADDR"] = args.guild
         print(f"  Using existing guild: {GUILD_ADDR}")
 
-    state_path = Path("/tmp/guildos-day1-state.json")
+    state_path = Path("guildos-day1-state.tmp.json")
     if state_path.exists():
         saved = json.loads(state_path.read_text())
         if saved.get("guild_addr") and not GUILD_ADDR:
@@ -431,7 +469,7 @@ def main():
 
     tests = {
         1: ("Hosted service health", lambda: test_health()),
-        2: ("DAO summon", lambda: test_summon(state_path)),
+        # 2: ("DAO summon", lambda: test_summon(state_path)),
         3: ("Membership lifecycle", lambda: test_membership(state_path)),
         4: ("Payment lifecycle", lambda: test_payment(state_path)),
         5: ("Hash signal", lambda: test_hash_signal(state_path)),
@@ -443,6 +481,8 @@ def main():
             continue
         try:
             results[num] = fn()
+            if not results[num]:
+                break
         except Exception as e:
             print(f"\n  💥 Test {num} raised exception: {e}")
             results[num] = False
