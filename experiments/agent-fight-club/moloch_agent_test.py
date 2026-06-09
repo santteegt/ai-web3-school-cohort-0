@@ -119,12 +119,30 @@ def wait(seconds: int, reason: str = ""):
 
 
 def get_proposal_count(guild: str) -> int:
-    """Read the current proposalCount directly from the Baal contract via RPC (no graph)."""
+    """Read proposalCount directly from the Baal contract via RPC (no graph)."""
     _, out, _ = cli(f"read-dao --dao {guild}")
     try:
-        return int(json.loads(out).get("proposalCount", "")) - 1 # NOTE: proposal counter is zero-based
-    except (json.JSONDecodeError, AttributeError):
-        return ""
+        return int(json.loads(out).get("proposalCount", 0))
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError):
+        return 0
+
+
+def wait_for_new_proposal(guild: str, prev_count: int, max_wait: int = 60, poll_interval: int = 5) -> str | None:
+    """Poll read-dao until proposalCount exceeds prev_count, then return the new proposal ID.
+
+    Handles RPC propagation lag and MOLOCH_WAIT_DEFAULT=false by retrying on-chain reads
+    until the submitted proposal is confirmed visible.
+    """
+    deadline = time.time() + max_wait
+    while time.time() < deadline:
+        count = get_proposal_count(guild)
+        if count > prev_count:
+            return str(count)
+        remaining = int(deadline - time.time())
+        print(f"  ⏳ Proposal not yet on-chain (count={count}, prev={prev_count}, {remaining}s left)...")
+        if not DRY_RUN:
+            time.sleep(poll_interval)
+    return None
 
 
 def load_state(path: Path) -> dict:
@@ -262,42 +280,64 @@ def test_membership(state_path: Path) -> bool:
     print(f"  Guild:      {guild}")
     print(f"  Specialist: {specialist}")
 
-    # Create membership proposal
+    # Snapshot proposalCount before submitting so we can detect when the new proposal lands
+    prev_count = get_proposal_count(guild)
+
+    # Create membership proposal — --wait forces the CLI to block until the receipt is confirmed
     rc, out, _ = cli(
         f'mint-shares --dao {guild} --to {specialist} --amount 10 '
         f'--title "Specialist Agent Membership Test" '
-        f'--description "Day1 test | ERC-8004: placeholder | capabilities: security-audit"'
+        f'--description "Day1 test | ERC-8004: placeholder | capabilities: security-audit" '
+        f'--wait'
     )
     ok_propose = check(rc == 0, "mint-shares proposal submitted")
     if not ok_propose:
         return False
 
-    # proposalCount on Baal is incremented before storing, so its current value == latest proposal ID
-    proposal_id = get_proposal_count(guild)
-    if not proposal_id or proposal_id == "0":
-        print(f"  ⚠️  read-dao returned proposalCount='{proposal_id}' — cannot sponsor safely. Aborting.")
+    # Poll until proposalCount > prev_count (guards against RPC propagation lag)
+    proposal_id = wait_for_new_proposal(guild, prev_count)
+    if not proposal_id:
+        print(f"  ⚠️  Timed out waiting for proposal to appear on-chain (prev count={prev_count}).")
         return False
-
     print(f"  → Proposal ID: {proposal_id}")
 
-    # Sponsor
-    rc, out, _ = cli(f"sponsor --dao {guild} --proposal {proposal_id - 1}")
-    ok_sponsor = check(rc == 0, "sponsor succeeded")
+    # Sponsor — skip if already sponsored
+    _, prop_out, _ = cli(f"proposal --dao {guild} --proposal {proposal_id}")
+    try:
+        already_sponsored = json.loads(prop_out).get("proposal", {}).get("sponsored", False)
+    except (json.JSONDecodeError, AttributeError):
+        already_sponsored = False
 
-    if rc != 0:
-        return False
+    if already_sponsored:
+        ok_sponsor = check(True, "proposal already sponsored — skipping")
+    else:
+        rc, out, _ = cli(f"sponsor --dao {guild} --proposal {proposal_id}")
+        ok_sponsor = check(rc == 0, "sponsor succeeded")
 
     # Vote
-    rc, out, _ = cli(
-        f'vote --dao {guild} --proposal {proposal_id} --approved true '
-        f'--reason "Day 1 test — approving specialist membership"'
-    )
+    rc, _, _ = cli(f"vote --dao {guild} --proposal {proposal_id} --approved true")
     ok_vote = check(rc == 0, "vote submitted")
 
     # Wait for voting + grace period
     wait(VOTING_PERIOD_SEC + GRACE_PERIOD_SEC, "voting + grace periods")
 
-    # Process
+    # Check: verify our proposal is in the processable queue
+    _, pq_out, _ = cli(f"process-queue --dao {guild}")
+    try:
+        pq_data = json.loads(pq_out)
+        queue = pq_data.get("queue", [])
+        in_queue = any(
+            str(item.get("proposalId")) == str(proposal_id)
+            for item in queue
+            if isinstance(item, dict)
+        )
+    except (json.JSONDecodeError, AttributeError):
+        in_queue = False
+    ok_ready = check(in_queue, f"proposal {proposal_id} in process queue")
+    if not ok_ready:
+        return False
+
+    # Process: submit tx to execute the oldest ready proposal
     rc, out, _ = cli(f"process-ready --dao {guild}")
     ok_process = check(rc == 0, "process-ready succeeded")
 
@@ -325,7 +365,7 @@ def test_membership(state_path: Path) -> bool:
     else:
         print("  ⚠️  Membership not confirmed in members list — check graph indexing lag")
 
-    return all([ok_propose, ok_sponsor, ok_vote, ok_process])
+    return all([ok_propose, ok_sponsor, ok_vote, ok_ready, ok_process])
 
 
 # ---------------------------------------------------------------------------
@@ -360,35 +400,64 @@ def test_payment(state_path: Path) -> bool:
     )
     check(rc == 0, "tribute (fund treasury) succeeded")
 
-    # Payment proposal
+    prev_count = get_proposal_count(guild)
+
+    # Payment proposal — --wait forces the CLI to block until the receipt is confirmed
     rc, out, _ = cli(
         f'payment --dao {guild} --recipient {SPECIALIST_ADDR} '
         f'--amount 0.005 '
         f'--title "Test payment: T001 accepted" '
-        f'--description "sha256:PLACEHOLDER_HASH | task:TEST-T001"'
+        f'--description "sha256:PLACEHOLDER_HASH | task:TEST-T001" '
+        f'--wait'
     )
     ok_payment = check(rc == 0, "payment proposal submitted")
     if not ok_payment:
         return False
 
-    proposal_id = get_proposal_count(guild)
-    if not proposal_id or proposal_id == "0":
-        print(f"  ⚠️  read-dao returned proposalCount='{proposal_id}' — cannot sponsor safely. Aborting.")
+    proposal_id = wait_for_new_proposal(guild, prev_count)
+    if not proposal_id:
+        print(f"  ⚠️  Timed out waiting for payment proposal on-chain (prev count={prev_count}).")
         return False
 
     print(f"  → Payment proposal ID: {proposal_id}")
 
-    rc, _, _ = cli(f"sponsor --dao {guild} --proposal {proposal_id}")
-    ok_sponsor = check(rc == 0, "sponsor succeeded")
+    # Sponsor — skip if already sponsored
+    _, prop_out, _ = cli(f"proposal --dao {guild} --proposal {proposal_id}")
+    try:
+        already_sponsored = json.loads(prop_out).get("sponsored", False)
+    except (json.JSONDecodeError, AttributeError):
+        already_sponsored = False
 
-    rc, _, _ = cli(
-        f'vote --dao {guild} --proposal {proposal_id} --approved true '
-        f'--reason "Deliverable accepted; releasing payment"'
-    )
+    if already_sponsored:
+        ok_sponsor = check(True, "proposal already sponsored — skipping")
+    else:
+        rc, _, _ = cli(f"sponsor --dao {guild} --proposal {proposal_id}")
+        ok_sponsor = check(rc == 0, "sponsor succeeded")
+        if rc != 0:
+            return False
+
+    rc, _, _ = cli(f"vote --dao {guild} --proposal {proposal_id} --approved true")
     ok_vote = check(rc == 0, "vote submitted")
 
     wait(VOTING_PERIOD_SEC + GRACE_PERIOD_SEC, "voting + grace periods")
 
+    # Check: verify our payment proposal is in the processable queue
+    _, pq_out, _ = cli(f"process-queue --dao {guild}")
+    try:
+        pq_data = json.loads(pq_out)
+        queue = pq_data.get("queue", [])
+        in_queue = any(
+            str(item.get("proposalId")) == str(proposal_id)
+            for item in queue
+            if isinstance(item, dict)
+        )
+    except (json.JSONDecodeError, AttributeError):
+        in_queue = False
+    ok_ready = check(in_queue, f"payment proposal {proposal_id} in process queue")
+    if not ok_ready:
+        return False
+
+    # Process: submit tx to settle the payment
     rc, out, _ = cli(f"process-ready --dao {guild}")
     ok_process = check(rc == 0, "process-ready (settlement) succeeded")
 
@@ -396,7 +465,7 @@ def test_payment(state_path: Path) -> bool:
         print("  ✅ Payment settlement works end-to-end")
         print("  → Find the process tx on Basescan — this is proof point #2 for judges")
 
-    return all([ok_payment, ok_sponsor, ok_vote, ok_process])
+    return all([ok_payment, ok_sponsor, ok_vote, ok_ready, ok_process])
 
 
 # ---------------------------------------------------------------------------
@@ -469,7 +538,7 @@ def main():
 
     tests = {
         1: ("Hosted service health", lambda: test_health()),
-        # 2: ("DAO summon", lambda: test_summon(state_path)),
+        2: ("DAO summon", lambda: test_summon(state_path)),
         3: ("Membership lifecycle", lambda: test_membership(state_path)),
         4: ("Payment lifecycle", lambda: test_payment(state_path)),
         5: ("Hash signal", lambda: test_hash_signal(state_path)),
