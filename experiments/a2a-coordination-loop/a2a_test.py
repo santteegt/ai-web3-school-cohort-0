@@ -172,7 +172,7 @@ async def test_agent_card():
 async def test_metadata_roundtrip():
     import httpx
     from a2a.client import A2ACardResolver, create_client, ClientConfig
-    from a2a.types import Message, TextPart, Role, MessageSendParams, SendMessageRequest
+    from a2a.types import Message, Part, Role, SendMessageRequest
 
     async with httpx.AsyncClient() as http:
         card = await A2ACardResolver(http, SPECIALIST_URL).get_agent_card()
@@ -181,20 +181,16 @@ async def test_metadata_roundtrip():
         message_id=str(uuid.uuid4()),
         context_id=str(uuid.uuid4()),
         role=Role.ROLE_USER,
-        parts=[TextPart(text="Run a test audit.")],
-        metadata=GUILD_META,
+        parts=[Part(text="Run a test audit.")],
     )
-    request = SendMessageRequest(
-        id=str(uuid.uuid4()),
-        params=MessageSendParams(message=message),
-    )
+    message.metadata.update(GUILD_META)
+    request = SendMessageRequest(message=message)
 
     client = await create_client(card, ClientConfig(streaming=False))
     task = None
-    async for event_wrapper in client.send_message(request):
-        result = event_wrapper.root.result
-        if hasattr(result, "artifacts"):
-            task = result
+    async for event in client.send_message(request):
+        if event.HasField("task"):
+            task = event.task
             break
     await client.close()
 
@@ -204,10 +200,12 @@ async def test_metadata_roundtrip():
     # Parse the echoed metadata from artifact
     artifact_data = None
     for part in task.artifacts[0].parts:
-        if hasattr(part, "data"):
-            artifact_data = part.data
+        which = part.WhichOneof("content")
+        if which == "data":
+            from google.protobuf.json_format import MessageToDict
+            artifact_data = MessageToDict(part.data)
             break
-        elif hasattr(part, "text"):
+        elif which == "text":
             artifact_data = json.loads(part.text)
             break
 
@@ -225,7 +223,7 @@ async def test_metadata_roundtrip():
 async def test_artifact_hash():
     import httpx
     from a2a.client import A2ACardResolver, create_client, ClientConfig
-    from a2a.types import Message, TextPart, Role, MessageSendParams, SendMessageRequest
+    from a2a.types import Message, Part, Role, SendMessageRequest
 
     async with httpx.AsyncClient() as http:
         card = await A2ACardResolver(http, SPECIALIST_URL).get_agent_card()
@@ -235,27 +233,26 @@ async def test_artifact_hash():
         message_id=str(uuid.uuid4()),
         context_id=str(uuid.uuid4()),
         role=Role.ROLE_USER,
-        parts=[TextPart(text=task_text)],
-        metadata=GUILD_META,
+        parts=[Part(text=task_text)],
     )
+    message.metadata.update(GUILD_META)
 
     client = await create_client(card, ClientConfig(streaming=False))
     task = None
-    async for event_wrapper in client.send_message(
-        SendMessageRequest(id=str(uuid.uuid4()), params=MessageSendParams(message=message))
-    ):
-        result = event_wrapper.root.result
-        if hasattr(result, "artifacts"):
-            task = result
+    async for event in client.send_message(SendMessageRequest(message=message)):
+        if event.HasField("task"):
+            task = event.task
             break
     await client.close()
 
     assert task and task.artifacts, "No artifacts returned"
     artifact_data = None
     for part in task.artifacts[0].parts:
-        if hasattr(part, "data"):
-            artifact_data = part.data
-        elif hasattr(part, "text"):
+        which = part.WhichOneof("content")
+        if which == "data":
+            from google.protobuf.json_format import MessageToDict
+            artifact_data = MessageToDict(part.data)
+        elif which == "text":
             artifact_data = json.loads(part.text)
 
     assert artifact_data, "Could not parse artifact data"
@@ -274,10 +271,7 @@ async def test_artifact_hash():
 async def test_streaming():
     import httpx
     from a2a.client import A2ACardResolver, create_client, ClientConfig
-    from a2a.types import (
-        Message, TextPart, Role, MessageSendParams, SendStreamingMessageRequest,
-        TaskStatusUpdateEvent,
-    )
+    from a2a.types import Message, Part, Role, SendMessageRequest, TaskState
 
     async with httpx.AsyncClient() as http:
         card = await A2ACardResolver(http, SPECIALIST_URL).get_agent_card()
@@ -288,19 +282,16 @@ async def test_streaming():
         message_id=str(uuid.uuid4()),
         context_id=str(uuid.uuid4()),
         role=Role.ROLE_USER,
-        parts=[TextPart(text="Stream test task")],
-        metadata=GUILD_META,
+        parts=[Part(text="Stream test task")],
     )
+    message.metadata.update(GUILD_META)
 
     client = await create_client(card, ClientConfig(streaming=True))
     states_seen = []
 
-    async for event_wrapper in client.send_message(
-        SendStreamingMessageRequest(id=str(uuid.uuid4()), params=MessageSendParams(message=message))
-    ):
-        event = event_wrapper.root.result
-        if isinstance(event, TaskStatusUpdateEvent):
-            state_name = str(event.status.state)
+    async for event in client.send_message(SendMessageRequest(message=message)):
+        if event.HasField("status_update"):
+            state_name = TaskState.Name(event.status_update.status.state)
             if state_name not in states_seen:
                 states_seen.append(state_name)
 
@@ -317,49 +308,48 @@ async def test_streaming():
 @gate("Gate 5 — CancelTask")
 async def test_cancel():
     import httpx
-    from a2a.client import A2ACardResolver, A2AClient
+    from a2a.client import A2ACardResolver, create_client, ClientConfig
     from a2a.types import (
-        Message, TextPart, Role, MessageSendParams, SendStreamingMessageRequest,
-        GetTaskRequest, TaskQueryParams, CancelTaskRequest, Task,
+        Message, Part, Role, SendMessageRequest, CancelTaskRequest, TaskState,
     )
 
     async with httpx.AsyncClient() as http:
         card = await A2ACardResolver(http, SPECIALIST_URL).get_agent_card()
-        client = A2AClient(http, agent_card=card)
 
-        message = Message(
-            message_id=str(uuid.uuid4()),
-            context_id=str(uuid.uuid4()),
-            role=Role.ROLE_USER,
-            parts=[TextPart(text="Long task - cancel me")],
-            metadata=GUILD_META,
-        )
+    message = Message(
+        message_id=str(uuid.uuid4()),
+        context_id=str(uuid.uuid4()),
+        role=Role.ROLE_USER,
+        parts=[Part(text="Long task - cancel me")],
+    )
+    message.metadata.update(GUILD_META)
 
-        # Start task
-        task_id = None
-        async for event_wrapper in client.send_message_streaming(
-            SendStreamingMessageRequest(id=str(uuid.uuid4()), params=MessageSendParams(message=message))
-        ):
-            event = event_wrapper.root.result
-            if isinstance(event, Task):
-                task_id = event.id
-                break  # don't wait for completion
+    client = await create_client(card, ClientConfig(streaming=True))
 
-        if task_id:
-            # Attempt cancellation
-            try:
-                cancel_response = await client.cancel_task(
-                    CancelTaskRequest(id=str(uuid.uuid4()), params=TaskQueryParams(id=task_id))
-                )
-                print(f"      CancelTask response: {cancel_response.root}")
-                print(f"      Note: Task may already be completed (fast executor). Cancel acknowledged.")
-            except Exception as e:
-                # Cancel on already-completed task raises an error — that is acceptable behavior
-                print(f"      Cancel after completion (expected): {type(e).__name__}: {e}")
-        else:
-            print("      No task_id captured before completion — executor too fast for cancel test")
+    # Start task and capture task_id from first event
+    task_id = None
+    async for event in client.send_message(SendMessageRequest(message=message)):
+        if event.HasField("task"):
+            task_id = event.task.id
+            break
+        elif event.HasField("status_update"):
+            task_id = event.status_update.task_id
+            break
 
-        print("      Gate 5 validated: CancelTask API is reachable and responds")
+    if task_id:
+        # Attempt cancellation
+        try:
+            cancel_response = await client.cancel_task(CancelTaskRequest(id=task_id))
+            print(f"      CancelTask response: state={TaskState.Name(cancel_response.status.state)}")
+            print(f"      Note: Task may already be completed (fast executor). Cancel acknowledged.")
+        except Exception as e:
+            # Cancel on already-completed task raises an error — that is acceptable behavior
+            print(f"      Cancel after completion (expected): {type(e).__name__}: {e}")
+    else:
+        print("      No task_id captured before completion — executor too fast for cancel test")
+
+    await client.close()
+    print("      Gate 5 validated: CancelTask API is reachable and responds")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

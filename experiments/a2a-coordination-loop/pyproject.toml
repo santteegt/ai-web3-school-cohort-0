@@ -1,0 +1,12 @@
+[project]
+name = "a2a-coordination-loop"
+version = "0.1.0"
+description = "GuildOS A2A Day 1 gate tests — validates the 5 go/no-go gates before building the full A2A coordination stack"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "a2a-sdk[http-server]>=1.1.0",
+    "httpx>=0.28.1",
+    "starlette>=1.2.1",
+    "uvicorn>=0.49.0",
+]
