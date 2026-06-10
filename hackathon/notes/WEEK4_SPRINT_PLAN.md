@@ -48,50 +48,38 @@
 
 ---
 
-## Day 9 — Tuesday, June 9 · Wallets + Identity + A2A/GLM
+## Day 9 — Tuesday, June 9 · Wallets + Identity + A2A/GLM ✅ COMPLETE
 
-**Theme:** Agent wallets live on **Base mainnet**. Both agents registered on ERC-8004. Guild deployed and funded. A2A test suite + GLM-5.1 task type locked (carried from Day 8). AFC proposal sponsorship timing fix. End-of-day: the economic container exists on-chain and all integrations validated.
+**Theme:** Integration validation complete. All three core stacks validated. Project build starts Day 10.
 
-### Morning (4h): Agent wallets + ERC-8004 registration
+### Validation Results
 
-| Task | Real or Mock | Evidence |
+| Integration | Result | Notes |
 |---|---|---|
-| Initialize Orchestrator Agent wallet (Cobo CAW) | **Real** | Wallet address printed; Base mainnet balance > 0 (fund manually — no faucet) |
-| Initialize Specialist Agent wallet (Cobo CAW or EOA) | **Real** | Same |
-| Call `ERC-8004.register(agentURI)` for Orchestrator | **Real** | ERC-721 agentId minted; Basescan event `AgentRegistered` |
-| Call `ERC-8004.register(agentURI)` for Specialist | **Real** | Same |
-| Capture Specialist **before-state** snapshot | **Real** | Save to `hackathon/notes/erc8004_specialist_before.json` |
-| Publish Orchestrator A2A Agent Card at `localhost:10000/.well-known/agent.json` | **Real** | Validate with `curl` |
-| Publish Specialist A2A Agent Card at `localhost:10001/.well-known/agent.json` | **Real** | Same |
+| **AFC full flow** | ✅ Working | launch → commit → propose → vote → settle; timing issue resolved |
+| **A2A coordination loop** | ✅ Working | All 5 gates passing; metadata extension fields accepted |
+| **GLM-5.1 / Hermes** | ✅ Locked | Hermes agent deployed as Specialist; Z.AI track alignment confirmed; long-horizon task prompt locked |
 
-### Afternoon (3h): Guild formation
+### Day 9 Deliverables — Status
 
-| Task | Real or Mock | Evidence |
-|---|---|---|
-| AgentFightClub `launch(mandate_string, treasury_address)` | **Real** (or DAOhaus fallback) | Guild contract address on Basescan |
-| AgentFightClub `commit(guild_address, 0.001 ETH)` | **Real** | Treasury balance readable; Basescan tx |
-| AgentFightClub `propose(specialist_erc8004_id)` | **Real** | Proposal ID returned; Basescan `ProposalSubmitted` event |
-| AgentFightClub `vote(proposal_id, approve=True)` | **Real** — this is **Gate 1** (human founds guild) | Proposal state → `Passed` on Basescan |
-| Write guild state to `guild_context.json` | **Real (JSON file)** | Fields: `guild_address`, `mandate`, `treasury_wei`, `member_list: [orchestrator, specialist]`, `task_state: ACTIVE` |
+- [x] AFC full flow: ✅ confirmed working (`experiments/agent-fight-club/moloch_agent_test.py`)
+- [x] A2A: ✅ coordination loop working, all 5 gates pass
+- [x] GLM-5.1 demo task type: ✅ locked (Hermes agent + long-horizon prompt)
+- [ ] ERC-8004 agent registration → **carry to Day 10**
+- [ ] Guild launch + fund → **carry to Day 10**
+- [ ] Repo scaffold → **carry to Day 10**
 
-### Day 9 Deliverables
+### What Carries to Day 10
 
-- [ ] Orchestrator + Specialist wallet addresses (save to `submissions/tx_hashes.md`)
-- [ ] ERC-8004 agentIds for both agents (with Basescan links)
-- [ ] Guild contract address + `commit` tx hash (save to `submissions/tx_hashes.md`)
-- [ ] `propose` + `vote` tx hashes saved
-- [ ] `erc8004_specialist_before.json` committed to `hackathon/notes/`
-
-### What is Mocked Today
-
-- ERC-8004 talent query / shortlist — Orchestrator uses the hardcoded Specialist profile from `erc8004_specialist_before.json`. No live registry query. **Gate 0** (candidate selection) is a CLI prompt that prints the cached profile and asks `y/N`.
-- Session key policy (if ZeroDev fallback triggered): shown as code exhibit only.
+Day 10 opens with ERC-8004 `register()` for both agents and guild formation before the A2A+execution flow begins. All integration dependencies are now confirmed — no blockers.
 
 ---
 
-## Day 10 — Wednesday, June 10 · A2A + Execution
+## Day 10 — Wednesday, June 10 · Setup + A2A + Execution
 
-**Theme:** The full A2A conversation runs. GLM-5.1 executes the locked demo task. Deliverable is hashed and committed to chain. End-of-day: Basescan tx #1 (deliverable hash) is in hand.
+**Theme:** Start with ERC-8004 agent registration and guild formation (carried from Day 9), then run the full A2A conversation. GLM-5.1/Hermes executes the locked demo task. Deliverable is hashed and committed to chain. End-of-day: Basescan tx #1 (deliverable hash) is in hand.
+
+**Day 10 morning priority (before A2A):** Pre-fund agent wallets · `ERC-8004.register()` for both agents · AFC `launch` + `commit` + `propose` + `vote` (Gate 1) · Save `erc8004_specialist_before.json`
 
 ### Morning (4h): A2A flow + GLM-5.1 execution
 

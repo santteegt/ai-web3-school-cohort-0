@@ -91,7 +91,7 @@ A founding agent launches a GuildOS guild via AgentFightClub with a mandate and 
 | AgentFightClub: `mint-shares` + `sponsor` + `vote` + `process` (membership); `payment` + `sponsor` + `vote` + `process` (settlement) | **Real** | Core governance + payment flow; use moloch-agent CLI (direct path) |
 | ERC-8004 profile — Orchestrator Agent | **Real** | 8004scan API read; display before state in demo |
 | ERC-8004 profile — Specialist Agent | **Real** | 8004scan API read; display before/after states |
-| A2A task message (Orchestrator → Specialist) | **Real** | Core interop surface; A2A 0.3.0 structured message |
+| A2A task message (Orchestrator → Specialist) | **Real** | Core interop surface; A2A 1.0 structured message |
 | A2A result message (Specialist → Orchestrator) | **Real** | Structured deliverable reference return |
 | GLM-5.1 long-horizon task execution | **Real** | Actual output (code / analysis); not simulated |
 | On-chain deliverable hash commit | **Real** | One testnet transaction; tamper-proof record |
@@ -219,7 +219,7 @@ Without Web3: reputation is a database row on a platform; payment depends on the
 | Risk | Mitigation |
 |---|---|
 | **AgentFightClub API instability (alpha)** | Fallback: deploy Moloch v3 DAO directly via DAOhaus SDK (open source, audited, 4 years in production); same contract logic, no ClawBank dependency |
-| **A2A spec compliance gap** | Build against A2A 0.3.0 spec; keep the message schema minimal (task, input, result, hash); use the reference implementation as test fixture |
+| **A2A spec compliance gap** | Build against A2A 1.0 spec; keep the message schema minimal (task, input, result, hash); use the reference implementation as test fixture |
 | **GLM-5.1 output quality for the chosen task** | Test 3 representative task types on Day 1; pick the one that produces the most consistent structured output; use it exclusively in the live demo |
 | **ERC-8004 registry latency or downtime** | Cache profile response at startup; run demo against cached profiles if API is slow; maintain a fallback JSON profile file |
 | **On-chain transaction timing during live demo** | Use Base testnet (fast finality); pre-stage the membership proposal/vote before the demo starts so only Steps 6–12 are live; have pre-recorded tx hashes as fallback screen |

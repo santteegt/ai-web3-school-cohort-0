@@ -1,8 +1,8 @@
 # GuildOS — Risk & Assumption Memo
 
-> Author: Sensei (Claude via Cowork) | Date: 2026-06-07  
+> Author: Sensei (Claude via Cowork) | Date: 2026-06-07 | Last updated: 2026-06-09  
 > Deadline: 2026-06-13 12:00 UTC+8 (04:00 UTC)  
-> Status: Active build sprint — Day 7 of 13
+> Status: Active build sprint — Day 9 of 13 · All core integrations validated · **Build starts Day 10**
 
 ---
 
@@ -16,15 +16,11 @@ This memo surfaces the assumptions the demo depends on, the most likely failure 
 
 These are statements the project treats as true. If any prove false, the build path changes.
 
-### A1 — AgentFightClub API is callable from Python
+### A1 — AgentFightClub API is callable from Python ✅ VALIDATED 2026-06-09
 
-**What we assume:** The AgentFightClub Skill API (ClawBank) accepts authenticated requests, exposes `launch`, `commit`, `propose`, `vote`, and `settle` as callable endpoints, and returns deterministic results within the demo window.
+**What we assumed:** The AgentFightClub Skill API (ClawBank) accepts authenticated requests, exposes `launch`, `commit`, `propose`, `vote`, and `settle` as callable endpoints, and returns deterministic results within the demo window.
 
-**Evidence for:** API is documented; referenced in hackathon track materials.
-
-**Evidence against:** Docs are alpha-quality; endpoint availability not confirmed via live test during pre-research.
-
-**Validation step:** Day 1 — make one live `launch` call. If it returns a tx hash, assumption holds.
+**Result:** ✅ Full flow test passing as of Day 9. `experiments/agent-fight-club/moloch_agent_test.py` executes the complete sequence: launch → commit → propose → vote → settle. Proposal sponsorship timing issue (identified Day 8) is resolved. Assumption holds.
 
 ---
 
@@ -42,27 +38,19 @@ These are statements the project treats as true. If any prove false, the build p
 
 ---
 
-### A3 — A2A SDK v1.0.0 supports the GuildOS message pattern
+### A3 — A2A SDK v1.0.0 supports the GuildOS message pattern ✅ VALIDATED 2026-06-09
 
-**What we assume:** `pip install "a2a-sdk[http-server]"` installs a working server; `SendMessage` delivers structured task messages; `Artifact` with a `DataPart` carries the deliverable hash without schema rejection.
+**What we assumed:** `pip install "a2a-sdk[http-server]"` installs a working server; `SendMessage` delivers structured task messages; `Artifact` with a `DataPart` carries the deliverable hash without schema rejection.
 
-**Evidence for:** Protocol is v1.0.0 (stable, Linux Foundation); Python SDK is released; pre-research rated this GREEN and lowest-risk component.
-
-**Evidence against:** Payment/budget and deliverable-hash fields are not native — carried in `Message.metadata` and `Artifact.parts[0]` via convention. Any strict schema validation could reject these extensions.
-
-**Validation step:** Day 1 — run `A2A_DAY1_TEST.py` against all 5 gates before any other integration work.
+**Result:** ✅ A2A coordination loop validated Day 9. All 5 gates passing (agent card, send, quote, deliver, accept). Metadata extension fields accepted without schema rejection. Assumption holds.
 
 ---
 
-### A4 — GLM-5.1 produces usable structured output for the chosen task type
+### A4 — GLM-5.1 produces usable structured output for the chosen task type ✅ VALIDATED 2026-06-09
 
-**What we assume:** For at least one of the three pre-selected task types (code generation, analysis, spec writing), GLM-5.1 via the Z.AI API produces consistent, structured output that can be hashed and presented as a credible deliverable within a single API call sequence.
+**What we assumed:** For at least one of the three pre-selected task types, GLM-5.1 via the Z.AI API produces consistent, structured output that can be hashed and presented as a credible deliverable.
 
-**Evidence for:** GLM-5.1 is a production long-horizon model; Z.AI API is live.
-
-**Evidence against:** Output quality for niche technical tasks (e.g., smart contract audits) is unknown; "long-horizon" in practice may mean slow, not just multi-step.
-
-**Validation step:** Day 1 — run three representative prompts. Pick the task type with the most consistent, parseable output. Lock that in as the demo task. Do not change it afterward.
+**Result:** ✅ Z.AI track alignment reviewed Day 9. Hermes agent instance deployed as the Specialist Agent. Long-horizon task prompt built and locked for the demo. Assumption holds — Hermes + GLM-5.1 produces structured, hashable output for the selected task type.
 
 ---
 
@@ -231,7 +219,9 @@ Track assumption validation and fallback triggers here as the build progresses.
 | 2026-06-08 | Cobo CAW | ✅ **Restored** — TSS node restart fixed signing | CAW is primary wallet again; ZeroDev demoted to design exhibit |
 | 2026-06-08 | AgentFightClub | ✅ Functional — probe script live | `experiments/agent-fight-club/moloch_agent_test.py` runs; timing issue with proposal sponsorship being fixed Day 9 |
 | 2026-06-08 | Network | ⚠️ **Base Sepolia → Base mainnet** | AFC has no Base Sepolia support (no contracts, no subgraph); all on-chain ops move to Base mainnet (chain_id 8453) |
-| — | A2A + GLM-5.1 | ⏳ Deferred to Day 9 morning | Day 8 scope shifted to CAW/AFC validation |
+| 2026-06-09 | AgentFightClub | ✅ **Full flow confirmed** | Complete sequence working: launch → commit → propose → vote → settle; timing issue resolved |
+| 2026-06-09 | A2A SDK v1.0.0 | ✅ **Coordination loop validated** | All 5 gates passing; metadata fields accepted; no schema issues |
+| 2026-06-09 | GLM-5.1 / Hermes | ✅ **Specialist stack locked** | Hermes agent deployed; Z.AI track alignment reviewed; long-horizon task prompt locked |
 | — | ZeroDev session keys | Demoted — design exhibit only | CAW restored; ZeroDev no longer on critical path |
 
 ---
