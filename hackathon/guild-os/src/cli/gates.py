@@ -12,7 +12,6 @@ Gates:
 
 from __future__ import annotations
 import json
-import sys
 
 
 def _prompt(label: str, details: str) -> bool:
@@ -22,7 +21,7 @@ def _prompt(label: str, details: str) -> bool:
     print(details)
     print(f"{'━' * 60}")
     while True:
-        answer = input(f"\n  Proceed? [y/N]: ").strip().lower()
+        answer = input("\n  Proceed? [y/N]: ").strip().lower()
         if answer in ("y", "yes"):
             return True
         if answer in ("n", "no", ""):
