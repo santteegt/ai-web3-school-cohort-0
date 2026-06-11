@@ -1,13 +1,8 @@
 {
-  "guild_address": null,
-  "mandate": null,
-  "treasury_wei": "0",
+  "guild_address": "0xTest",
+  "mandate": "Build DeFi tools",
+  "treasury_wei": "1000000000000000",
   "member_list": [],
-  "task_state": "INIT",
-  "proposal_id": null,
-  "a2a_task_id": null,
-  "deliverable_hash": null,
-  "deliverable_tx": null,
-  "settlement_tx": null,
-  "reputation_tx": null
+  "task_state": "SETTLED",
+  "settlement_tx": "0xSettleTx"
 }

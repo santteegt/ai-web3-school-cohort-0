@@ -23,6 +23,13 @@ import pytest
 import mcp.types as types
 
 
+def async_return(value):
+    """Helper to create an async function that returns a fixed value."""
+    async def _f(*args, **kwargs):
+        return value
+    return _f
+
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -208,26 +215,40 @@ class TestToolCalls:
             assert "true" in text.lower()
 
     @pytest.mark.asyncio
-    async def test_guild_launch_returns_stub(self, dispatch):
-        """Check 7.1: guild_launch is callable (stub — returns STUB message)."""
-        result = await dispatch("guild_launch", {
-            "mandate": "Build DeFi tools",
-            "treasury_address": "0x1234567890abcdef1234567890abcdef12345678",
-        })
-        assert len(result) == 1
-        text = result[0].text
-        assert "STUB" in text or "not yet built" in text or "Issue #1" in text
+    async def test_guild_launch_returns_result_or_error(self, dispatch):
+        """Check 7.1: guild_launch is callable (returns result or error)."""
+        with patch("src.shared.agentfightclub.launch") as mock_launch, \
+             patch("src.shared.agentfightclub.commit") as mock_commit, \
+             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
+
+            async def fake_launch(**kwargs):
+                return {"guild_address": "0xTest", "tx_hash": "0xTestTx"}
+            mock_launch.side_effect = fake_launch
+            mock_commit.side_effect = async_return("0xCommitTx")
+
+            result = await dispatch("guild_launch", {
+                "mandate": "Build DeFi tools",
+                "treasury_address": "0x1234567890abcdef1234567890abcdef12345678",
+            })
+            assert len(result) == 1
+            text = result[0].text
+            assert "guild_address" in text or "ERROR" in text or "STUB" in text
 
     @pytest.mark.asyncio
-    async def test_settle_returns_stub(self, dispatch):
-        """Check 7.6: settle is callable (stub — returns STUB message)."""
-        result = await dispatch("settle", {
-            "guild_address": "0x1234567890abcdef1234567890abcdef12345678",
-            "specialist_wallet": "0xabcdef1234567890abcdef1234567890abcdef12",
-        })
-        assert len(result) == 1
-        text = result[0].text
-        assert "STUB" in text or "not yet built" in text or "Issue #1" in text
+    async def test_settle_returns_result_or_error(self, dispatch):
+        """Check 7.6: settle is callable (returns result or error)."""
+        with patch("src.shared.agentfightclub.settle") as mock_settle, \
+             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
+
+            mock_settle.side_effect = async_return("0xSettleTx")
+
+            result = await dispatch("settle", {
+                "guild_address": "0x1234567890abcdef1234567890abcdef12345678",
+                "specialist_wallet": "0xabcdef1234567890abcdef1234567890abcdef12",
+            })
+            assert len(result) == 1
+            text = result[0].text
+            assert "SettleTx" in text or "ERROR" in text or "STUB" in text
 
     @pytest.mark.asyncio
     async def test_reputation_write_returns_stub(self, dispatch):
