@@ -23,8 +23,8 @@ Fallback: basic signing (private key in env) if CAW TSS node fails mid-build.
 |---|-------|----------|--------|
 | 2.1 | `launch()` — guild deployed on Base mainnet with mandate string | Contract address + Basescan tx hash | `[ ]` |
 | 2.2 | `commit()` — treasury funded (≥ 0.001 ETH) | Tx hash; treasury balance readable | `[ ]` |
-| 2.3 | `propose()` — Specialist membership proposal on-chain | Proposal ID; Basescan `ProposalSubmitted` event | `[ ]` |
-| 2.4 | `vote()` — Human founder approves | Tx hash; proposal state → `Passed` | `[ ]` |
+| 2.3 | `propose()` — Specialist membership proposal on-chain | Proposal ID; Basescan `ProposalSubmitted` event | `[x]` |
+| 2.4 | `vote()` — Human founder approves | Tx hash; proposal state → `Passed` | `[x]` |
 | 2.5 | `settle()` — payment released to Specialist wallet | **Basescan tx #2**; Specialist balance increases | `[ ]` |
 | 2.6 | `guild_context.json` updated after each phase | File readable; all fields present | `[ ]` |
 
@@ -109,7 +109,7 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 |---|------|-------|--------|
 | 8.1 | Gate 0 | ERC-8004 shortlist displayed; CLI halts; resumes only on `y` | `[ ]` |
 | 8.2 | Gate 0.5 | Quote displayed; `Accept quote? [y/N]` halts execution | `[ ]` |
-| 8.3 | Gate 1 | `vote` called only after human approves; rejection tested | `[ ]` |
+| 8.3 | Gate 1 | `vote` called only after human approves; rejection tested | `[x]` |
 | 8.4 | Gate 2 | `settle()` called only after human accepts deliverable | `[ ]` |
 | 8.5 | Dispute stub | Gate 2 rejection → `task_state: DISPUTED` in JSON; no settlement tx | `[ ]` |
 
