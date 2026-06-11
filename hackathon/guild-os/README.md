@@ -68,19 +68,22 @@ Human Founder (Marco)
 
 ### Prerequisites
 
-- Python 3.11+
-- Node.js 20+ (ZeroDev TypeScript bridge for session key policies)
-- [gh CLI](https://cli.github.com/) authenticated to `santteegt/guild-os`
-- Base Sepolia RPC (Alchemy recommended)
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+- Python 3.11+ (uv will manage the Python version automatically)
+- Node.js 20+ (for `moloch-agent` CLI — `npm i -g @raidguild/meta-clawtel`)
+- Base mainnet RPC (Alchemy recommended)
 - Z.AI GLM-5.1 API key
 
 ### Install
 
 ```bash
-git clone https://github.com/santteegt/guild-os
-cd guild-os
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+git clone https://github.com/santteegt/ai-web3-school-cohort-0
+cd hackathon/guild-os
+
+# Install all dependencies (uv creates .venv automatically)
+uv sync
+
+# Copy environment template
 cp .env.example .env
 # Edit .env — fill in all required variables
 ```
@@ -89,40 +92,33 @@ cp .env.example .env
 
 | Variable | Purpose | Required |
 |----------|---------|----------|
-| `ALCHEMY_API_KEY` | Base Sepolia RPC | Yes |
+| `PRIVATE_KEY` | Founder/Orchestrator EOA signing key (hex) | Yes |
+| `SPECIALIST_WALLET_ADDRESS` | Specialist Agent wallet address | Yes |
+| `RPC_URL` | Base mainnet RPC endpoint | Default: `https://mainnet.base.org` |
 | `GLM_API_KEY` | Z.AI GLM-5.1 API | Yes |
-| `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator Agent EOA signing key | Yes |
-| `SPECIALIST_PRIVATE_KEY` | Specialist Agent EOA signing key | Yes |
-| `AGENTFIGHTCLUB_API_KEY` | ClawBank API key | Optional — fallback: DAOhaus SDK |
-| `ZERODEV_PROJECT_ID` | ZeroDev for session key policies | Optional — fallback: basic signer |
-| `ERC8004_CONTRACT` | IdentityRegistry address on Base Sepolia | Default: `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
-| `REPUTATION_CONTRACT` | ReputationRegistry address | Default: `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
+| `ORCHESTRATOR_PRIVATE_KEY` | Alternative key for ERC-8004 `giveFeedback()` | Optional |
+| `ALCHEMY_API_KEY` | Base RPC (if not using default) | Optional |
 
-### Run (Two Terminals)
+### Run
 
 **Terminal 1 — Orchestrator Agent (MCP server):**
 ```bash
-python -m src.orchestrator.server
-# Starts MCP server on localhost:3000
+uv run python -m src.orchestrator.server
+# Starts MCP server on stdio (for Claude Code integration)
 ```
 
 **Terminal 2 — Specialist Agent:**
 ```bash
-python -m src.specialist.agent
+uv run python -m src.specialist.agent
 # Starts A2A HTTP server on localhost:10001
 ```
 
-Human gate prompts appear in Terminal 1 at Gate 0, 0.5, 1, and 2.
-
-### GitHub Project Board Setup (one-time)
+### Tests & Lint
 
 ```bash
-chmod +x scripts/setup-github.sh
-./scripts/setup-github.sh
+uv run pytest tests/ -v    # Run all tests
+uv run ruff check src/     # Lint check
 ```
-
-Creates 14 labels and 6 sprint milestones (Day 8–13) in the GitHub repo.  
-Then go to `https://github.com/santteegt/guild-os/projects/new` and create a board with columns matching the milestones.
 
 ---
 
@@ -151,8 +147,8 @@ Then go to `https://github.com/santteegt/guild-os/projects/new` and create a boa
 | AgentFightClub settlement — Basescan tx #2 | _TBD_ |
 | Specialist ERC-8004 before-state | `hackathon/notes/erc8004_specialist_before.json` |
 | Specialist ERC-8004 after-state | `hackathon/notes/erc8004_specialist_after.json` |
-| A2A message trace (all 7 events) | `hackathon/notes/a2a_trace_*.json` |
-| GLM-5.1 execution trace | `hackathon/notes/glm_trace_*.json` |
+| A2A message trace (all 7 events) | `logs/a2a_trace_*.json` |
+| GLM-5.1 execution trace | `logs/glm_trace_*.json` |
 | Demo video (3–5 min) | _TBD_ |
 
 → Full evidence checklist: [`../../submissions/tx_hashes.md`](../../submissions/tx_hashes.md)

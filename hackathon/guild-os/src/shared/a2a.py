@@ -7,7 +7,7 @@ Message types used in GuildOS:
   task/delivered — Specialist → Orchestrator (Step 9)
   task/accepted  — Orchestrator → Specialist (Step 11)
 
-All messages are logged to hackathon/notes/a2a_trace_{date}.json.
+All messages are logged to logs/a2a_trace_{date}.json.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from a2a.types import a2a_pb2
 
 logger = logging.getLogger(__name__)
 
-TRACE_DIR = Path(__file__).parent.parent.parent.parent.parent / "hackathon" / "notes"
+TRACE_DIR = Path(__file__).parent.parent.parent.parent / "logs"
 
 
 def _log_message(direction: str, msg_type: str, payload: dict) -> None:
