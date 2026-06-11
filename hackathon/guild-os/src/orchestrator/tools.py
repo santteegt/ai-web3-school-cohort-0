@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 
 from src.shared import a2a as a2a_client
@@ -175,6 +176,75 @@ async def settle(guild_address: str, specialist_wallet: str) -> str:
     return tx_hash
 
 
+async def membership_propose(guild_address: str, specialist_erc8004_id: int) -> dict:
+    """Step 5: Submit Specialist membership proposal via AgentFightClub.
+
+    Creates an on-chain proposal to grant the Specialist voting shares.
+    Returns proposal ID and updates guild_context.
+
+    Args:
+        guild_address: Deployed guild contract address
+        specialist_erc8004_id: ERC-8004 token ID of the Specialist
+
+    Returns:
+        dict with proposal_id and specialist_wallet.
+    """
+    proposal_id = await afc.propose(guild_address, specialist_erc8004_id)
+
+    # Update guild context
+    try:
+        guild_context.update(proposal_id=proposal_id)
+    except Exception:
+        logger.warning("Could not update guild context with proposal_id")
+
+    specialist_wallet = os.getenv("SPECIALIST_WALLET_ADDRESS", "unknown")
+
+    return {
+        "proposal_id": proposal_id,
+        "specialist_wallet": specialist_wallet,
+        "guild_address": guild_address,
+        "status": "proposed",
+    }
+
+
+async def membership_vote(guild_address: str, proposal_id: str, approve: bool = True) -> dict:
+    """Step 7: Cast vote on Specialist membership proposal.
+
+    Should only be called AFTER Gate 1 (human approval via CLI).
+    Updates guild_context with member on success.
+
+    Args:
+        guild_address: Deployed guild contract address
+        proposal_id: Proposal ID from membership_propose()
+        approve: True to approve, False to reject
+
+    Returns:
+        dict with vote_tx and updated member_list.
+    """
+    tx_hash = await afc.vote(guild_address, proposal_id, approve=approve)
+
+    result = {
+        "vote_tx": tx_hash,
+        "proposal_id": proposal_id,
+        "approved": approve,
+    }
+
+    # On approval, add Specialist to member list
+    if approve:
+        specialist_wallet = os.getenv("SPECIALIST_WALLET_ADDRESS", "")
+        try:
+            ctx = guild_context.load()
+            member_list = ctx.get("member_list", [])
+            if specialist_wallet and specialist_wallet not in member_list:
+                member_list.append(specialist_wallet)
+                guild_context.update(member_list=member_list)
+            result["member_list"] = member_list
+        except Exception:
+            logger.warning("Could not update guild context member_list")
+
+    return result
+
+
 async def reputation_write(delivery_record: dict) -> str:
     """Step 13: Call ERC-8004 giveFeedback() with 6-field delivery record.
 
@@ -188,7 +258,6 @@ async def reputation_write(delivery_record: dict) -> str:
         DeliveryRecorded event tx hash.
     """
     # Use guild contract address or orchestrator EOA as caller (F2 constraint)
-    import os
     caller_key = os.getenv("ORCHESTRATOR_PRIVATE_KEY", "")
 
     tx_hash = erc8004.give_feedback(
