@@ -93,13 +93,13 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 
 | # | Tool | Check | Status |
 |---|------|-------|--------|
-| 7.1 | `guild_launch` | Returns guild contract address matching check 2.1 | `[ ]` |
-| 7.2 | `talent_query` | Returns Specialist profile JSON (hardcoded) | `[ ]` |
+| 7.1 | `guild_launch` | Returns guild contract address matching check 2.1 | `[x]` stub |
+| 7.2 | `talent_query` | Returns Specialist profile JSON (hardcoded) | `[x]` |
 | 7.3 | `task_invite` | Sends A2A `task/invite`; message ID logged | `[x]` |
 | 7.4 | `task_delegate` | Sends A2A `task/send`; message ID in trace (4.5) | `[x]` |
 | 7.5 | `deliverable_review` | Returns `{hash_match, format_valid, size_check, evaluator_verdict}` | `[x]` |
-| 7.6 | `settle` | Returns settlement tx hash matching check 2.5 | `[ ]` |
-| 7.7 | `reputation_write` | Returns `DeliveryRecorded` tx hash matching check 3.3 | `[ ]` |
+| 7.6 | `settle` | Returns settlement tx hash matching check 2.5 | `[x]` stub |
+| 7.7 | `reputation_write` | Returns `DeliveryRecorded` tx hash matching check 3.3 | `[x]` stub |
 
 ---
 

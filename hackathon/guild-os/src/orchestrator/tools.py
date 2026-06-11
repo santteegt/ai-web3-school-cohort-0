@@ -9,10 +9,27 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from pathlib import Path
 
 from src.shared import a2a as a2a_client
+from src.shared import agentfightclub as afc
+from src.shared import erc8004
 from src.shared import guild_context
+
+logger = logging.getLogger(__name__)
+
+ASSETS_DIR = Path(__file__).parent.parent.parent.parent / "assets"
+
+# Hardcoded Specialist profile for MVP talent_query (see CLAUDE.md: "hardcoded Specialist profile is MVP")
+_DEFAULT_SPECIALIST_PROFILE = {
+    "name": "Specialist Agent",
+    "agent_id": "erc8004:1",
+    "capabilities": ["code-generation", "audit", "testing"],
+    "a2a_endpoint": "http://localhost:10001",
+    "delivery_count": 0,
+    "rating": None,
+}
 
 
 async def guild_launch(mandate: str, treasury_address: str) -> dict:
@@ -21,34 +38,48 @@ async def guild_launch(mandate: str, treasury_address: str) -> dict:
     Returns:
         dict with guild_address and tx hashes for launch + commit.
     """
-    # TODO Issue #1: call AgentFightClub.launch() then commit()
-    raise NotImplementedError("guild_launch — implemented in Issue #1")
+    result = await afc.launch(mandate=mandate, treasury_address=treasury_address)
+    guild_address = result["guild_address"]
+    tx_hash = result["tx_hash"]
+
+    # Fund treasury with 0.001 ETH
+    commit_tx = await afc.commit(guild_address, amount_wei=1_000_000_000_000_000)
+
+    # Update guild context
+    guild_context.save({
+        "guild_address": guild_address,
+        "mandate": mandate,
+        "treasury_wei": "1000000000000000",
+        "member_list": [],
+        "task_state": "ACTIVE",
+    })
+
+    return {
+        "guild_address": guild_address,
+        "launch_tx": tx_hash,
+        "commit_tx": commit_tx,
+    }
 
 
 async def talent_query(task_type: str) -> list[dict]:
     """Step 3: Return ERC-8004 shortlist of candidate agents.
 
-    MVP: returns hardcoded Specialist profile from hackathon/notes/erc8004_specialist_before.json.
+    MVP: returns hardcoded Specialist profile from assets/erc8004_specialist_profile.json.
     Post-hackathon: live registry query + LLM ranking.
     """
-    profile_path = (
-        Path(__file__).parent.parent.parent.parent.parent
-        / "hackathon"
-        / "notes"
-        / "erc8004_specialist_before.json"
-    )
-    if profile_path.exists():
-        profile = json.loads(profile_path.read_text())
-    else:
-        # Hardcoded fallback for MVP
-        profile = {
-            "name": "GuildOS Specialist Agent",
-            "agent_id": 1,
-            "capabilities": ["code-generation", "security-analysis"],
-            "delivery_count": 0,
-            "acceptance_rate": 1.0,
-        }
-    return [profile]
+    # Try loading cached profile first
+    cached_path = ASSETS_DIR / "erc8004_specialist_profile.json"
+    if cached_path.exists():
+        try:
+            data = json.loads(cached_path.read_text())
+            if isinstance(data, list):
+                return data
+            return [data]
+        except (json.JSONDecodeError, OSError):
+            logger.warning("Failed to load cached ERC-8004 profile, using default")
+
+    # Fallback to hardcoded profile
+    return [_DEFAULT_SPECIALIST_PROFILE]
 
 
 async def task_invite(specialist_endpoint: str, task_spec: dict) -> str:
@@ -68,7 +99,13 @@ async def task_delegate(specialist_endpoint: str, full_task: dict) -> str:
         A2A message ID.
     """
     message_id = await a2a_client.send_task(specialist_endpoint, full_task)
-    guild_context.update(a2a_task_id=message_id)
+
+    # Update guild context with A2A task ID
+    try:
+        guild_context.update(a2a_task_id=message_id)
+    except Exception:
+        logger.warning("Could not update guild context with a2a_task_id")
+
     return message_id
 
 
@@ -78,20 +115,35 @@ async def deliverable_review(deliverable_reference: str, deliverable_hash: str) 
     Returns:
         dict with hash_match, format_valid, size_check, evaluator_verdict.
     """
-    ref_path = Path(deliverable_reference)
+    path = Path(deliverable_reference)
 
-    # Check if reference is a readable file
-    size_check = ref_path.exists() and ref_path.stat().st_size > 0 if ref_path.exists() else False
+    # Check file exists and read content
+    if not path.exists():
+        return {
+            "hash_match": False,
+            "format_valid": False,
+            "size_check": False,
+            "evaluator_verdict": "FAIL",
+            "error": f"File not found: {deliverable_reference}",
+        }
 
-    # Format validation — expect JSON or known extension
-    format_valid = ref_path.suffix in (".json", ".py", ".md", ".sol", ".txt", "") if ref_path.suffix else True
+    content = path.read_bytes()
+    size = len(content)
 
-    # Hash cross-check if file exists
-    hash_match = False
-    if ref_path.exists():
-        content = ref_path.read_bytes()
-        computed = "sha256:" + hashlib.sha256(content).hexdigest()
-        hash_match = computed == deliverable_hash
+    # Compute SHA-256 hash
+    actual_hash = "sha256:" + hashlib.sha256(content).hexdigest()
+    hash_match = actual_hash == deliverable_hash
+
+    # Format check: valid JSON or non-empty text
+    format_valid = False
+    try:
+        json.loads(content.decode("utf-8"))
+        format_valid = True
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        format_valid = size > 0  # non-empty file is valid enough
+
+    # Size check: file must be non-zero
+    size_check = size > 0
 
     verdict = "PASS" if (hash_match and format_valid and size_check) else "FAIL"
 
@@ -109,8 +161,18 @@ async def settle(guild_address: str, specialist_wallet: str) -> str:
     Returns:
         Settlement tx hash (Basescan tx #2).
     """
-    # TODO Issue #1: call AgentFightClub.settle()
-    raise NotImplementedError("settle — implemented in Issue #1")
+    tx_hash = await afc.settle(guild_address, specialist_wallet)
+
+    # Update guild context
+    try:
+        guild_context.update(
+            task_state="SETTLED",
+            settlement_tx=tx_hash,
+        )
+    except Exception:
+        logger.warning("Could not update guild context with settlement")
+
+    return tx_hash
 
 
 async def reputation_write(delivery_record: dict) -> str:
@@ -125,5 +187,24 @@ async def reputation_write(delivery_record: dict) -> str:
     Returns:
         DeliveryRecorded event tx hash.
     """
-    # TODO Issue #1: call ERC8004.give_feedback() with correct caller
-    raise NotImplementedError("reputation_write — implemented in Issue #1")
+    # Use guild contract address or orchestrator EOA as caller (F2 constraint)
+    import os
+    caller_key = os.getenv("ORCHESTRATOR_PRIVATE_KEY", "")
+
+    tx_hash = erc8004.give_feedback(
+        caller_private_key=caller_key,
+        task_type=delivery_record["task_type"],
+        deliverable_hash=delivery_record["deliverable_hash"],
+        acceptance_timestamp=delivery_record.get("acceptance_timestamp", 0),
+        payment_wei=delivery_record.get("payment_wei", 0),
+        guild_address=delivery_record.get("guild_address", ""),
+        a2a_task_id=delivery_record.get("a2a_task_id", ""),
+    )
+
+    # Update guild context
+    try:
+        guild_context.update(reputation_tx=tx_hash)
+    except Exception:
+        logger.warning("Could not update guild context with reputation tx")
+
+    return tx_hash
