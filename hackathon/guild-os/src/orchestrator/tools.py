@@ -7,6 +7,13 @@ A2A endpoints, or the ERC-8004 registry.
 
 from __future__ import annotations
 
+import hashlib
+import json
+from pathlib import Path
+
+from src.shared import a2a as a2a_client
+from src.shared import guild_context
+
 
 async def guild_launch(mandate: str, treasury_address: str) -> dict:
     """Step 1: Deploy guild contract and fund treasury via AgentFightClub.
@@ -14,8 +21,8 @@ async def guild_launch(mandate: str, treasury_address: str) -> dict:
     Returns:
         dict with guild_address and tx hashes for launch + commit.
     """
-    # TODO Day 9: call AgentFightClub.launch() then commit()
-    raise NotImplementedError
+    # TODO Issue #1: call AgentFightClub.launch() then commit()
+    raise NotImplementedError("guild_launch — implemented in Issue #1")
 
 
 async def talent_query(task_type: str) -> list[dict]:
@@ -24,8 +31,24 @@ async def talent_query(task_type: str) -> list[dict]:
     MVP: returns hardcoded Specialist profile from hackathon/notes/erc8004_specialist_before.json.
     Post-hackathon: live registry query + LLM ranking.
     """
-    # TODO Day 9: load cached profile JSON
-    raise NotImplementedError
+    profile_path = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "hackathon"
+        / "notes"
+        / "erc8004_specialist_before.json"
+    )
+    if profile_path.exists():
+        profile = json.loads(profile_path.read_text())
+    else:
+        # Hardcoded fallback for MVP
+        profile = {
+            "name": "GuildOS Specialist Agent",
+            "agent_id": 1,
+            "capabilities": ["code-generation", "security-analysis"],
+            "delivery_count": 0,
+            "acceptance_rate": 1.0,
+        }
+    return [profile]
 
 
 async def task_invite(specialist_endpoint: str, task_spec: dict) -> str:
@@ -34,8 +57,8 @@ async def task_invite(specialist_endpoint: str, task_spec: dict) -> str:
     Returns:
         A2A message ID of the invite.
     """
-    # TODO Day 10: call A2AClient.send_invite()
-    raise NotImplementedError
+    message_id = await a2a_client.send_invite(specialist_endpoint, task_spec)
+    return message_id
 
 
 async def task_delegate(specialist_endpoint: str, full_task: dict) -> str:
@@ -44,8 +67,9 @@ async def task_delegate(specialist_endpoint: str, full_task: dict) -> str:
     Returns:
         A2A message ID.
     """
-    # TODO Day 10: call A2AClient.send_task()
-    raise NotImplementedError
+    message_id = await a2a_client.send_task(specialist_endpoint, full_task)
+    guild_context.update(a2a_task_id=message_id)
+    return message_id
 
 
 async def deliverable_review(deliverable_reference: str, deliverable_hash: str) -> dict:
@@ -54,8 +78,29 @@ async def deliverable_review(deliverable_reference: str, deliverable_hash: str) 
     Returns:
         dict with hash_match, format_valid, size_check, evaluator_verdict.
     """
-    # TODO Day 10: implement hash verification + format check
-    raise NotImplementedError
+    ref_path = Path(deliverable_reference)
+
+    # Check if reference is a readable file
+    size_check = ref_path.exists() and ref_path.stat().st_size > 0 if ref_path.exists() else False
+
+    # Format validation — expect JSON or known extension
+    format_valid = ref_path.suffix in (".json", ".py", ".md", ".sol", ".txt", "") if ref_path.suffix else True
+
+    # Hash cross-check if file exists
+    hash_match = False
+    if ref_path.exists():
+        content = ref_path.read_bytes()
+        computed = "sha256:" + hashlib.sha256(content).hexdigest()
+        hash_match = computed == deliverable_hash
+
+    verdict = "PASS" if (hash_match and format_valid and size_check) else "FAIL"
+
+    return {
+        "hash_match": hash_match,
+        "format_valid": format_valid,
+        "size_check": size_check,
+        "evaluator_verdict": verdict,
+    }
 
 
 async def settle(guild_address: str, specialist_wallet: str) -> str:
@@ -64,8 +109,8 @@ async def settle(guild_address: str, specialist_wallet: str) -> str:
     Returns:
         Settlement tx hash (Basescan tx #2).
     """
-    # TODO Day 11: call AgentFightClub.settle()
-    raise NotImplementedError
+    # TODO Issue #1: call AgentFightClub.settle()
+    raise NotImplementedError("settle — implemented in Issue #1")
 
 
 async def reputation_write(delivery_record: dict) -> str:
@@ -80,5 +125,5 @@ async def reputation_write(delivery_record: dict) -> str:
     Returns:
         DeliveryRecorded event tx hash.
     """
-    # TODO Day 11: call ERC8004.give_feedback() with correct caller
-    raise NotImplementedError
+    # TODO Issue #1: call ERC8004.give_feedback() with correct caller
+    raise NotImplementedError("reputation_write — implemented in Issue #1")

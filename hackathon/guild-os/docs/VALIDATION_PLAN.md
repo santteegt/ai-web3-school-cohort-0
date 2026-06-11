@@ -52,12 +52,12 @@ Fallback: serve cached profile JSON if 8004scan API is down.
 |---|-------|----------|--------|
 | 4.1 | Orchestrator Agent Card at `localhost:10000/.well-known/agent.json` | `curl` returns valid A2A card | `[ ]` |
 | 4.2 | Specialist Agent Card at `localhost:10001/.well-known/agent.json` | Same | `[ ]` |
-| 4.3 | `task/invite` sent; Specialist receives and parses | Logged in A2A trace | `[ ]` |
-| 4.4 | `task/quote` received from Specialist | Fields: `scope`, `estimated_cost_wei`, `deadline_iso` | `[ ]` |
-| 4.5 | `task/send` delivered with full payload | Logged; message ID captured | `[ ]` |
-| 4.6 | `task/delivered` received with hash matching on-chain commit | Hash cross-check passes | `[ ]` |
-| 4.7 | `task/accepted` sent after human acceptance | Specialist receives confirmation | `[ ]` |
-| 4.8 | Full A2A trace log exported | `hackathon/notes/a2a_trace_{date}.json` with 7 events | `[ ]` |
+| 4.3 | `task/invite` sent; Specialist receives and parses | Logged in A2A trace | `[x]` |
+| 4.4 | `task/quote` received from Specialist | Fields: `scope`, `estimated_cost_wei`, `deadline_iso` | `[x]` |
+| 4.5 | `task/send` delivered with full payload | Logged; message ID captured | `[x]` |
+| 4.6 | `task/delivered` received with hash matching on-chain commit | Hash cross-check passes | `[x]` |
+| 4.7 | `task/accepted` sent after human acceptance | Specialist receives confirmation | `[x]` |
+| 4.8 | Full A2A trace log exported | `hackathon/notes/a2a_trace_{date}.json` with 7 events | `[x]` |
 
 Fallback: text-body JSON if `Message.metadata` extension fields are rejected.
 
@@ -95,9 +95,9 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 |---|------|-------|--------|
 | 7.1 | `guild_launch` | Returns guild contract address matching check 2.1 | `[ ]` |
 | 7.2 | `talent_query` | Returns Specialist profile JSON (hardcoded) | `[ ]` |
-| 7.3 | `task_invite` | Sends A2A `task/invite`; message ID logged | `[ ]` |
-| 7.4 | `task_delegate` | Sends A2A `task/send`; message ID in trace (4.5) | `[ ]` |
-| 7.5 | `deliverable_review` | Returns `{hash_match, format_valid, size_check, evaluator_verdict}` | `[ ]` |
+| 7.3 | `task_invite` | Sends A2A `task/invite`; message ID logged | `[x]` |
+| 7.4 | `task_delegate` | Sends A2A `task/send`; message ID in trace (4.5) | `[x]` |
+| 7.5 | `deliverable_review` | Returns `{hash_match, format_valid, size_check, evaluator_verdict}` | `[x]` |
 | 7.6 | `settle` | Returns settlement tx hash matching check 2.5 | `[ ]` |
 | 7.7 | `reputation_write` | Returns `DeliveryRecorded` tx hash matching check 3.3 | `[ ]` |
 

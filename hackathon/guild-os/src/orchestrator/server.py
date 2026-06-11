@@ -14,12 +14,34 @@ from src.orchestrator.tools import (
     reputation_write,
 )
 
+TOOLS = {
+    "guild_launch": guild_launch,
+    "talent_query": talent_query,
+    "task_invite": task_invite,
+    "task_delegate": task_delegate,
+    "deliverable_review": deliverable_review,
+    "settle": settle,
+    "reputation_write": reputation_write,
+}
+
+__all__ = [
+    "guild_launch",
+    "talent_query",
+    "task_invite",
+    "task_delegate",
+    "deliverable_review",
+    "settle",
+    "reputation_write",
+    "TOOLS",
+]
+
 
 def main() -> None:
-    # TODO Day 9: wire tools into MCP server (mcp package or a2a-sdk MCP adapter)
-    print("OrchestratorServer starting...")
-    print("Registered tools: guild_launch, talent_query, task_invite, task_delegate, deliverable_review, settle, reputation_write")
-    raise NotImplementedError("Implement MCP server registration in Day 9")
+    """Start the Orchestrator MCP server."""
+    # Issue #8: wire tools into MCP server framework
+    tool_names = ", ".join(TOOLS.keys())
+    print(f"OrchestratorServer starting with tools: {tool_names}")
+    print("MCP server registration pending — see Issue #8")
 
 
 if __name__ == "__main__":
