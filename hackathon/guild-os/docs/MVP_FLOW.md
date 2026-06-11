@@ -34,13 +34,13 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 
 ### Step 1 — Human Founds Guild
 
-- Marco calls AgentFightClub `launch(mandate_string, treasury_address)` — guild contract deployed on Base Sepolia with mandate string
+- Marco calls AgentFightClub `launch(mandate_string, treasury_address)` — guild contract deployed on Base mainnet with mandate string
 - Marco calls AgentFightClub `commit(guild_address, 0.001 ETH)` — treasury funded; Basescan tx recorded
 - Guild state written to `guild_context.json`: `{ guild_address, mandate, treasury_wei, member_list: [], task_state: "ACTIVE" }`
 
 ### Step 2 — Orchestrator Registers on ERC-8004
 
-- Orchestrator calls `ERC-8004.register(agentURI)` — ERC-721 agentId minted on Base Sepolia
+- Orchestrator calls `ERC-8004.register(agentURI)` — ERC-721 agentId minted on Base mainnet
 - Orchestrator publishes A2A Agent Card at `localhost:10000/.well-known/agent.json`
 - Guild is now discoverable via the Orchestrator's A2A endpoint
 
@@ -102,7 +102,7 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 ### Step 8 — Specialist Hashes Deliverable; Commits On-Chain
 
 - Specialist computes SHA-256 of deliverable file
-- Commits hash to guild contract via `eth_sendTransaction` on Base Sepolia
+- Commits hash to guild contract via `eth_sendTransaction` on Base mainnet
 - **Basescan tx #1** — deliverable hash commit link saved to `../../submissions/tx_hashes.md`
 
 ### Step 9 — Specialist Sends task/delivered via A2A
@@ -146,7 +146,7 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
   4. `payment_wei` — amount released in `settle()`
   5. `guild_address` — cross-guild traceability
   6. `a2a_task_id` — links to A2A message log
-- Emits `DeliveryRecorded` event on Base Sepolia
+- Emits `DeliveryRecorded` event on Base mainnet
 - **Caller constraint:** Guild contract address or Marco's EOA — NOT the Specialist Agent's wallet
 
 ### Step 14 — Guild Context Updated
@@ -171,9 +171,9 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 | ERC-8004 profile reads (before/after) | **Real** | 8004scan API; cached JSON fallback |
 | ERC-8004 `giveFeedback()` write | **Real** | Via guild contract or Marco's EOA |
 | A2A task flow (all 7 message events) | **Real** | A2A SDK v1.0.0 |
-| GLM-5.1 task execution | **Real** | Locked task type from Day 8 |
+| GLM-5.1 task execution (via Hermes) | **Real** | Locked task type Day 9; Hermes agent deployed as Specialist |
 | On-chain deliverable hash commit | **Real** | Always real — one `eth_sendTransaction` |
-| ZeroDev session key policies | **Real if bridge < 3h Day 2; else design exhibit** | |
+| Cobo CAW spending ceiling (Pact) | **Real** — TSS local node; x402 pipeline confirmed working Day 8 | ZeroDev session key policy shown as design exhibit only |
 | ERC-8004 talent query (capability matching) | **Mocked** | Hardcoded Specialist profile |
 | Guild context store | **Mocked** | JSON file per guild session |
 | Multiple concurrent guild members | **Mocked** | One agent pair for demo |

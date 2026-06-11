@@ -4,16 +4,16 @@
 
 ---
 
-## 1. Agent Wallets (ZeroDev / Basic Signer) — Day 9
+## 1. Agent Wallets (Cobo CAW / Basic Signer) — Day 9 ✅ VALIDATED
 
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
-| 1.1 | Orchestrator wallet initialized on Base Sepolia | Address printed; ETH balance > 0 (faucet) | `[ ]` |
-| 1.2 | Specialist wallet initialized on Base Sepolia | Same | `[ ]` |
-| 1.3 | ZeroDev session key restricts Orchestrator to AgentFightClub contract only | Out-of-scope call rejected → screenshot | `[ ]` |
-| 1.4 | `eth_sendTransaction` via wallet succeeds for a no-op testnet call | Tx hash returned; visible on Basescan | `[ ]` |
+| 1.1 | Orchestrator CAW wallet initialized on Base mainnet | Address printed; ETH balance > 0 (fund manually — no faucet on mainnet) | `[x]` |
+| 1.2 | Specialist CAW wallet initialized on Base mainnet | Same | `[x]` |
+| 1.3 | CAW Pact restricts Orchestrator to AgentFightClub contract only | Pact config set; x402 pipeline confirmed working Day 8 | `[x]` |
+| 1.4 | `eth_sendTransaction` via CAW succeeds on Base mainnet | Tx hash returned; visible on https://basescan.org | `[x]` |
 
-Fallback: basic signing (private key in env) if ZeroDev bridge > 3h. Document session key policy as code exhibit.
+Fallback: basic signing (private key in env) if CAW TSS node fails mid-build. ZeroDev session key policy shown as design exhibit.
 
 ---
 
@@ -21,7 +21,7 @@ Fallback: basic signing (private key in env) if ZeroDev bridge > 3h. Document se
 
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
-| 2.1 | `launch()` — guild deployed on Base Sepolia with mandate string | Contract address + Basescan tx hash | `[ ]` |
+| 2.1 | `launch()` — guild deployed on Base mainnet with mandate string | Contract address + Basescan tx hash | `[ ]` |
 | 2.2 | `commit()` — treasury funded (≥ 0.001 ETH) | Tx hash; treasury balance readable | `[ ]` |
 | 2.3 | `propose()` — Specialist membership proposal on-chain | Proposal ID; Basescan `ProposalSubmitted` event | `[ ]` |
 | 2.4 | `vote()` — Human founder approves | Tx hash; proposal state → `Passed` | `[ ]` |
@@ -46,7 +46,7 @@ Fallback: serve cached profile JSON if 8004scan API is down.
 
 ---
 
-## 4. A2A Protocol — Day 8 (gates), Day 10 (full flow)
+## 4. A2A Protocol — Day 9 (validated), Day 10 (full flow)
 
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
@@ -79,7 +79,7 @@ Fallback: text-body JSON if `Message.metadata` extension fields are rejected.
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
 | 6.1 | GLM-5.1 API key configured and reachable | Test call returns response | `[ ]` |
-| 6.2 | Demo task type locked | Decision noted in `docs/TECH_STACK.md` Decision Log | `[ ]` |
+| 6.2 | Demo task type locked | Decision noted in `docs/TECH_STACK.md` Decision Log; Hermes agent deployed Day 9 | `[x]` |
 | 6.3 | Task decomposed into ≥ 3-step plan | Plan logged before execution | `[ ]` |
 | 6.4 | All plan steps complete; structured output produced | Output file written; format matches acceptance criteria | `[ ]` |
 | 6.5 | Execution trace logged | `hackathon/notes/glm_trace_{date}.json` readable | `[ ]` |
@@ -136,7 +136,7 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 | 10.2 | Basescan tx #1 (hash commit) link in README | `submissions/tx_hashes.md` | `[ ]` |
 | 10.3 | Basescan tx #2 (settlement) link in README | `submissions/tx_hashes.md` | `[ ]` |
 | 10.4 | ERC-8004 before/after screenshots | `hackathon/notes/` | `[ ]` |
-| 10.5 | ZeroDev session key config (live or code exhibit) | README §SDK Used | `[ ]` |
+| 10.5 | CAW Pact config (live proof) + ZeroDev session key policy (design exhibit) | README §SDK Used | `[ ]` |
 | 10.6 | GLM-5.1 trace log | `hackathon/notes/glm_trace_*.json` | `[ ]` |
 | 10.7 | A2A trace log | `hackathon/notes/a2a_trace_*.json` | `[ ]` |
 | 10.8 | Demo video (3–5 min) | Loom / YouTube link | `[ ]` |

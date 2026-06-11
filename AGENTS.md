@@ -494,4 +494,46 @@ Track submission readiness in: `hackathon/SUBMISSION_CHECKLIST.md` (to be create
 
 ---
 
+## 17. GuildOS Project Sub-Repository
+
+The active hackathon project lives at **`hackathon/guild-os/`**. It is a self-contained Python multi-service application with its own agent instructions, component map, and sprint gates.
+
+### Required Context Load
+
+Any agent starting work inside `hackathon/guild-os/` — or on any task that touches its source files — **must read both files before writing a single line of code:**
+
+| File | What it contains |
+|------|-----------------|
+| `hackathon/guild-os/README.md` | Problem statement, minimum demo loop, architecture diagram, setup instructions, sprint plan, SDK/API table, submission evidence tracker |
+| `hackathon/guild-os/CLAUDE.md` | Component map (canonical class and file names), build rules, per-sprint P0 gates, what not to do, and "when unsure" decision shortcuts |
+
+These two files together define the **complete working contract** for the project. CLAUDE.md in particular contains the Component Map — use it to look up correct class names, file paths, and fallback decisions before inventing anything.
+
+### Quick Reference
+
+| Item | Value |
+|------|-------|
+| Project root | `hackathon/guild-os/` |
+| Network | Base mainnet (chain_id 8453) — AFC has no Base Sepolia support |
+| Wallet | Cobo CAW (TSS local node) |
+| Submission deadline | 2026-06-13 12:00 UTC+8 (04:00 UTC) |
+| Sprint log | `hackathon/notes/WEEK4_SPRINT_PLAN.md` |
+| Risk/decision log | `hackathon/notes/RISK_ASSUMPTION_MEMO.md` |
+| Evidence tracker | `submissions/tx_hashes.md` |
+
+### Agent Rules for This Sub-Repo
+
+| Rule | Behavior |
+|------|----------|
+| Read README + CLAUDE.md first | Always, no exceptions — even for small fixes |
+| Component naming | Use names from CLAUDE.md Component Map exactly; do not invent new class or file names |
+| Scope | Only build what is in the 15-step MVP flow in `docs/MVP_FLOW.md` |
+| On-chain network | Base mainnet only — never Ethereum mainnet, never Base Sepolia |
+| Secrets | No private keys, API keys, or seed phrases in source files — `.env` only |
+| Human gates | Every Gate (0, 0.5, 1, 2) must halt and wait for explicit `y`; use `src/cli/gates.py` |
+| After coding | Run `pytest tests/` + `ruff check src/` before considering a task done |
+| Tx hashes | Log every on-chain tx hash to `../../submissions/tx_hashes.md` immediately |
+
+---
+
 *Last updated: 2026-06-06 | Agent: Sensei (Claude via Cowork) | v1.7 — added Section 16: Casual Hackathon platform management*

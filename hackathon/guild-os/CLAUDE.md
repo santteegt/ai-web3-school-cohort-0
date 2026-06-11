@@ -1,6 +1,6 @@
 # CLAUDE.md — GuildOS
 
-You are building **GuildOS**, a Python multi-service application that coordinates AI agents through the A2A protocol, on-chain treasury (AgentFightClub / Moloch v3), and verifiable reputation (ERC-8004) on Base Sepolia testnet. This is a **7-day hackathon build** ending June 13. Scope is locked — every file in `docs/` defines the boundaries.
+You are building **GuildOS**, a Python multi-service application that coordinates AI agents through the A2A protocol, on-chain treasury (AgentFightClub / Moloch v3), and verifiable reputation (ERC-8004) on **Base mainnet (chain_id 8453)**. This is a **7-day hackathon build** ending June 13. Scope is locked — every file in `docs/` defines the boundaries.
 
 ## Files — Read Before Coding
 
@@ -38,7 +38,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 - All A2A messages must be logged to `hackathon/notes/a2a_trace_{date}.json`
 - All GLM-5.1 calls must log plan + tool calls + output to `hackathon/notes/glm_trace_{date}.json`
 - Every human gate (0, 0.5, 1, 2) must halt execution and wait for explicit `y` — never skip or auto-proceed
-- All on-chain calls must log the tx hash and print the Base Sepolia Basescan URL
+- All on-chain calls must log the tx hash and print the Base mainnet Basescan URL (https://basescan.org/tx/...)
 - Guild state transitions must update `guild_context.json` immediately after the on-chain event
 
 ## After Building
@@ -50,15 +50,15 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 
 ## When Unsure
 
-- **Which library for Base Sepolia calls?** → `web3.py` with Alchemy RPC; see `docs/TECH_STACK.md`
-- **AgentFightClub API or DAOhaus SDK?** → Check `docs/RISKS.md` § Decision Log; use what was validated Day 8
+- **Which library for Base mainnet calls?** → `web3.py` with Alchemy RPC; see `docs/TECH_STACK.md`
+- **AgentFightClub API or DAOhaus SDK?** → Check `docs/RISKS.md` § Decision Log; ClawBank API confirmed working Day 9
 - **Which wallet calls `giveFeedback()`?** → Guild contract address or Marco's EOA — NOT the Specialist wallet (see `docs/RISKS.md §F2`)
 - **New A2A message type needed?** → Check `src/shared/a2a.py` for the established pattern; don't invent new types without updating `docs/MVP_FLOW.md`
 - **Is this feature in scope?** → Check `docs/MVP_FLOW.md`; if not in the 15 steps, it's out of scope
 
 ## Don't
 
-- Run any transaction on Ethereum mainnet — Base Sepolia only
+- Run any transaction on Ethereum mainnet — Base mainnet (chain_id 8453) only; never Base Sepolia
 - Hardcode private keys, API keys, or seed phrases in source files
 - Skip human gate prompts — every gate must halt and wait; use `src/cli/gates.py`
 - Add Python packages without updating `requirements.txt`
@@ -74,7 +74,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 |-----|------|-------|---------|
 | 8 | Jun 8 | Validation | `launch` live · A2A test green · GLM-5.1 task locked |
 | 9 | Jun 9 | Wallets + Identity | Both wallets on-chain · ERC-8004 agentIds · Guild funded |
-| 10 | Jun 10 | A2A + Execution | Hash on Base Sepolia · Basescan tx #1 saved |
+| 10 | Jun 10 | A2A + Execution | Hash on Base mainnet · Basescan tx #1 saved |
 | 11 | Jun 11 | Settlement + Reputation + E2E | `settle()` tx · ERC-8004 delta · Smoke test passes |
 | 12 | Jun 12 | Demo Prep | README, demo script, all artifacts — repo clean |
 | 13 | Jun 13 | Submission | Submitted before 12:00 UTC+8 (04:00 UTC) |

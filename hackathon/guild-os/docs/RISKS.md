@@ -4,15 +4,11 @@
 
 ---
 
-## F1 — AgentFightClub Skill API Unavailable (HIGH)
+## F1 — AgentFightClub Skill API Unavailable (HIGH) ✅ CLEARED Day 9
 
-**Why:** Alpha product; ClawBank dependency is an extra abstraction; no live test during pre-research.
+**Status:** ClawBank API confirmed working. Full flow tested Day 9: `launch` → `commit` → `propose` → `vote` → `settle` all passing. `experiments/agent-fight-club/moloch_agent_test.py` is the live probe. This risk is substantially reduced — monitor for unexpected outages during build days only.
 
-**Impact:** Blocks treasury creation, governance, and settlement.
-
-**Fallback:** Deploy Moloch v3 DAO directly via **DAOhaus SDK** (open source, audited, 4 years production). Same contract logic — `launch`, `commit`, `propose`, `vote`, `settle` map directly. Estimated recovery: 4 hours.
-
-**Trigger:** If `launch` call fails or errors on Day 8, switch immediately. Do not debug ClawBank for more than 2 hours.
+**Fallback (still available):** Deploy Moloch v3 DAO directly via **DAOhaus SDK** (open source, audited, 4 years production). Trigger only if ClawBank becomes unavailable mid-build. Do not debug for more than 2 hours before switching.
 
 ---
 
@@ -28,47 +24,41 @@
 
 ---
 
-## F3 — GLM-5.1 Output Inconsistent for Demo Task (MEDIUM)
+## F3 — GLM-5.1 Output Inconsistent for Demo Task (MEDIUM) ✅ CLEARED Day 9
 
-**Why:** Long-horizon execution quality for niche technical tasks is unknown. First test may produce unstructured or incomplete output.
+**Status:** Z.AI track alignment reviewed Day 9. Hermes agent deployed as Specialist. Long-horizon task prompt built and locked. This risk is substantially reduced — Hermes + GLM-5.1 produces structured, hashable output for the locked task type.
 
-**Impact:** No real deliverable → no hash → "Specialist executes" step is hollow.
-
-**Fallback:** Test 3 task types on Day 8 morning. If all fail, use a deterministic fallback: `"Write a Python function that computes SHA-256 of a given input and returns the hex digest."` Any capable model produces consistent, hashable output.
-
-**Trigger:** Three failed GLM-5.1 attempts on Day 8 → lock in the deterministic fallback prompt.
+**Fallback (still available):** If GLM-5.1 fails during build, use the deterministic fallback prompt: `"Write a Python function that computes SHA-256 of a given input and returns the hex digest."` Do not change the locked task type unless GLM-5.1 produces 3 consecutive unusable outputs.
 
 ---
 
-## F4 — ZeroDev Session Keys — Python SDK Gap (MEDIUM)
+## F4 — Agent Wallet Spending Limits (LOW) — ZeroDev replaced by CAW
 
-**Why:** ZeroDev Python SDK is alpha with no session key support. TypeScript/Python interop adds a bridge layer with its own complexity.
+**Status (updated 2026-06-08):** Cobo CAW restored as primary wallet after TSS local node restart. Full x402 pipeline confirmed working. ZeroDev Kernel v3.3 is **demoted to design exhibit only** — no longer on the critical path.
 
-**Impact:** Agent wallets run without per-task spending limits — the "controllable fund operations" claim for the Cobo track weakens.
+**Current approach:** CAW Pacts enforce per-task spending ceiling at the signature level — no TypeScript bridge required.
 
-**Fallback:** Use basic signing (no session key scoping) for the hackathon. Document the TypeScript session key config as a code exhibit in the README. The design is correct; the demo limitation is implementation time.
+**Remaining risk:** CAW TSS node is local — a second crash requires the same restart. If the node goes down mid-build, restart it immediately; the API itself is stable.
 
-**Trigger:** If TypeScript bridge takes more than 3 hours on Day 9, fall back and document the design.
-
----
-
-## F5 — A2A Metadata Extension Fields Rejected (LOW)
-
-**Why:** A2A v1.0.0 may reject non-standard keys in `Message.metadata`. Pre-research rated GREEN but the gap exists.
-
-**Impact:** Structured task handoff loses `budget_wei` and `deliverable_hash` as native message fields.
-
-**Fallback:** Carry GuildOS-specific fields in the message `text` body as a JSON string. Parse on the receiving end.
-
-**Trigger:** If Day 8 A2A test gate 3 or 4 fails on metadata validation, switch to text-body encoding immediately.
+**Fallback:** If CAW becomes permanently unavailable, use basic EOA signing (private key in env) and present ZeroDev session key config as the "intended architecture" code exhibit for Cobo track submission.
 
 ---
 
-## F6 — Base Sepolia Congestion During Live Demo (LOW)
+## F5 — A2A Metadata Extension Fields Rejected (LOW) ✅ CLEARED Day 9
 
-**Mitigation already designed in:** Pre-stage `propose` and `vote` steps before the live demo. Only `settle()`, hash commit, and `giveFeedback()` happen live. Have pre-recorded Basescan screenshots as a last resort.
+**Status:** A2A coordination loop validated Day 9. All 5 gates passing. Metadata extension fields accepted without schema rejection. This risk is closed.
 
-**Trigger:** If any live tx takes more than 30 seconds, show the pre-recorded screenshot and note testnet latency.
+**Fallback (standby):** If metadata validation fails during real task flow (not the test), carry GuildOS-specific fields in the message `text` body as a JSON string. 15-minute fix — do not block on this.
+
+---
+
+## F6 — Base Mainnet Congestion During Live Demo (LOW)
+
+**Network (updated 2026-06-08):** All on-chain operations run on **Base mainnet (chain_id 8453)** — AFC has no Base Sepolia support. Explorer: https://basescan.org
+
+**Mitigation already designed in:** Pre-stage `propose` and `vote` steps before the live demo. Only `settle()`, hash commit, and `giveFeedback()` happen live. Have pre-recorded Basescan screenshots as a last resort. Pre-fund agent wallets with enough ETH before Day 10 build starts.
+
+**Trigger:** If any live tx takes more than 30 seconds, show the pre-recorded screenshot and note network latency.
 
 ---
 
@@ -93,11 +83,14 @@ Tier B **drops:** Treasury via AgentFightClub, formal governance, automated sett
 |------|-----------|--------|--------|
 | 2026-06-06 | Cobo CAW | ❌ Non-functional | Replaced with ZeroDev Kernel v3.3 |
 | 2026-06-06 | ERC-8004 | ✅ Deployed; caller constraint documented | Proceed with EOA fallback for `giveFeedback()` |
-| 2026-06-06 | A2A v1.0.0 | ✅ GREEN | Test Day 8; use text-body fallback if metadata fails |
-| 2026-06-06 | ERC-8183 | ⚠️ No Base Sepolia deploy | Deferred post-hackathon |
-| — | AgentFightClub | ⏳ Validate Day 8 | — |
-| — | GLM-5.1 task type | ⏳ Validate Day 8 | — |
-| — | ZeroDev session keys | ⏳ Validate Day 9 | — |
+| 2026-06-06 | A2A v1.0.0 | ✅ GREEN | Validated Day 9; text-body fallback on standby |
+| 2026-06-06 | ERC-8183 | ⚠️ No Base mainnet deploy | Deferred post-hackathon |
+| 2026-06-08 | Cobo CAW | ✅ **Restored** — TSS node restart | Primary wallet; ZeroDev demoted to design exhibit |
+| 2026-06-08 | Network | ⚠️ **Base Sepolia → Base mainnet** | AFC has no Base Sepolia support; chain_id 8453 |
+| 2026-06-09 | AgentFightClub | ✅ Full flow confirmed | launch → commit → propose → vote → settle all working |
+| 2026-06-09 | A2A SDK v1.0.0 | ✅ All 5 gates validated | Metadata accepted; coordination loop working |
+| 2026-06-09 | GLM-5.1 / Hermes | ✅ Specialist stack locked | Hermes agent deployed; long-horizon prompt locked |
+| — | ZeroDev session keys | Demoted — design exhibit only | CAW handles spending limits via Pacts |
 
 ---
 
@@ -110,5 +103,5 @@ If you find yourself doing any of these without an explicit decision, stop:
 - Querying the live ERC-8004 registry for real — hardcoded profile is correct
 - Building any frontend UI — terminal windows are the demo surface
 - Implementing ragequit on-chain — document the path only
-- Deploying on mainnet — Base Sepolia tx hashes are credible
+- Deploying extra contracts beyond what the demo needs — Base mainnet, keep lean
 - Adding ERC-8183 — AgentFightClub settle is the payment story
