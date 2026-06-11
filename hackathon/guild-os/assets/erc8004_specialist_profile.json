@@ -1,0 +1,8 @@
+{
+  "name": "Specialist Agent",
+  "agent_id": "erc8004:1",
+  "capabilities": ["code-generation", "audit", "testing"],
+  "a2a_endpoint": "http://localhost:10001",
+  "delivery_count": 0,
+  "rating": null
+}

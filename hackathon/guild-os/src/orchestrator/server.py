@@ -231,23 +231,18 @@ async def run_server() -> None:
         )
 
 TOOLS = {
-    "guild_launch": guild_launch,
-    "talent_query": talent_query,
-    "task_invite": task_invite,
-    "task_delegate": task_delegate,
-    "deliverable_review": deliverable_review,
-    "settle": settle,
-    "reputation_write": reputation_write,
+    "guild_launch": orchestrator_tools.guild_launch,
+    "talent_query": orchestrator_tools.talent_query,
+    "task_invite": orchestrator_tools.task_invite,
+    "task_delegate": orchestrator_tools.task_delegate,
+    "deliverable_review": orchestrator_tools.deliverable_review,
+    "settle": orchestrator_tools.settle,
+    "reputation_write": orchestrator_tools.reputation_write,
 }
 
 __all__ = [
-    "guild_launch",
-    "talent_query",
-    "task_invite",
-    "task_delegate",
-    "deliverable_review",
-    "settle",
-    "reputation_write",
+    "create_server",
+    "run_server",
     "TOOLS",
 ]
 

@@ -12,13 +12,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import sys
-import tempfile
-import uuid
-from datetime import date, datetime, timezone
+from datetime import date
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
