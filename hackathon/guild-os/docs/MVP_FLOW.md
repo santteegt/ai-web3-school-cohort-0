@@ -173,7 +173,7 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 | A2A task flow (all 7 message events) | **Real** | A2A SDK v1.0.0 |
 | GLM-5.1 task execution (via Hermes) | **Real** | Locked task type Day 9; Hermes agent deployed as Specialist |
 | On-chain deliverable hash commit | **Real** | Always real — one `eth_sendTransaction` |
-| Cobo CAW spending ceiling (Pact) | **Real** — TSS local node; x402 pipeline confirmed working Day 8 | ZeroDev session key policy shown as design exhibit only |
+| Cobo CAW spending ceiling (Pact) | **Real** — TSS local node; x402 pipeline confirmed working Day 8 |
 | ERC-8004 talent query (capability matching) | **Mocked** | Hardcoded Specialist profile |
 | Guild context store | **Mocked** | JSON file per guild session |
 | Multiple concurrent guild members | **Mocked** | One agent pair for demo |

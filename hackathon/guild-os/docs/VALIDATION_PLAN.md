@@ -13,7 +13,7 @@
 | 1.3 | CAW Pact restricts Orchestrator to AgentFightClub contract only | Pact config set; x402 pipeline confirmed working Day 8 | `[x]` |
 | 1.4 | `eth_sendTransaction` via CAW succeeds on Base mainnet | Tx hash returned; visible on https://basescan.org | `[x]` |
 
-Fallback: basic signing (private key in env) if CAW TSS node fails mid-build. ZeroDev session key policy shown as design exhibit.
+Fallback: basic signing (private key in env) if CAW TSS node fails mid-build.
 
 ---
 
@@ -136,7 +136,7 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 | 10.2 | Basescan tx #1 (hash commit) link in README | `submissions/tx_hashes.md` | `[ ]` |
 | 10.3 | Basescan tx #2 (settlement) link in README | `submissions/tx_hashes.md` | `[ ]` |
 | 10.4 | ERC-8004 before/after screenshots | `hackathon/notes/` | `[ ]` |
-| 10.5 | CAW Pact config (live proof) + ZeroDev session key policy (design exhibit) | README §SDK Used | `[ ]` |
+| 10.5 | CAW Pact config (live proof) | README §SDK Used | `[ ]` |
 | 10.6 | GLM-5.1 trace log | `hackathon/notes/glm_trace_*.json` | `[ ]` |
 | 10.7 | A2A trace log | `hackathon/notes/a2a_trace_*.json` | `[ ]` |
 | 10.8 | Demo video (3–5 min) | Loom / YouTube link | `[ ]` |

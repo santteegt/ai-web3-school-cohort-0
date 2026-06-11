@@ -13,7 +13,6 @@
 | LLM execution | Z.AI GLM-5.1 | API | Specialist Agent long-horizon planning; task type locked Day 9 |
 | Orchestrator harness | Claude Code (MCP server) | — | 7 tools registered; entry point `src/orchestrator/server.py` |
 | Agent wallet | Cobo CAW | TSS local node | x402 pipeline working end-to-end; Pact-scoped spending ceiling per task |
-| Session key fallback | ZeroDev Kernel v3.3 | v3.3 | Demoted to design exhibit if CAW issues recur; TypeScript SDK |
 | Treasury + governance | AgentFightClub (Moloch v3) | — | ClawBank API (primary — live, timing issue being fixed); DAOhaus SDK (fallback — see RISKS.md F1) |
 | Agent identity | ERC-8004 Registry | Base mainnet | IdentityRegistry: `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
 | Reputation | ERC-8004 ReputationRegistry | Base mainnet | `0x8004B663056A597Dffe9eCcC1965A193B7388713`; caller constraint applies |
@@ -122,7 +121,6 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 | `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator signing key (EOA) | — |
 | `SPECIALIST_PRIVATE_KEY` | Specialist signing key (EOA) | — |
 | `AGENTFIGHTCLUB_API_KEY` | ClawBank Skill API | Optional |
-| `ZERODEV_PROJECT_ID` | ZeroDev project for session keys | Optional |
 | `ERC8004_CONTRACT` | IdentityRegistry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
 | `REPUTATION_CONTRACT` | ReputationRegistry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
 | `ORCHESTRATOR_A2A_PORT` | Orchestrator A2A endpoint port | `10000` |

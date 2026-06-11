@@ -15,7 +15,7 @@
 | Resource procurement | Specialist Agent pays for API services (e.g., GLM-5.1 inference via x402) from its CAW wallet; full x402 pipeline confirmed Day 8 |
 
 **Key demo evidence for Cobo track:**
-- CAW Pact config shown as live proof (TSS node running); ZeroDev session key policy shown as design exhibit (architecture reference)
+- CAW Pact config shown as live proof (TSS node running)
 - Orchestrator calls `settle()` from the guild contract — not from its own wallet (demonstrates scoped operations)
 - CAW wallet address + anonymized Pact config in README
 
