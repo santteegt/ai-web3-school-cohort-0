@@ -110,12 +110,39 @@ async def handle_task_send(message: dict) -> dict:
         deliverable_content.encode()
     ).hexdigest()
 
+    # Commit hash on-chain (Validation plan 5.3 — Basescan tx #1)
+    on_chain_tx = None
+    try:
+        from src.shared.onchain_hash import commit_hash
+
+        # Get guild address from guild context
+        from src.shared import guild_context
+        ctx = guild_context.load()
+        guild_address = ctx.get("guild_address", "")
+        if guild_address:
+            result = commit_hash(
+                deliverable_hash=deliverable_hash,
+                guild_address=guild_address,
+                task_id=task_id,
+            )
+            on_chain_tx = result["tx_hash"]
+            logger.info(
+                "Hash committed on-chain: %s → %s",
+                on_chain_tx,
+                result["basescan_url"],
+            )
+        else:
+            logger.warning("No guild_address in context — skipping on-chain commit")
+    except Exception as e:
+        logger.error("On-chain hash commit failed: %s", e)
+        on_chain_tx = None
+
     result = {
         "type": "task/delivered",
         "task_id": task_id,
         "deliverable_reference": f"deliverables/{task_id}.json",
         "deliverable_hash": deliverable_hash,
-        "on_chain_tx": None,  # Set when hash is committed on-chain
+        "on_chain_tx": on_chain_tx,  # Basescan tx #1
     }
     _log_message("outgoing", "task/delivered", result)
     return result
