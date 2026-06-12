@@ -57,7 +57,17 @@
     "large-language-model",
     "erc-8004",
     "smart-account",
-    "payment-and-commerce"
+    "payment-and-commerce",
+    "ai-agent-tracing",
+    "llm-as-judge",
+    "verifiable-ai",
+    "reentrancy",
+    "multi-agent-systems",
+    "defi-tool",
+    "structured-output",
+    "ai-privacy",
+    "langgraph",
+    "lora"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }

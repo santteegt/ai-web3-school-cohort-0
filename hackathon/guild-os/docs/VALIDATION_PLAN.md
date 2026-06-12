@@ -141,3 +141,93 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 | 10.7 | A2A trace log | `hackathon/notes/a2a_trace_*.json` | `[ ]` |
 | 10.8 | Demo video (3–5 min) | Loom / YouTube link | `[ ]` |
 | 10.9 | Team info (name, wallet, contact) | Submission form | `[ ]` |
+
+---
+
+## 11. Hackathon Submission Requirements (Casual Hackathon)
+
+> Official requirements from the platform. Every item below must be satisfied before submitting the form on Day 13.
+
+### 11.1 Project Identity
+
+| # | Requirement | Where | Status |
+|---|-------------|-------|--------|
+| 11.1.1 | Project name: **GuildOS** | README title + submission form | `[ ]` |
+| 11.1.2 | One-line introduction: *"A programmable studio where founding and specialist agents coordinate real work through A2A, share a Moloch-secured treasury through AgentFightClub, and build verifiable on-chain reputation — no platform, no middleman, no context loss."* | README subtitle + submission form | `[ ]` |
+
+### 11.2 GitHub README — Required Sections
+
+All sections must be present and complete in `README.md` before Day 13:
+
+| # | Section | Notes | Status |
+|---|---------|-------|--------|
+| 11.2.1 | **Project background** — problem, why it matters, why AI + Web3 are both required | `docs/PROBLEM.md` is the source; summarise in README | `[ ]` |
+| 11.2.2 | **Installation / run instructions** — prerequisites, `pip install`, env vars, two-terminal setup | Already drafted; verify against final working build | `[ ]` |
+| 11.2.3 | **Core features** — guild formation, A2A task delegation, GLM-5.1 execution, hash commitment, settlement, ERC-8004 reputation | Add a Features section to README | `[ ]` |
+| 11.2.4 | **Technical architecture** — swimlane or Mermaid diagram showing the 9-step flow; component map | Embed Mermaid or ASCII diagram from `docs/MVP_FLOW.md` | `[ ]` |
+| 11.2.5 | **APIs / SDKs / AI tools used** — A2A SDK, GLM-5.1, Cobo CAW, AgentFightClub, ERC-8004, Alchemy, ZeroDev (design exhibit) | Expand existing SDK table in README | `[ ]` |
+| 11.2.6 | **Third-party disclosures** — explicitly list all third-party APIs, SDKs, open-source code, and AI tools used | Add a dedicated "Third-Party Disclosures" section | `[ ]` |
+
+### 11.3 Demo
+
+| # | Requirement | Notes | Status |
+|---|-------------|-------|--------|
+| 11.3.1 | Demo link or demo video | Loom / YouTube; 3–5 min recommended | `[ ]` |
+| 11.3.2 | Clear walkthrough of the core flow | Must show: mandate → A2A flow → GLM-5.1 output → hash on Basescan → settlement → ERC-8004 delta | `[ ]` |
+
+### 11.4 Project Documentation / Proposal
+
+| # | Requirement | Where | Status |
+|---|-------------|-------|--------|
+| 11.4.1 | **Problem** | `docs/PROBLEM.md` → link from README or embed | `[ ]` |
+| 11.4.2 | **Solution** | README §Minimum Demo Loop or dedicated section | `[ ]` |
+| 11.4.3 | **Target users** | `docs/PROBLEM.md §Target Users` → include in submission | `[ ]` |
+| 11.4.4 | **Technical implementation** | `docs/TECH_STACK.md` + `docs/MVP_FLOW.md` → summarise in README or proposal doc | `[ ]` |
+| 11.4.5 | **Current completion** | Add a "Completion Status" section to README with Mock vs. Real table from `docs/MVP_FLOW.md` | `[ ]` |
+| 11.4.6 | **Follow-up plan** | Add "Post-Hackathon Roadmap" section — semantic ERC-8004 matching, Mem0 memory, multi-guild, web UI | `[ ]` |
+
+### 11.5 On-Chain / Testnet Evidence
+
+| # | Evidence | Location | Status |
+|---|----------|----------|--------|
+| 11.5.1 | Guild contract address | `submissions/tx_hashes.md` + README | `[ ]` |
+| 11.5.2 | Basescan tx #1 — deliverable hash commit | `submissions/tx_hashes.md` + README (clickable) | `[ ]` |
+| 11.5.3 | Basescan tx #2 — AgentFightClub settlement | `submissions/tx_hashes.md` + README (clickable) | `[ ]` |
+| 11.5.4 | Orchestrator Agent wallet address (CAW) | `submissions/tx_hashes.md` | `[ ]` |
+| 11.5.5 | Specialist Agent wallet address (CAW) | `submissions/tx_hashes.md` | `[ ]` |
+| 11.5.6 | ERC-8004 agentId for both agents | `submissions/tx_hashes.md` + README | `[ ]` |
+| 11.5.7 | ERC-8004 `DeliveryRecorded` event tx | `submissions/tx_hashes.md` | `[ ]` |
+| 11.5.8 | Screenshots of Basescan pages for each tx | `hackathon/notes/screenshots/` | `[ ]` |
+
+### 11.6 Compliance and Security Boundaries
+
+Must be documented in README or a dedicated section:
+
+| # | Requirement | Notes | Status |
+|---|-------------|-------|--------|
+| 11.6.1 | **Permission boundaries** — which actions are automated vs. human-gated | Document the 4 human gates (Gate 0, 0.5, 1, 2); reference `docs/MVP_FLOW.md §Automation Boundaries` | `[ ]` |
+| 11.6.2 | **Failure handling** — what happens when a component fails | Reference `docs/RISKS.md` fallback table; summarise in README | `[ ]` |
+| 11.6.3 | **Human intervention points** — when and why a human must approve | List all 4 gates with the action each gate blocks | `[ ]` |
+| 11.6.4 | **Spending limits** — agent wallets do not have unconstrained fund access | CAW Pact config; describe per-task ceiling and contract allowlist | `[ ]` |
+
+### 11.7 Hackathon Contribution Scope
+
+| # | Requirement | Notes | Status |
+|---|-------------|-------|--------|
+| 11.7.1 | Clearly explain what is new work done during the hackathon | Add "What Was Built During the Hackathon" section — GuildOS is a new project; all code written Jun 8–12 | `[ ]` |
+| 11.7.2 | Distinguish pre-existing components vs. hackathon-built integration | Pre-existing: AgentFightClub, ERC-8004, A2A SDK, GLM-5.1, ZeroDev. New: GuildOS coordination layer, MCP tools, A2A handlers, CLI gates, guild context store | `[ ]` |
+
+### 11.8 Runnability
+
+| # | Requirement | Notes | Status |
+|---|-------------|-------|--------|
+| 11.8.1 | Project is runnable from the README instructions | Do a clean-clone test before Day 13: fresh venv, follow README exactly | `[ ]` |
+| 11.8.2 | Not a static presentation or mockup | Confirmed by smoke test × 2 (Section 9) and demo video (11.3) | `[ ]` |
+
+### 11.9 Track Selection
+
+| # | Requirement | Notes | Status |
+|---|-------------|-------|--------|
+| 11.9.1 | Primary track declared: **Cobo \| Agentic Economy × Cobo Agentic Wallet** | Strongest advantage — full economic loop: CAW wallets, treasury, settlement | `[ ]` |
+| 11.9.2 | Secondary track eligibility documented: **Z.AI \| Web3 × Long-Horizon Task** | GLM-5.1 via Hermes; long-horizon trace log as evidence | `[ ]` |
+| 11.9.3 | Track alignment section in README or proposal | `docs/TRACK.md` is the source — summarise in README or link directly | `[ ]` |

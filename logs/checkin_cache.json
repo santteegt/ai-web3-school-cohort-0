@@ -1,0 +1,847 @@
+{
+  "as_of": "2026-06-07T22:53:46Z",
+  "total_pending": 31,
+  "total_submitted_last_14d": 43,
+  "pending": [
+    {
+      "id": "cmpgg4rmy7agnmu01xbh8ovz4",
+      "title": "Week 4\uff5cWeekly Review Sharing\uff5c6.12 Live Reflection or Hackathon Idea",
+      "status": "NOT_STARTED",
+      "points": 5,
+      "validTo": "2026-06-14T13:00:00.000Z",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmptcmp0jojcmpo019wtt2iix",
+      "title": "Week 3\uff5cSponsor Question Collection\uff5cQuestions for Cobo / Z.AI",
+      "status": "NOT_STARTED",
+      "points": 5,
+      "validTo": "2026-06-08T11:59:00.000Z",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpukyz7ys1dspo015ksh6u4u",
+      "title": "Week 3\uff5c\u52a0\u5206\u6311\u6218\uff5c\u9ed1\u5ba2\u677e\u62a5\u540d\u7f51\u7ad9 Bug / PR \u53cd\u9988",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": "2026-06-12T15:59:00.000Z",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmptce7vboir2po01n5874leq",
+      "title": "Week 3\uff5cSponsor Workshop\uff5cRelevant Workshop Notes",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": "2026-06-08T11:59:00.000Z",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmptce7d7oiqwpo01nvvvpuyf",
+      "title": "Week 3\uff5cRecommended\uff5cSponsor / Mentor Questions",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": "2026-06-08T11:59:00.000Z",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpuki5lqs05ppo01hr1zezey",
+      "title": "Week 3\uff5cMust Submit\uff5cFind Hackathon Teammates",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": "2026-06-12T15:59:00.000Z",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmptce5rhoiq8po01tgv5p2my",
+      "title": "Week 3\uff5c\u6700\u4f4e\u5b8c\u6210\u8def\u5f84\uff5c\u8d5b\u9053\u9009\u62e9\u8bf4\u660e",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": "2026-06-08T11:59:00.000Z",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpgg4rgr7agkmu0141kbb1q8",
+      "title": "Week 3\uff5cWeekly Review Sharing\uff5c6.05 Live Reflection or Hackathon Idea",
+      "status": "NOT_STARTED",
+      "points": 5,
+      "validTo": "2026-06-08T11:59:00.000Z",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmp9utimu0mcfmw01wkwxgybz",
+      "title": "Week 1\uff5cPreparation\uff5cPost Your AI \u00d7 Web3 School Starting Point on X",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmp3jypgi07ryn301xm9rpz1f",
+      "title": "Week 1\uff5cPreparation\uff5cJoin the Course Community and Introduce Yourself",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpl7kjds2l2amq01a0hyes0u",
+      "title": "Week 2\uff5cOnline Session\uff5cAttend 5.25 Co-learning Live\uff5cCo-learning",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpla24xx3b22mq015ryjogdl",
+      "title": "Week 2\uff5cOnline Session\uff5cAttend 5.29 Live\uff5cWomen Builders in AI \u00d7 Web3: Learning Paths, Collaboration Networks & Global Opportunities",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpla25gt3b25mq01ctefelh8",
+      "title": "Week 2\uff5cOnline Session\uff5cWatch 5.29 Recording\uff5cWomen Builders in AI \u00d7 Web3: Learning Paths, Collaboration Networks & Global Opportunities",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpla279s3b35mq01yi3u41nl",
+      "title": "Week 2\uff5cOnline Session\uff5cAttend 5.27 Co-learning Live\uff5cCo-learning",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpla27qv3b38mq01zgw7pwbl",
+      "title": "Week 2\uff5cOnline Session\uff5cAttend 5.28 Co-learning Live\uff5cCo-learning",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpnvnuan4w4zpo01wu82qih7",
+      "title": "Week 2\uff5c\u81ea\u7ec4\u7ec7\u5206\u4eab\uff5c\u529e\u4e00\u573a\u4f60\u7684 Twitter Space / Workshop",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpnvnugx4w51po01c8g751ez",
+      "title": "Week 3\uff5c\u81ea\u7ec4\u7ec7\u5206\u4eab\uff5c\u529e\u4e00\u573a\u4f60\u7684 Twitter Space / Workshop",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpnvnund4w53po01hnmukqvb",
+      "title": "Week 4\uff5c\u81ea\u7ec4\u7ec7\u5206\u4eab\uff5c\u529e\u4e00\u573a\u4f60\u7684 Twitter Space / Workshop",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpum0ll0s325po01548wvxie",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 6.02 Live\uff5cOpenday",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpum0lt9s328po01oocedbbj",
+      "title": "Week 3\uff5cOnline Session\uff5cWatch 6.02 Recording\uff5cOpenday",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpum0prus32rpo01eht91p9b",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 6.04 Live\uff5cExploring and Thinking Through Payment Use Cases",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpum0q07s32upo01ljw3ehea",
+      "title": "Week 3\uff5cOnline Session\uff5cWatch 6.04 Recording\uff5cExploring and Thinking Through Payment Use Cases",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpum0qozs332po012omi4myg",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 6.05 Live\uff5cWeek 3 Review Meeting",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpum0qvms335po014mhnkvkj",
+      "title": "Week 3\uff5cOnline Session\uff5cWatch 6.05 Recording\uff5cWeek 3 Review Meeting",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpunw51lsb58po01tker14eh",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 6.05 Live\uff5cIn the AI Agent Era, Re-examining Blockchain as a Technical Choice & Hands-on Blockchain App Development with Deep AI Agent Participation",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpunw58usb5bpo01ogfg6doi",
+      "title": "Week 3\uff5cOnline Session\uff5cWatch 6.05 Recording\uff5cIn the AI Agent Era, Re-examining Blockchain as a Technical Choice & Hands-on Blockchain App Development with Deep AI Agent Participation",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpxyuvchbznoph01q0qgpz3z",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 06.01 Co-learning Live\uff5cCo-learning",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpxyuvmjbznsph01hy754gog",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 06.03 Co-learning Live\uff5cCo-learning",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpxyuvsxbzp6ph01qy9tgi2x",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 06.04 Co-learning Live\uff5cCo-learning",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpxyuvz1bzp8ph01cu3kxi7f",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 06.08 Co-learning Live\uff5cCo-learning",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmq0j81lkk660ph01mtukt931",
+      "title": "Week 3\uff5cOnline Session\uff5cAttend 06.10 Co-learning Live\uff5cCo-learning",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "validTo": null,
+      "available": true,
+      "proofRequired": true
+    }
+  ],
+  "submitted": [
+    {
+      "id": "cmptceamsoirnpo01hv5yo16a",
+      "title": "Week 3\uff5cBonus\uff5cComplete Week 4 Ready Pack",
+      "status": "SUBMITTED",
+      "points": 40,
+      "latestSubmission": {
+        "id": "cmq4djb5vuw73ph01wzuh9b82",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T22:49:11.491Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptceaf1oirkpo01l4q1maea",
+      "title": "Week 3\uff5cBonus\uff5cTechnical Validation Plan",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmq3xl0v9u2zmph01hgj71o0e",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:22:37.606Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptcea8eoirhpo01efbkt7g9",
+      "title": "Week 3\uff5cBonus\uff5cProject Flow Diagram",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmq3xlhndu31vph01i2iusix6",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:22:59.353Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptcea10oirepo01m316o0wl",
+      "title": "Week 3\uff5cBonus\uff5cDeep Research Pack",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmq3xlzwyu373ph018t5l9tt6",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:23:23.026Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce9ucoirbpo019dsf3okp",
+      "title": "Week 3\uff5cSponsor Workshop\uff5cSponsor SDK / API Integration Plan",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmq3xn7amu3egph01fssbfefi",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:24:19.246Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce88uoir8po012rk5kzic",
+      "title": "Week 3\uff5cSponsor Workshop\uff5cZ.AI Track Alignment",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmq3xngvwu3lmph0139tdi9ja",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:24:31.676Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce81yoir5po01wm6ipm2o",
+      "title": "Week 3\uff5cSponsor Workshop\uff5cCobo Track Alignment",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmq3xnp7vu3ndph0126o62ts9",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:24:42.475Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce7msoiqzpo01o85a15ou",
+      "title": "Week 3\uff5cRecommended\uff5cRisk / Assumption Memo",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmq3xnzggu3saph0115d8kote",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:24:55.744Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce76zoiqtpo019i68zfo4",
+      "title": "Week 3\uff5cRecommended\uff5cScope Review",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmq3xob2nu3siph01kicr9h6m",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:25:10.799Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce70ooiqqpo01hkycnu6p",
+      "title": "Week 3\uff5cRecommended\uff5cProposal Memo",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmq03avxij2jwph01t3d6jkb7",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-04T22:51:37.638Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce6u0oiqnpo01pan1ts1g",
+      "title": "Week 3\uff5cRecommended\uff5cWeek 1\u20132 Gap Diagnosis",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmpyytnz5exogph01kvljqvgr",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-04T03:58:29.537Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce6lqoiqkpo01inlgt10w",
+      "title": "Week 3\uff5cMust Submit\uff5cWeek 4 Sprint Plan",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmq3xoljmu3uaph01w4t2juf2",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:25:24.370Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce6d8oiqhpo01m9dxkdwt",
+      "title": "Week 3\uff5cMust Submit\uff5cRepo Skeleton",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmq3yrezeufikph01hk3lwa5y",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:55:35.451Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce670oiqepo01dfx7npyt",
+      "title": "Week 3\uff5cMust Submit\uff5cTeam / Solo Status",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmq3xowfwu3y9ph01ql0siwlg",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:25:38.492Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce609oiqbpo01b8y6xks2",
+      "title": "Week 3\uff5cMust Submit\uff5cProject One-liner",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmq3xp6auu41nph01rj4uy66s",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:25:51.270Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmptce5knoiq5po01bbv9i29l",
+      "title": "Week 3\uff5cMust Submit\uff5cHackathon Direction Card",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmq3xph97u43cph01x48ckh84",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-07T15:26:05.467Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpkl64ppnbg2mu01renief9v",
+      "title": "Week 2\uff5cDirection Research\uff5cAI \u00d7 Web3 Problem Map and Main Direction Selection",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmprkdqb1jnklpo01hvnk3b3b",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-29T23:39:48.205Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jypyz07s4n301jcnklgn4",
+      "title": "Week 1\uff5cPreparation\uff5cComplete a Proof-of-Work Submission Test",
+      "status": "SUBMITTED",
+      "points": 5,
+      "latestSubmission": {
+        "id": "cmpkpk94hnvotmu01ir888rbn",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-25T04:30:27.378Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpkl64w9nbg5mu01jev746ru",
+      "title": "Week 2\uff5cPayment / Commerce\uff5cMinimal Payment and Commerce Flow Breakdown",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmpumm6l5s5x1po01hn3mweci",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-01T03:05:40.313Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jyq4x07s6n301xzm2cmds",
+      "title": "Week 1\uff5cAI Track\uff5cCreate AI Fundamentals Concept Cards",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmpkp32k8nt3bmu01il0ayv2y",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-26T01:07:43.625Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpkl6548nbg8mu01ufwogcau",
+      "title": "Week 2\uff5cAdvanced Practice\uff5cx402 Paywall + CAW Agent Autonomous Payment Loop",
+      "status": "SUBMITTED",
+      "points": 40,
+      "latestSubmission": {
+        "id": "cmq2xz2ngr9yjph01cvk2b8qd",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-06T22:45:46.924Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpkl65aonbgdmu01wvheztth",
+      "title": "Week 2\uff5cAgent Identity\uff5cAgent Profile and Capability Claim Draft",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmpumxrr2s7sipo01kcmmo0z6",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-01T03:14:40.959Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jyqgx07san301erpv124n",
+      "title": "Week 1\uff5cAI Track\uff5cBuild an Interactive AI Learning Artifact",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmpna5wx62oqjpo01sqxtl2f9",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-26T23:42:42.667Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpkl65h2nbggmu01i4egjtq6",
+      "title": "Week 2\uff5cWallet / Permission\uff5cPermission Strategy for Agent-Initiated On-Chain Actions",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmpun4hgis8japo01xbh62t9b",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-01T03:19:54.211Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jyqq507scn3016sd7iflf",
+      "title": "Week 1\uff5cWeb3 Track\uff5cCreate Web3 Fundamentals Concept Cards",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmplyuu5x5t2kmq01hvhq40iu",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-26T01:38:23.925Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpkl65ninbgjmu01jek69nnf",
+      "title": "Week 2\uff5cSecurity / Privacy\uff5cAgent Workflow Threat Model and Confirmation Strategy",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmpunau4fs8znpo01n9j7nqog",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-01T03:24:50.559Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jyqxo07sen301c3ljomc5",
+      "title": "Week 1\uff5cWeb3 Task\uff5cComplete a Testnet Transaction",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmplz1h7d5tqrmq01owss296t",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-26T01:43:33.721Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpkl65x9nbgmmu019o1juedn",
+      "title": "Week 2\uff5cGovernance / Coordination\uff5cGovernance and Coordination Workflow Sketch",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmpunhnuas9nipo01krggieb0",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-01T03:30:09.010Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jyr3h07sgn301jpcjoma9",
+      "title": "Week 1\uff5cWeb3 Task\uff5cDeploy or Call a Minimal Smart Contract",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmplz2iq45ttcmq011njszg8c",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-26T01:44:22.348Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpkl6652nbgpmu012os75zfg",
+      "title": "Week 2\uff5cFinal Deliverable\uff5cDirection Deep-Dive Pack and Initial Project Proposal",
+      "status": "SUBMITTED",
+      "points": 40,
+      "latestSubmission": {
+        "id": "cmpwxeur69e8pph01tpsg6qvv",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-02T17:43:26.514Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp9wlsoh0s4hmw01lck7hidd",
+      "title": "Week 1\uff5cWeb3 Advanced\uff5cCompare EOAs, Smart Accounts, and Multisigs",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmpn9l68z2na8po017d1dlalf",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-26T23:26:34.980Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jyrc507sin301kjhy1mwf",
+      "title": "Week 1\uff5cAI \u00d7 Web3 Integrated Task\uff5cDraw a Minimal AI \u00d7 Web3 Workflow",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmpoo3w8h8pyipo010xb2mh88",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-27T23:00:49.266Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jyrjn07skn301qopx9rwe",
+      "title": "Week 1\uff5cAI \u00d7 Web3 Integrated Task\uff5cSubmit Your Week 1 Proof-of-Work Pack",
+      "status": "SUBMITTED",
+      "points": 40,
+      "latestSubmission": {
+        "id": "cmpp0b1ww9m8apo01jjcl7cy0",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-28T04:42:18.608Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp9wlsuo0s4lmw01u8h0og3t",
+      "title": "Week 1\uff5cIntegrated Advanced\uff5cDesign a Restricted Web3 Assistant or Workflow",
+      "status": "SUBMITTED",
+      "points": 40,
+      "latestSubmission": {
+        "id": "cmpony6oi8ph5po01rxafkopi",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-27T22:56:22.866Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp3jyrq307smn301bmk31xc2",
+      "title": "Week 1\uff5cPublish an AI \u00d7 Web3 Learning Summary",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmpp0bj2p9m96po016hgswht8",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-28T04:42:40.850Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmp9wlt0p0s4nmw01ypoa45tk",
+      "title": "Week 1\uff5cAdvanced Industry Observation\uff5cAnalyze 1\u20132 AI \u00d7 Web3 Projects or Builders",
+      "status": "SUBMITTED",
+      "points": 30,
+      "latestSubmission": {
+        "id": "cmpooyar18s2kpo01se3gvatc",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-27T23:24:27.758Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpaouccj010hmj01515rw0qz",
+      "title": "Week 1\uff5cPreparation\uff5cBuild Your AI \u00d7 Web3 Industry Follow List",
+      "status": "SUBMITTED",
+      "points": 20,
+      "latestSubmission": {
+        "id": "cmpoq8q5f90lspo01t3xn3i1g",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-28T00:00:33.892Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpla21ed3b1dmq01vf8ifdyj",
+      "title": "Week 2\uff5cOnline Session\uff5cWatch 5.25 Recording\uff5cLong-term Memory for AI Agents: Persistent Context and Long-term Consistency",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmpmwzzwn1j3dpo01ame51jzm",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-26T17:34:11.591Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpla229e3b1jmq01tyx7v2m2",
+      "title": "Week 2\uff5c\u7ebf\u4e0a\u6d3b\u52a8\uff5c\u89c2\u770b\u56de\u653e 5.26\uff5cProduct manager of Cobo Agentic Wallet",
+      "status": "SUBMITTED",
+      "points": 15,
+      "latestSubmission": {
+        "id": "cmpqde2kgf2b1po01hhigihv6",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-29T03:36:20.609Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpla235w3b1tmq016pcati33",
+      "title": "Week 2\uff5cOnline Session\uff5cWatch 5.27 Recording\uff5cNeo-Cypherpunk & the Cultural Layers of Privacy: Why Privacy Matters for Builders",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmprv8nd7kjz4po013kntdteg",
+        "status": "SUBMITTED",
+        "createdAt": "2026-05-30T04:43:46.891Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpla26c03b2bmq014ub1dnz9",
+      "title": "Week 2\uff5cOnline Session\uff5cWatch 5.29 Recording\uff5cWeek 2 Review Meeting",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmpx77g3n9s6bph01wazzrj8f",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-02T22:17:37.091Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpum0kscs31xpo010ax5dgu8",
+      "title": "Week 3\uff5cOnline Session\uff5cWatch 6.01 Recording\uff5cHow to Refine Your Project from a VC Perspective",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmq2ghj4ipmmcph01reqic6x2",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-06T14:36:14.994Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    },
+    {
+      "id": "cmpum0mshs32jpo01pyeo50y7",
+      "title": "Week 3\uff5cOnline Session\uff5cWatch 6.03 Recording\uff5cHackathon Track Practice",
+      "status": "SUBMITTED",
+      "points": 10,
+      "latestSubmission": {
+        "id": "cmpzsev0ziv2gph019t8u72mt",
+        "status": "SUBMITTED",
+        "createdAt": "2026-06-04T17:46:47.315Z",
+        "reviewedAt": null,
+        "rejectionReason": null
+      }
+    }
+  ]
+}

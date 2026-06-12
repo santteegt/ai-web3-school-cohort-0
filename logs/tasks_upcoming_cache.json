@@ -1,0 +1,57 @@
+{
+  "as_of": "2026-06-07T22:53:50Z",
+  "window_days": 3,
+  "upcoming_count": 5,
+  "upcoming": [
+    {
+      "id": "cmptcmp0jojcmpo019wtt2iix",
+      "title": "Week 3\uff5cSponsor Question Collection\uff5cQuestions for Cobo / Z.AI",
+      "description": "Submit one concrete question you want to ask Cobo or Z.AI during your project learning / Hackathon preparation.\n\nSuggested format:\nSponsor: Cobo / Z.AI\nQuestion:\nBackground / blocker:\nWhat you hope the sponsor will answer in the sharing session:\n\nWe will export these questions from the backend and send them to the corresponding sponsor for the sharing-session Q&A.",
+      "status": "NOT_STARTED",
+      "points": 5,
+      "deadline": "2026-06-08T11:59:00",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmptce7vboir2po01n5874leq",
+      "title": "Week 3\uff5cSponsor Workshop\uff5cRelevant Workshop Notes",
+      "description": "Choose 1\u20132 sponsor workshops most relevant to your project and record what problem the sponsor solves, what tools they provide, which track they fit, and what demo can be built.",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "deadline": "2026-06-08T11:59:00",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmptce7d7oiqwpo01nvvvpuyf",
+      "title": "Week 3\uff5cRecommended\uff5cSponsor / Mentor Questions",
+      "description": "Prepare 1\u20133 concrete implementation-related questions for sponsors, mentors, or TAs.",
+      "status": "NOT_STARTED",
+      "points": 20,
+      "deadline": "2026-06-08T11:59:00",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmptce5rhoiq8po01tgv5p2my",
+      "title": "Week 3\uff5c\u6700\u4f4e\u5b8c\u6210\u8def\u5f84\uff5c\u8d5b\u9053\u9009\u62e9\u8bf4\u660e",
+      "description": "Choose either Cobo or Z.AI, explain in 3\u20135 sentences why your project fits that track, and tag the corresponding project account in your public submission / tweet: @Zai_org / @Cobo_Global, plus @aiweb3school @LXDAO_Official @ETHPanda_Org @web3careerbuild.",
+      "status": "NOT_STARTED",
+      "points": 10,
+      "deadline": "2026-06-08T11:59:00",
+      "available": true,
+      "proofRequired": true
+    },
+    {
+      "id": "cmpgg4rgr7agkmu0141kbb1q8",
+      "title": "Week 3\uff5cWeekly Review Sharing\uff5c6.05 Live Reflection or Hackathon Idea",
+      "description": "Join this Friday\u2019s weekly review meeting and give an approximately 5-minute live sharing on mic. You may choose one or combine several of the following angles:\n\n1. Your learning reflections, blockers, or new understanding from this week.\n2. A valuable piece of information, project, article, tool, or case you discovered.\n3. Which session impressed you most this week, and why.\n4. What kind of growth or transformation you hope to achieve through the AI \u00d7 Web3 School project.\n5. What your Hackathon idea is, and what problem you want to solve.\n\nAuthentic reflection is encouraged. You may also share your screen to show notes, repo, demo, diagrams, or learning materials.",
+      "status": "NOT_STARTED",
+      "points": 5,
+      "deadline": "2026-06-08T11:59:00",
+      "available": true,
+      "proofRequired": true
+    }
+  ]
+}
