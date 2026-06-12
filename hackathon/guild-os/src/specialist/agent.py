@@ -87,10 +87,12 @@ async def handle_task_send(message: dict) -> dict:
     Steps:
     1. Parse task payload
     2. Simulate task execution (GLM-5.1 call)
-    3. Compute SHA-256 of deliverable
-    4. Return task/delivered with hash
+    3. Write deliverable file to disk
+    4. Compute SHA-256 of deliverable
+    5. Return task/delivered with hash + file path
     """
     from datetime import datetime, timezone
+    from pathlib import Path
 
     task_id = message.get("task_id", str(uuid.uuid4()))
 
@@ -105,6 +107,13 @@ async def handle_task_send(message: dict) -> dict:
         indent=2,
     )
 
+    # Write deliverable to disk so Orchestrator pre-check can verify it
+    deliverable_dir = Path("deliverables")
+    deliverable_dir.mkdir(exist_ok=True)
+    deliverable_path = deliverable_dir / f"{task_id}.json"
+    deliverable_path.write_text(deliverable_content)
+    logger.info("Deliverable written to %s", deliverable_path)
+
     # Compute SHA-256
     deliverable_hash = "sha256:" + hashlib.sha256(
         deliverable_content.encode()
@@ -113,7 +122,7 @@ async def handle_task_send(message: dict) -> dict:
     result = {
         "type": "task/delivered",
         "task_id": task_id,
-        "deliverable_reference": f"deliverables/{task_id}.json",
+        "deliverable_reference": str(deliverable_path),
         "deliverable_hash": deliverable_hash,
         "on_chain_tx": None,  # Set when hash is committed on-chain
     }
