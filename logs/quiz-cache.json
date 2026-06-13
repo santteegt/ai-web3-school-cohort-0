@@ -67,7 +67,20 @@
     "structured-output",
     "ai-privacy",
     "langgraph",
-    "lora"
+    "lora",
+    "tool-schema",
+    "golden-set",
+    "plurality",
+    "data-boundary",
+    "vibe-coding",
+    "fine-tuning",
+    "evaluation",
+    "rollup",
+    "amm",
+    "agent-memory",
+    "policy",
+    "key-safety",
+    "eval-harness"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
