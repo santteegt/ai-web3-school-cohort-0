@@ -1,0 +1,22 @@
+[project]
+name = "caw-afc-poc"
+version = "0.1.0"
+description = "CAW × Moloch-Agent Minimal PoC"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "cobo-agentic-wallet>=0.1.0",
+    "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+]
+
+[tool.setuptools]
+py-modules = ["orchestrator", "caw_client", "pact"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
