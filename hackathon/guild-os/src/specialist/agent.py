@@ -108,7 +108,7 @@ async def handle_task_send(message: dict) -> dict:
     )
 
     # Write deliverable to disk so Orchestrator pre-check can verify it
-    deliverable_dir = Path("deliverables")
+    deliverable_dir = Path("output")
     deliverable_dir.mkdir(exist_ok=True)
     deliverable_path = deliverable_dir / f"{task_id}.json"
     deliverable_path.write_text(deliverable_content)

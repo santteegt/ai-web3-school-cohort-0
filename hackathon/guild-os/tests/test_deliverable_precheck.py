@@ -13,8 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -220,7 +219,7 @@ class TestReportSurfacedAtGate2:
             "evaluator_verdict": "PASS",
         }
         with patch("builtins.input", return_value="y"):
-            gate_2_deliverable_acceptance("deliverables/test.json", report)
+            gate_2_deliverable_acceptance("output/test.json", report)
 
         captured = capsys.readouterr()
         assert "GATE 2" in captured.out
@@ -239,7 +238,7 @@ class TestReportSurfacedAtGate2:
             "evaluator_verdict": "FAIL — hash mismatch",
         }
         with patch("builtins.input", return_value="n"):
-            gate_2_deliverable_acceptance("deliverables/bad.json", report)
+            gate_2_deliverable_acceptance("output/bad.json", report)
 
         captured = capsys.readouterr()
         assert "❌" in captured.out
