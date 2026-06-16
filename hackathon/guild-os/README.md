@@ -116,8 +116,8 @@ uv run python -m src.specialist.agent
 ### Tests & Lint
 
 ```bash
-uv run pytest tests/ -v    # Run all tests
-uv run ruff check src/     # Lint check
+make test   # uv run pytest tests/
+make lint   # uv run ruff check src/ tests/
 ```
 
 ---
