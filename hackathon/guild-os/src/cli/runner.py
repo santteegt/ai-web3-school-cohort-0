@@ -200,7 +200,7 @@ async def run_coordination_loop(
     # For MVP, write the deliverable to a temp location if it doesn't exist
     if deliverable_path and not Path(deliverable_path).exists():
         # Write simulated deliverable to disk for pre-check
-        deliv_dir = Path("deliverables")
+        deliv_dir = Path("output")
         deliv_dir.mkdir(exist_ok=True)
         actual_path = deliv_dir / f"{delegate_msg_id}.json"
         actual_path.write_text(json.dumps({

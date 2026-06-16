@@ -13,7 +13,6 @@ Tests cover:
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -340,7 +339,7 @@ class TestCoordinationRunner:
                 })
                 mock_hti.return_value = {"scope": "test", "estimated_cost_wei": 0, "deadline_iso": "N/A"}
                 mock_hts.return_value = {
-                    "deliverable_reference": "deliverables/test.json",
+                    "deliverable_reference": "output/test.json",
                     "deliverable_hash": "sha256:abc",
                     "task_id": "msg-2",
                 }
