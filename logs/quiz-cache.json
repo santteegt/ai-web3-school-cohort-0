@@ -80,7 +80,21 @@
     "agent-memory",
     "policy",
     "key-safety",
-    "eval-harness"
+    "eval-harness",
+    "contract-write",
+    "stablecoin",
+    "context-engineering",
+    "web3-tool-use",
+    "wallet-tool",
+    "privacy-security-sovereignty",
+    "quantization",
+    "x402",
+    "prompt-injection",
+    "payment-intent",
+    "deep-exploration-paths",
+    "contract-read",
+    "tool-log",
+    "machine-payment"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
