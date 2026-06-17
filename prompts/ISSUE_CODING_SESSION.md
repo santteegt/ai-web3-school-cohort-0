@@ -135,8 +135,22 @@ DO:
 HARD CONSTRAINTS (violating any of these fails review)
 ═══════════════════════════════════════════════════════════════════════════════
 
-- NETWORK: Base mainnet (chain_id 8453) ONLY. Never Ethereum mainnet, never Base Sepolia.
-  All explorer links: https://basescan.org/tx/...
+- NETWORK: Two networks are permitted — never any other chain, never hardcode a chain ID.
+  Network is set via CHAIN_ID env var; all on-chain code must read it from env.
+
+  | Purpose                        | Network      | chain_id | Explorer                          |
+  |-------------------------------|--------------|----------|-----------------------------------|
+  | Isolated component testing     | Base Sepolia | 84532    | https://sepolia.basescan.org/tx/  |
+  | Deployment / full integration  | Base         | 8453     | https://basescan.org/tx/          |
+
+  Use Base Sepolia when testing your component in isolation and the contract or service
+  you are calling has a Sepolia deployment. Use Base for all cross-module integration
+  work. Any tx hash submitted as evidence (tx_hashes.md, VALIDATION_PLAN.md) MUST be
+  on Base.
+
+  Before assuming a testnet contract exists, check RISKS.md and PROTOTYPING_RESOURCES.md.
+  If a dependency (AgentFightClub, EAS, ERC-8004) has no Base Sepolia deployment, skip
+  testnet and work directly on Base.
 - SECRETS: No private keys, API keys, or seed phrases in source or commits.
   Keys live in .env only. If you need a new env var, add it to .env.example with a
   placeholder — never the real value.
