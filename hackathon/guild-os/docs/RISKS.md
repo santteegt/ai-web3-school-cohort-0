@@ -6,15 +6,13 @@
 
 ## F1 — AgentFightClub Skill API Unavailable (HIGH) ✅ CLEARED Day 9
 
-**Status:** ClawBank API confirmed working. Full flow tested Day 9: `launch` → `commit` → `propose` → `vote` → `settle` all passing. `experiments/agent-fight-club/moloch_agent_test.py` is the live probe. This risk is substantially reduced — monitor for unexpected outages during build days only.
-
-**Fallback (still available):** Deploy Moloch v3 DAO directly via **DAOhaus SDK** (open source, audited, 4 years production). Trigger only if ClawBank becomes unavailable mid-build. Do not debug for more than 2 hours before switching.
+**Status:** moloch-agent CLI confirmed working. Full flow tested Day 9: `summon` → `propose` → `vote` → `settle` all passing. `experiments/agent-fight-club/moloch_agent_test.py` is the live probe. This risk is substantially reduced. The `experiments/caw-afc-poc` demonstrates that tx execution can be forwarded to a CAW wallet by building DAO intents via moloch-agent with flags `--build-only --full`
 
 ---
 
 ## F2 — ERC-8004 `giveFeedback()` Caller Constraint (HIGH)
 
-**Why:** `giveFeedback()` caller CANNOT be the agent's own wallet — Sybil protection. The guild contract or Marco's EOA must be the caller.
+**Why:** `giveFeedback()` caller CANNOT be the agent's own wallet — Sybil protection. The guild contract (DAO) or Marco's EOA must be the caller.
 
 **Impact:** `settle()` must complete → reputation proposal submitted → DAO vote passed → `giveFeedback()` called. All three preconditions must hold. If the Specialist calls it directly, the tx reverts silently.
 
@@ -121,8 +119,5 @@ If you find yourself doing any of these without an explicit decision, stop:
 
 - Building a second specialist agent path — one pair is the demo
 - Integrating Mem0 or LangChain memory — JSON file is the stub; ship it
-- Querying the live ERC-8004 registry for real — hardcoded profile is correct
-- Building any frontend UI — terminal windows are the demo surface
-- Implementing ragequit on-chain — document the path only
 - Deploying extra contracts beyond what the demo needs — Base mainnet, keep lean
 - Adding ERC-8183 — AgentFightClub settle is the payment story
