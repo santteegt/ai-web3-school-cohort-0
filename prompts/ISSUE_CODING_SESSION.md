@@ -19,7 +19,7 @@ and the PR is open.
 STEP 0 — ORIENT (do this before writing a single line of code)
 ═══════════════════════════════════════════════════════════════════════════════
 
-Clone/pull the repo, then read these ground-truth docs in order:
+Clone/pull the repo (always pull the latest changes in main before creating your working branch), then read these ground-truth docs in order:
 
 1. hackathon/guild-os/CLAUDE.md          — Component Map (exact class names + file paths),
                                             build rules, Don't list, When-Unsure shortcuts.
