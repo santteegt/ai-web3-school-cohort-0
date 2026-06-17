@@ -23,8 +23,10 @@ Step 10  Orchestrator runs automated pre-check
                         ── [GATE 2: Human accepts/rejects deliverable] ──
 Step 11  On acceptance: Orchestrator sends task/accepted via A2A
 Step 12  AgentFightClub settle() releases payment
-Step 13  ERC-8004 reputation write-back (6 fields)
-Step 14  Guild context updated to SETTLED
+Step 13a  Guild submits reputation feedback proposal via AgentFightClub
+                        ── [GATE 3: Human votes to approve feedback] ──
+Step 13b  On proposal pass: ERC-8004 giveFeedback() with 6 fields
+Step 14   Guild context updated to SETTLED
 Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 ```
 
@@ -146,17 +148,31 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 - Moloch v3 releases treasury funds to Specialist wallet
 - **Basescan tx #2** — settlement tx link saved to `../../submissions/tx_hashes.md`
 
-### Step 13 — ERC-8004 Reputation Write-Back
+### Step 13a — Guild Submits Reputation Feedback Proposal
 
-- Orchestrator calls `ERC-8004.giveFeedback()` with 6 fields:
+- After `settle()` confirms, Orchestrator calls `AgentFightClub.propose(reputation_data)` encoding the 6 feedback fields as the proposal payload:
   1. `task_type` — capability ID matching mandate category
-  2. `deliverable_hash` — SHA-256 committed before acceptance
-  3. `acceptance_timestamp` — on-chain block timestamp
+  2. `deliverable_hash` — SHA-256 from the EAS attestation
+  3. `acceptance_timestamp` — on-chain block timestamp from Gate 2
   4. `payment_wei` — amount released in `settle()`
-  5. `guild_address` — cross-guild traceability
+  5. `guild_address` — guild contract address
   6. `a2a_task_id` — links to A2A message log
+- Reputation proposal ID saved to `guild_context.json`: `reputation_proposal_id`
+- **Why DAO proposal:** Reputation changes are governed by the guild DAO — no single party (not even the Orchestrator) can unilaterally write to a Specialist's on-chain profile. The vote record is a permanent accountability trail alongside the delivery attestation.
+
+### **GATE 3 — Feedback Approval (Human)**
+
+- Human reviews the proposed reputation entry before it goes on-chain
+- Human calls `AgentFightClub.vote(reputation_proposal_id, approve=True)`
+- CLI prompt: `Approve reputation feedback for Specialist? [y/N]`
+- Execution halts until `y` — `giveFeedback()` is NOT called without this vote
+
+### Step 13b — ERC-8004 Reputation Write-Back (on proposal pass)
+
+- Orchestrator calls `ERC-8004.giveFeedback()` with the 6 fields from the approved proposal
 - Emits `DeliveryRecorded` event on Base mainnet
-- **Caller constraint:** Guild contract address or Marco's EOA — NOT the Specialist Agent's wallet
+- **Basescan tx #3** — reputation tx link saved to `../../submissions/tx_hashes.md`
+- **Caller constraint:** Guild contract address or Marco's EOA — NOT the Specialist Agent's wallet (F2)
 
 ### Step 14 — Guild Context Updated
 
@@ -178,7 +194,7 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 | AgentFightClub `launch` + `commit` + `settle` | **Real** | ClawBank API or DAOhaus fallback |
 | AgentFightClub `propose` + `vote` | **Real** | Pre-staged before live demo |
 | ERC-8004 profile reads (before/after) | **Real** | 8004scan API; cached JSON fallback |
-| ERC-8004 `giveFeedback()` write | **Real** | Via guild contract or Marco's EOA |
+| ERC-8004 reputation proposal + `giveFeedback()` | **Real** | DAO proposal via AgentFightClub; vote must pass before write-back executes |
 | A2A task flow (all 7 message events) | **Real** | A2A SDK v1.0.0 |
 | GLM-5.1 task execution (via Hermes) | **Real** | Locked task type Day 9; Hermes agent deployed as Specialist |
 | EAS deliverable attestation | **Real** | `EASClient.attest()` on Base mainnet; UID embedded in A2A message and guild context |

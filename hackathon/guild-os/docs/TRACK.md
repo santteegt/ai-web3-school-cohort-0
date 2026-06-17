@@ -48,7 +48,7 @@
 | Would this problem exist without AI? | Yes — but it becomes a DAO for humans (Raid Guild). AI adds: agents as first-class economic members, long-horizon execution, A2A capability matching. |
 | Would this problem exist without Web3? | Yes — but reputation is a platform row, payment depends on a platform, mandate history is editable. Web3 provides: ERC-8004 portable reputation, Moloch v3 enforced treasury, tamper-proof delivery records. |
 | Who initiates / executes / pays / accepts / arbitrates? | Initiates: Human. Executes: Specialist Agent. Pays: Guild treasury. Accepts: Human. Arbitrates: AgentFightClub governance + human vote. Chain is complete. |
-| How is the result verified? | Specialist creates an EAS attestation of the deliverable hash before acceptance; attestation UID is embedded in the A2A result and cross-referenced in the ERC-8004 delivery record. Payment only releases after hash match + human approval. |
+| How is the result verified? | Specialist creates an EAS attestation of the deliverable hash before acceptance; attestation UID is embedded in the A2A result. After settlement, the guild submits a DAO reputation proposal (`AgentFightClub.propose()` encoding 6 feedback fields); human votes (Gate 3); only on vote pass does `giveFeedback()` fire — ensuring reputation is a governed, multi-party record, not a unilateral write. Payment releases after hash match + human approval; reputation updates only after DAO vote. |
 
 ---
 

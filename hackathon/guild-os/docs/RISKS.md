@@ -16,11 +16,13 @@
 
 **Why:** `giveFeedback()` caller CANNOT be the agent's own wallet — Sybil protection. The guild contract or Marco's EOA must be the caller.
 
-**Impact:** `settle()` must complete before `giveFeedback()` is called, AND the caller must be set up correctly before demo day. If the Specialist calls it directly, the tx reverts silently.
+**Impact:** `settle()` must complete → reputation proposal submitted → DAO vote passed → `giveFeedback()` called. All three preconditions must hold. If the Specialist calls it directly, the tx reverts silently.
 
-**Fallback:** Route `giveFeedback()` through Marco's (human founder's) EOA wallet. Functionally equivalent — the on-chain `DeliveryRecorded` event is identical.
+**New flow (2026-06-17):** `giveFeedback()` is now gated behind a DAO proposal (`AgentFightClub.propose()` with reputation data payload) and a human vote (Gate 3). The caller of `giveFeedback()` is still the guild contract address or Marco's EOA — this constraint is unchanged.
 
-**Trigger:** If the first `giveFeedback()` call reverts, check `msg.sender` before assuming any deeper issue. If the issue is the caller, switch to Marco's EOA immediately.
+**Fallback:** Route `giveFeedback()` through Marco's (human founder's) EOA wallet after the DAO vote. If the reputation proposal vote mechanism fails, call `giveFeedback()` directly post-`settle()` using Marco's EOA and note the governance step as a "design exhibit."
+
+**Trigger:** If the reputation proposal vote tx reverts, check that `settle()` confirmed first. If `giveFeedback()` reverts, check `msg.sender` before assuming any deeper issue.
 
 ---
 

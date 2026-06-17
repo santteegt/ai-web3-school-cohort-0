@@ -18,7 +18,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | Component | Location | What It Does |
 |-----------|----------|--------------|
 | `OrchestratorServer` | `src/orchestrator/server.py` | MCP server entry point; registers all tools |
-| `OrchestratorTools` | `src/orchestrator/tools.py` | 7 tools: `guild_launch`, `talent_query`, `task_invite`, `task_delegate`, `deliverable_review`, `settle`, `reputation_write` |
+| `OrchestratorTools` | `src/orchestrator/tools.py` | 8 tools: `guild_launch`, `talent_query`, `task_invite`, `task_delegate`, `deliverable_review`, `settle`, `reputation_propose`, `reputation_write` |
 | `SpecialistAgent` | `src/specialist/agent.py` | Python A2A server; runs GLM-5.1 long-horizon tasks; responds to task messages |
 | `A2AClient` | `src/shared/a2a.py` | Sends/receives A2A messages (invite, quote, send, delivered, accepted) |
 | `EASClient` | `src/shared/eas.py` | `attest()` and `get_attestation()` — Specialist creates EAS delivery attestation; UID embedded in A2A `task/delivered` |
@@ -54,6 +54,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 - **Which library for Base mainnet calls?** → `web3.py` with Alchemy RPC; see `docs/TECH_STACK.md`
 - **AgentFightClub API or DAOhaus SDK?** → Check `docs/RISKS.md` § Decision Log; ClawBank API confirmed working Day 9
 - **Which wallet calls `giveFeedback()`?** → Guild contract address or Marco's EOA — NOT the Specialist wallet (see `docs/RISKS.md §F2`)
+- **Does `reputation_write` need a DAO proposal first?** → Yes — call `reputation_propose` first (submits `AgentFightClub.propose()` with 6 feedback fields); Gate 3 halts for human vote; only then call `reputation_write` → `giveFeedback()`. Never skip the proposal.
 - **EAS schema not found on `attest()`?** → Check `DELIVERY_SCHEMA_UID` in `.env`; register schema on Base mainnet if missing (see `docs/RISKS.md §F7`)
 - **New A2A message type needed?** → Check `src/shared/a2a.py` for the established pattern; don't invent new types without updating `docs/MVP_FLOW.md`
 - **Is this feature in scope?** → Check `docs/MVP_FLOW.md`; if not in the 15 steps, it's out of scope
@@ -77,7 +78,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | 8 | Jun 8 | Validation | `launch` live · A2A test green · GLM-5.1 task locked |
 | 9 | Jun 9 | Wallets + Identity | Both wallets on-chain · ERC-8004 agentIds · Guild funded |
 | 10 | Jun 10 | A2A + Execution | Hash on Base mainnet · Basescan tx #1 saved |
-| 11 | Jun 11 | Settlement + Reputation + E2E | `settle()` tx · ERC-8004 delta · Smoke test passes |
+| 11 | Jun 11 | Settlement + Reputation + E2E | `settle()` tx · reputation proposal passed (Gate 3) · ERC-8004 delta · Smoke test passes |
 | 12 | Jun 12 | Demo Prep | README, demo script, all artifacts — repo clean |
 | 13 | Jun 13 | Submission | Submitted before 12:00 UTC+8 (04:00 UTC) |
 

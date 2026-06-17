@@ -38,9 +38,11 @@ Fallback: DAOhaus SDK direct Moloch v3 deploy if ClawBank API fails on Day 8.
 |---|-------|----------|--------|
 | 3.1 | Orchestrator ERC-8004 profile readable | JSON: `name`, `capabilities[]`, `a2a_endpoint`, `delivery_count` | `[ ]` |
 | 3.2 | Specialist ERC-8004 **before-state** captured | Saved to `hackathon/notes/erc8004_specialist_before.json` | `[ ]` |
-| 3.3 | `giveFeedback()` call succeeds after `settle()` | Tx hash; Basescan `DeliveryRecorded` event | `[ ]` |
-| 3.4 | Specialist profile **after-state** shows +1 delivery | 6 fields present: task_type, hash, timestamp, wei, guild, a2a_id | `[ ]` |
-| 3.5 | Before/after delta printable side-by-side for demo | CLI command or script outputs both states | `[ ]` |
+| 3.3 | Reputation feedback proposal submitted via `AgentFightClub.propose()` | Proposal ID returned; `reputation_proposal_id` saved to `guild_context.json` | `[ ]` |
+| 3.4 | Human votes to approve reputation proposal (Gate 3) | Tx hash; `AgentFightClub.vote(reputation_proposal_id, approve=True)` confirmed | `[ ]` |
+| 3.5 | `giveFeedback()` call succeeds after proposal passes | Tx hash; **Basescan tx #3** `DeliveryRecorded` event; saved to `submissions/tx_hashes.md` | `[ ]` |
+| 3.6 | Specialist profile **after-state** shows +1 delivery | 6 fields present: task_type, hash, timestamp, wei, guild, a2a_id | `[ ]` |
+| 3.7 | Before/after delta printable side-by-side for demo | CLI command or script outputs both states | `[ ]` |
 
 Fallback: serve cached profile JSON if 8004scan API is down.
 
@@ -103,7 +105,8 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 | 7.4 | `task_delegate` | Sends A2A `task/send`; message ID in trace (4.5) | `[x]` |
 | 7.5 | `deliverable_review` | Returns `{hash_match, format_valid, size_check, evaluator_verdict}` | `[x]` |
 | 7.6 | `settle` | Returns settlement tx hash matching check 2.5 | `[x]` stub |
-| 7.7 | `reputation_write` | Returns `DeliveryRecorded` tx hash matching check 3.3 | `[x]` stub |
+| 7.7 | `reputation_propose` | Returns reputation proposal ID; saved to `guild_context.json` (check 3.3) | `[ ]` |
+| 7.8 | `reputation_write` | Returns `DeliveryRecorded` tx hash after Gate 3 vote passes (check 3.5) | `[ ]` |
 
 ---
 
@@ -115,7 +118,8 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 | 8.2 | Gate 0.5 | Quote displayed; `Accept quote? [y/N]` halts execution | `[ ]` |
 | 8.3 | Gate 1 | `vote` called only after human approves; rejection tested | `[x]` |
 | 8.4 | Gate 2 | `settle()` called only after human accepts deliverable | `[ ]` |
-| 8.5 | Dispute stub | Gate 2 rejection → `task_state: DISPUTED` in JSON; no settlement tx | `[ ]` |
+| 8.5 | Gate 3 | `giveFeedback()` called only after human approves reputation proposal vote | `[ ]` |
+| 8.6 | Dispute stub | Gate 2 rejection → `task_state: DISPUTED` in JSON; no settlement tx | `[ ]` |
 
 ---
 
