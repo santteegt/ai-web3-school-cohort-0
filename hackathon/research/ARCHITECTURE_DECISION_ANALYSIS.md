@@ -96,7 +96,7 @@ For each GuildOS MVP feature, this matrix scores how much each architecture appr
 | ERC-8004 profile read | ✅ HTTP call to 8004scan API | ⚠️ HTTP call via web tool | ⚠️ HTTP call via web tool | ⚠️ HTTP call via MCP/web tool |
 | ERC-8004 reputation write-back | ✅ eth_sendTransaction (ZeroDev) | ❌ No EVM signing | ❌ No EVM signing (exec workaround) | ❌ No EVM signing |
 | ZeroDev wallet signing | ✅ zerodev-aa Python SDK | ❌ No built-in EVM support | ⚠️ Possible via exec to Python script | ❌ No built-in EVM support |
-| On-chain deliverable hash commit | ✅ ZeroDev UserOp | ❌ No EVM signing | ⚠️ Exec to Python script | ❌ No EVM signing |
+| EAS deliverable attestation | ✅ `web3.py` `EASClient.attest()` | ❌ No EVM signing | ⚠️ Exec to Python script | ❌ No EVM signing |
 | Human review CLI (Gate 1, Gate 2) | ✅ Python input() or simple web form | ✅ Via OpenClaw messaging gateway | ✅ Via Hermes Telegram/Discord | ⚠️ Manual Claude Code prompt |
 | Guild context store (JSON mock) | ✅ Python dict / JSON file | ✅ `workspace-create` + `memory-post` | ✅ SQLite session store | ✅ File tool |
 | AgentFightClub treasury settlement | ✅ moloch-agent subprocess | ✅ `fightclub_payment` MCP tool | ⚠️ moloch-agent via exec | ⚠️ MCP server call |

@@ -17,8 +17,8 @@ Step 5   Specialist submits membership proposal
                         ── [GATE 1: Human votes to approve] ──
 Step 6   Orchestrator delegates task via A2A
 Step 7   Specialist decomposes and executes (GLM-5.1)
-Step 8   Specialist hashes deliverable; commits hash on-chain
-Step 9   Specialist sends task/delivered via A2A
+Step 8   Specialist hashes deliverable; creates EAS attestation; returns UID
+Step 9   Specialist sends task/delivered via A2A (includes attestation UID)
 Step 10  Orchestrator runs automated pre-check
                         ── [GATE 2: Human accepts/rejects deliverable] ──
 Step 11  On acceptance: Orchestrator sends task/accepted via A2A
@@ -99,11 +99,19 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 - Executes plan with tool use loop: plan → tool call → result → next step
 - Full trace logged to `hackathon/notes/glm_trace_{date}.json`
 
-### Step 8 — Specialist Hashes Deliverable; Commits On-Chain
+### Step 8 — Specialist Hashes Deliverable; Creates EAS Attestation
 
 - Specialist computes SHA-256 of deliverable file
-- Commits hash to guild contract via `eth_sendTransaction` on Base mainnet
-- **Basescan tx #1** — deliverable hash commit link saved to `../../submissions/tx_hashes.md`
+- Creates EAS attestation via `EASClient.attest()` on Base mainnet:
+  - Schema: `DELIVERY_SCHEMA_UID` (registered once before demo)
+  - Recipient: guild contract address
+  - Data: `{deliverableHash, taskType, guildContract, paymentAmount}`
+  - Revocable: `false` (delivery is permanent)
+- Attestation UID returned (stable, non-zero, immutable on-chain)
+- **easscan attestation #1** — `https://base.easscan.org/attestation/{uid}` saved to `../../submissions/tx_hashes.md`
+- UID stored in `guild_context.json`: `attestation_uid`
+
+> **Why EAS over raw `eth_sendTransaction`:** The attestation is cryptographically signed by the Specialist's key (proving the *Specialist* made this delivery claim), carries a stable UID that cross-references the A2A message and ERC-8004 record, and is queryable by judges via easscan without ABI parsing. Same gas cost as a raw tx.
 
 ### Step 9 — Specialist Sends task/delivered via A2A
 
@@ -112,7 +120,8 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
   {
     "deliverable_reference": "path/to/output",
     "deliverable_hash": "sha256:...",
-    "on_chain_tx": "0x..."
+    "attestation_uid": "0x...",
+    "attestation_url": "https://base.easscan.org/attestation/0x..."
   }
   ```
 
@@ -172,7 +181,7 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 | ERC-8004 `giveFeedback()` write | **Real** | Via guild contract or Marco's EOA |
 | A2A task flow (all 7 message events) | **Real** | A2A SDK v1.0.0 |
 | GLM-5.1 task execution (via Hermes) | **Real** | Locked task type Day 9; Hermes agent deployed as Specialist |
-| On-chain deliverable hash commit | **Real** | Always real — one `eth_sendTransaction` |
+| EAS deliverable attestation | **Real** | `EASClient.attest()` on Base mainnet; UID embedded in A2A message and guild context |
 | Cobo CAW spending ceiling (Pact) | **Real** — TSS local node; x402 pipeline confirmed working Day 8 |
 | ERC-8004 talent query (capability matching) | **Mocked** | Hardcoded Specialist profile |
 | Guild context store | **Mocked** | JSON file per guild session |

@@ -16,6 +16,7 @@
 | Treasury + governance | AgentFightClub (Moloch v3) | — | ClawBank API (primary — live, timing issue being fixed); DAOhaus SDK (fallback — see RISKS.md F1) |
 | Agent identity | ERC-8004 Registry | Base mainnet | IdentityRegistry: `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
 | Reputation | ERC-8004 ReputationRegistry | Base mainnet | `0x8004B663056A597Dffe9eCcC1965A193B7388713`; caller constraint applies |
+| Deliverable attestation | EAS (Ethereum Attestation Service) | v1.0.1 (Base mainnet) | EAS contract: `0x4200000000000000000000000000000000000021`; SchemaRegistry: `0x4200000000000000000000000000000000000020`; called via `web3.py` ABI (no Python SDK); UID links A2A message ↔ ERC-8004 record |
 | Chain interaction | `web3.py` | 6.x | All Base mainnet RPC calls; transaction submission and event reads |
 | RPC | Alchemy | Base mainnet | Primary; Infura as backup endpoint |
 | Network | **Base mainnet** | chain_id 8453 | AFC has no Base Sepolia support (no contracts, no subgraph); mainnet required |
@@ -37,6 +38,7 @@ guild-os/
 │   │   └── agent.py           # A2A HTTP server — receives tasks, runs GLM-5.1
 │   ├── shared/
 │   │   ├── a2a.py             # A2A client: send/receive invite, quote, send, delivered, accepted
+│   │   ├── eas.py             # EASClient: attest(), get_attestation() — deliverable hash commitment
 │   │   ├── erc8004.py         # ERC-8004 interface: register(), giveFeedback(), read profile
 │   │   ├── agentfightclub.py  # AgentFightClub interface: launch, commit, propose, vote, settle
 │   │   └── guild_context.py   # guild_context.json read/write helper
@@ -88,7 +90,7 @@ Receives: `task/send` → executes GLM-5.1 plan → commits hash → sends `task
 - `task/invite` — Orchestrator → Specialist
 - `task/quote` — Specialist → Orchestrator (fields: `scope`, `estimated_cost_wei`, `deadline_iso`)
 - `task/send` — Orchestrator → Specialist (full task payload)
-- `task/delivered` — Specialist → Orchestrator (fields: `deliverable_reference`, `deliverable_hash`, `on_chain_tx`)
+- `task/delivered` — Specialist → Orchestrator (fields: `deliverable_reference`, `deliverable_hash`, `attestation_uid`, `attestation_url`)
 - `task/accepted` — Orchestrator → Specialist (closes loop)
 
 **ERC-8004 caller constraint:** `giveFeedback()` must NOT be called from the Specialist Agent's own wallet. Use the guild contract address or Marco's EOA as the transaction signer. See `docs/RISKS.md §F2`.
@@ -103,6 +105,7 @@ Receives: `task/send` → executes GLM-5.1 plan → commits hash → sends `task
   "member_list": ["0x_orchestrator", "0x_specialist"],
   "task_state": "ACTIVE",
   "deliverable_hash": null,
+  "attestation_uid": null,
   "a2a_task_id": null,
   "proposal_id": null
 }
@@ -123,6 +126,9 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 | `AGENTFIGHTCLUB_API_KEY` | ClawBank Skill API | Optional |
 | `ERC8004_CONTRACT` | IdentityRegistry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
 | `REPUTATION_CONTRACT` | ReputationRegistry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
+| `EAS_CONTRACT` | EAS contract (Base mainnet) | `0x4200000000000000000000000000000000000021` |
+| `EAS_SCHEMA_REGISTRY` | EAS SchemaRegistry (Base mainnet) | `0x4200000000000000000000000000000000000020` |
+| `DELIVERY_SCHEMA_UID` | Registered GuildOS delivery schema UID | Register once; hardcode in `.env` |
 | `ORCHESTRATOR_A2A_PORT` | Orchestrator A2A endpoint port | `10000` |
 | `SPECIALIST_A2A_PORT` | Specialist A2A endpoint port | `10001` |
 
@@ -154,3 +160,4 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 | 2026-06-08 | AgentFightClub API | ✅ Functional (ClawBank API live) | Probe script confirms working; proposal sponsorship timing issue — fix in progress Day 9 |
 | — | GLM-5.1 demo task type | TBD Day 9 | Test 3 prompts; lock the winner |
 | — | ZeroDev session keys | Demoted to design exhibit | CAW is primary wallet; ZeroDev kept as fallback reference only |
+| 2026-06-11 | Deliverable hash commitment | **EAS attestation replaces raw `eth_sendTransaction`** | EAS `attest()` is cryptographically signed by Specialist, carries a stable UID cross-referenced in A2A message and ERC-8004 record, and is queryable on easscan without ABI parsing — strictly better than a raw event emission at the same gas cost (see `hackathon/research/EAS_ANALYSIS.md`) |

@@ -56,9 +56,27 @@
 
 **Network (updated 2026-06-08):** All on-chain operations run on **Base mainnet (chain_id 8453)** — AFC has no Base Sepolia support. Explorer: https://basescan.org
 
-**Mitigation already designed in:** Pre-stage `propose` and `vote` steps before the live demo. Only `settle()`, hash commit, and `giveFeedback()` happen live. Have pre-recorded Basescan screenshots as a last resort. Pre-fund agent wallets with enough ETH before Day 10 build starts.
+**Mitigation already designed in:** Pre-stage `propose` and `vote` steps before the live demo. Only `settle()`, EAS attestation, and `giveFeedback()` happen live. Have pre-recorded Basescan + easscan screenshots as a last resort. Pre-fund agent wallets with enough ETH before Day 10 build starts.
 
 **Trigger:** If any live tx takes more than 30 seconds, show the pre-recorded screenshot and note network latency.
+
+---
+
+## F7 — EAS Schema Not Registered Before Demo (LOW)
+
+**Why:** `EASClient.attest()` requires a registered schema UID (`DELIVERY_SCHEMA_UID`). If the schema is not registered on Base mainnet before Step 8, the `attest()` call will fail with a schema revert.
+
+**Mitigation:** Register the GuildOS delivery schema **once** before Day 10 build begins:
+```
+schema:   "bytes32 deliverableHash, string taskType, address guildContract, uint256 paymentAmount"
+resolver: 0x0000000000000000000000000000000000000000  (no resolver for MVP)
+revocable: false
+```
+Hardcode the returned UID in `.env` as `DELIVERY_SCHEMA_UID`. Log the registration tx to `submissions/tx_hashes.md`.
+
+**Fallback:** If `DELIVERY_SCHEMA_UID` is missing at runtime, fall back to raw `eth_sendTransaction` emitting a `DeliverableCommitted(bytes32 hash)` event — sufficient proof of hash commitment, but loses the stable UID and easscan explorer link.
+
+**Trigger:** If `attest()` reverts with a schema-related error, verify `DELIVERY_SCHEMA_UID` in `.env` before debugging further.
 
 ---
 
@@ -69,7 +87,7 @@ Apply **only** if three or more components fail simultaneously with no resolutio
 | Evidence | Tier B approach |
 |----------|-----------------|
 | A2A exchange | Orchestrator → Specialist message log (provable from logs without on-chain settlement) |
-| On-chain hash | One `eth_sendTransaction` from Marco's EOA to a minimal deployed contract — no AgentFightClub, no ERC-8004 |
+| EAS attestation | One `eth_sendTransaction` from Marco's EOA emitting a `DeliverableCommitted(bytes32 hash)` event — simpler than full EAS but still on-chain proof |
 | GLM-5.1 evidence | Full execution trace terminal log |
 | Design artifacts | Moloch v3 config, ERC-4337 session key policy, ERC-8004 reputation schema shown as code + diagrams |
 
@@ -91,6 +109,7 @@ Tier B **drops:** Treasury via AgentFightClub, formal governance, automated sett
 | 2026-06-09 | A2A SDK v1.0.0 | ✅ All 5 gates validated | Metadata accepted; coordination loop working |
 | 2026-06-09 | GLM-5.1 / Hermes | ✅ Specialist stack locked | Hermes agent deployed; long-horizon prompt locked |
 | — | ZeroDev session keys | Demoted — design exhibit only | CAW handles spending limits via Pacts |
+| 2026-06-11 | Deliverable hash commitment | ✅ **EAS attestation adopted** | Replaces raw `eth_sendTransaction`; Specialist signs attestation via EASClient; UID embedded in A2A result (see EAS_ANALYSIS.md) |
 
 ---
 

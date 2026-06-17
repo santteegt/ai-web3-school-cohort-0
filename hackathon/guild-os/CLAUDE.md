@@ -21,6 +21,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `OrchestratorTools` | `src/orchestrator/tools.py` | 7 tools: `guild_launch`, `talent_query`, `task_invite`, `task_delegate`, `deliverable_review`, `settle`, `reputation_write` |
 | `SpecialistAgent` | `src/specialist/agent.py` | Python A2A server; runs GLM-5.1 long-horizon tasks; responds to task messages |
 | `A2AClient` | `src/shared/a2a.py` | Sends/receives A2A messages (invite, quote, send, delivered, accepted) |
+| `EASClient` | `src/shared/eas.py` | `attest()` and `get_attestation()` — Specialist creates EAS delivery attestation; UID embedded in A2A `task/delivered` |
 | `ERC8004` | `src/shared/erc8004.py` | `register()` and `giveFeedback()` — caller constraint: NOT the agent's own wallet |
 | `AgentFightClub` | `src/shared/agentfightclub.py` | `launch`, `commit`, `propose`, `vote`, `settle` — ClawBank API or DAOhaus SDK fallback |
 | `GuildContext` | `src/shared/guild_context.py` | Read/write `guild_context.json`; the mock guild state store |
@@ -53,6 +54,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 - **Which library for Base mainnet calls?** → `web3.py` with Alchemy RPC; see `docs/TECH_STACK.md`
 - **AgentFightClub API or DAOhaus SDK?** → Check `docs/RISKS.md` § Decision Log; ClawBank API confirmed working Day 9
 - **Which wallet calls `giveFeedback()`?** → Guild contract address or Marco's EOA — NOT the Specialist wallet (see `docs/RISKS.md §F2`)
+- **EAS schema not found on `attest()`?** → Check `DELIVERY_SCHEMA_UID` in `.env`; register schema on Base mainnet if missing (see `docs/RISKS.md §F7`)
 - **New A2A message type needed?** → Check `src/shared/a2a.py` for the established pattern; don't invent new types without updating `docs/MVP_FLOW.md`
 - **Is this feature in scope?** → Check `docs/MVP_FLOW.md`; if not in the 15 steps, it's out of scope
 

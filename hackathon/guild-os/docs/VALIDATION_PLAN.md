@@ -63,14 +63,18 @@ Fallback: text-body JSON if `Message.metadata` extension fields are rejected.
 
 ---
 
-## 5. On-Chain Deliverable Hash — Day 10
+## 5. EAS Deliverable Attestation — Day 10
 
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
 | 5.1 | GLM-5.1 deliverable file produced | File in repo; non-zero size | `[ ]` |
-| 5.2 | SHA-256 hash computed | Hash matches what Specialist sends in `task/delivered` | `[ ]` |
-| 5.3 | Hash committed to guild contract | **Basescan tx #1** saved to `../../submissions/tx_hashes.md` | `[ ]` |
-| 5.4 | Contract storage confirms hash readable | `eth_call` returns matching value | `[ ]` |
+| 5.2 | SHA-256 hash computed | Hash matches `deliverable_hash` in `task/delivered` message | `[ ]` |
+| 5.3 | EAS attestation created via `EASClient.attest()` | Attestation UID returned (non-zero); tx visible on Basescan | `[ ]` |
+| 5.4 | Attestation readable via SDK or easscan GraphQL | `eas.getAttestation(uid)` or `base.easscan.org/graphql` returns matching data | `[ ]` |
+| 5.5 | Attestation UID embedded in A2A `task/delivered` message | Logged in `a2a_trace_{date}.json`; field `attestation_uid` present | `[ ]` |
+| 5.6 | easscan attestation link navigable | **easscan attestation #1** — `https://base.easscan.org/attestation/{uid}` saved to `../../submissions/tx_hashes.md` | `[ ]` |
+
+Prerequisite: `DELIVERY_SCHEMA_UID` registered once against SchemaRegistry `0x4200000000000000000000000000000000000020` on Base mainnet before Step 8.
 
 ---
 
