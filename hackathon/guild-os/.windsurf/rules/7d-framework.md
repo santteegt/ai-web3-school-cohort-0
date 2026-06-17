@@ -29,6 +29,6 @@ Python multi-service AI agent coordination app on Base Sepolia. 7-day hackathon 
 - No keys in source — env vars only
 - Human gates halt execution; wait for `y/N`
 - `giveFeedback()`: guild contract or Marco's EOA — NOT Specialist wallet
-- Log A2A to `hackathon/notes/a2a_trace_{date}.json`
-- Log GLM-5.1 to `hackathon/notes/glm_trace_{date}.json`
+- Log A2A to `./logs/a2a_trace_{date}.json`
+- Log GLM-5.1 to `./logs/glm_trace_{date}.json`
 - Run `pytest tests/` and `ruff check src/` before marking done

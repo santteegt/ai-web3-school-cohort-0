@@ -17,7 +17,7 @@ from pathlib import Path
 IDENTITY_CONTRACT = os.getenv("ERC8004_CONTRACT", "0x8004A818BFB912233c491871b3d84c89A494BD9e")
 REPUTATION_CONTRACT = os.getenv("REPUTATION_CONTRACT", "0x8004B663056A597Dffe9eCcC1965A193B7388713")
 
-NOTES_DIR = Path(__file__).parent.parent.parent.parent.parent / "hackathon" / "notes"
+NOTES_DIR = Path(__file__).parent / "logs"
 
 
 def read_profile(agent_id: int) -> dict:
@@ -51,7 +51,7 @@ def give_feedback(
 
 
 def capture_snapshot(agent_id: int, filename: str) -> dict:
-    """Read and save agent profile to hackathon/notes/{filename}.json."""
+    """Read and save agent profile to ./logs/{filename}.json."""
     profile = read_profile(agent_id)
     path = NOTES_DIR / f"{filename}.json"
     path.parent.mkdir(parents=True, exist_ok=True)

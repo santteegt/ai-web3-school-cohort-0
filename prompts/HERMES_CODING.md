@@ -101,7 +101,7 @@ then the on-chain economic actions that ride on them.
                                       src/orchestrator/tools.py. The 5 message types
                                       (invite, quote, send, delivered, accepted) between
                                       Orchestrator (:10000) and Specialist (:10001), each
-                                      logged to hackathon/notes/a2a_trace_{date}.json.
+                                      logged to ./logs/a2a_trace_{date}.json.
   #8  Orchestrator MCP server      — src/orchestrator/server.py + tools.py. Wire all 7
                                       tools so the server boots and every tool is callable.
                                       Stubs are acceptable for integrations not yet built
@@ -133,8 +133,8 @@ HARD CONSTRAINTS (violating any of these fails review)
 - giveFeedback() CALLER: ERC-8004 giveFeedback() is NOT called from the Specialist's own
   wallet — it reverts (RISKS §F2). Route via the guild contract or Marco's EOA. (Relevant
   if your work touches reputation_write; respect it even in stubs.)
-- LOGGING: Every A2A message → hackathon/notes/a2a_trace_{date}.json. Every on-chain call
-  → log the tx hash and print the Basescan URL, and append to ../../submissions/tx_hashes.md.
+- LOGGING: Every A2A message → ./logs/a2a_trace_{date}.json. Every on-chain call
+  → log the tx hash and print the Basescan URL, and append to ./logs/tx_hashes.md.
 - SCOPE: Build only what is in the 15-step MVP_FLOW. No UI. No second specialist path. No
   live ERC-8004 talent query (hardcoded profile is correct). No on-chain ragequit.
 - DEPENDENCIES: Any new package goes in requirements.txt in the same PR.
@@ -149,7 +149,7 @@ DEFINITION OF DONE — PER ISSUE (do not open a PR until all are true)
 3. pytest tests/ — all green. Add tests for the new behavior; do not rely on existing ones.
 4. ruff check src/ — zero errors.
 5. Code uses only Component Map names and stays inside MVP_FLOW scope.
-6. Any on-chain tx hash is logged to ../../submissions/tx_hashes.md with a Basescan link.
+6. Any on-chain tx hash is logged to ./logs/tx_hashes.md with a Basescan link.
 
 If a primary integration (e.g. ClawBank API for #1, A2A metadata for #9) fails, switch to
 the documented fallback in RISKS.md, note it in the PR, and keep going. Do not debug a

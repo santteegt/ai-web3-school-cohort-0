@@ -145,13 +145,13 @@ make lint   # uv run ruff check src/ tests/
 |----------|----------|
 | Deliverable hash commit — Basescan tx #1 | _TBD_ |
 | AgentFightClub settlement — Basescan tx #2 | _TBD_ |
-| Specialist ERC-8004 before-state | `hackathon/notes/erc8004_specialist_before.json` |
-| Specialist ERC-8004 after-state | `hackathon/notes/erc8004_specialist_after.json` |
-| A2A message trace (all 7 events) | `logs/a2a_trace_*.json` |
-| GLM-5.1 execution trace | `logs/glm_trace_*.json` |
+| Specialist ERC-8004 before-state | `./logs/erc8004_specialist_before.json` |
+| Specialist ERC-8004 after-state | `./logs/erc8004_specialist_after.json` |
+| A2A message trace (all 7 events) | `./logs/a2a_trace_*.json` |
+| GLM-5.1 execution trace | `./logs/glm_trace_*.json` |
 | Demo video (3–5 min) | _TBD_ |
 
-→ Full evidence checklist: [`../../submissions/tx_hashes.md`](../../submissions/tx_hashes.md)
+→ Full evidence checklist: [`./logs/tx_hashes.md`](./logs/tx_hashes.md)
 
 ---
 

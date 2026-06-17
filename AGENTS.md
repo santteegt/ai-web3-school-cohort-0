@@ -532,7 +532,7 @@ These two files together define the **complete working contract** for the projec
 | Secrets | No private keys, API keys, or seed phrases in source files — `.env` only |
 | Human gates | Every Gate (0, 0.5, 1, 2) must halt and wait for explicit `y`; use `src/cli/gates.py` |
 | After coding | Run `pytest tests/` + `ruff check src/` before considering a task done |
-| Tx hashes | Log every on-chain tx hash to `../../submissions/tx_hashes.md` immediately |
+| Tx hashes | Log every on-chain tx hash to `./logs/tx_hashes.md` immediately |
 
 ---
 

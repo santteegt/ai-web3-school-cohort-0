@@ -31,7 +31,7 @@
 |------------------|----------------------|
 | GLM-5.1 for long-horizon execution | **Hermes agent** deployed as Specialist; uses Z.AI GLM-5.1 API; decomposes task into ≥ 3-step plan, executes with ReAct tool-use loop, produces structured output (stack locked Day 9) |
 | Web3 proof | Deliverable SHA-256 hash attested via **EAS** on Base mainnet before human acceptance; attestation UID embedded in A2A `task/delivered` message and queryable on `base.easscan.org` |
-| Long-horizon task run log | `hackathon/notes/glm_trace_{date}.json` — every step: plan → tool call → result → next step |
+| Long-horizon task run log | `./logs/glm_trace_{date}.json` — every step: plan → tool call → result → next step |
 | Agentic dev context | Orchestrator→Specialist A2A task delegation is the Web3-native agent workflow |
 
 **Key demo evidence for Z.AI track:**

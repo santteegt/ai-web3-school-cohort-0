@@ -36,8 +36,8 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 
 ## While Building
 
-- All A2A messages must be logged to `hackathon/notes/a2a_trace_{date}.json`
-- All GLM-5.1 calls must log plan + tool calls + output to `hackathon/notes/glm_trace_{date}.json`
+- All A2A messages must be logged to `./logs/a2a_trace_{date}.json`
+- All GLM-5.1 calls must log plan + tool calls + output to `./logs/glm_trace_{date}.json`
 - Every human gate (0, 0.5, 1, 2) must halt execution and wait for explicit `y` — never skip or auto-proceed
 - All on-chain calls must log the tx hash and print the Base mainnet Basescan URL (https://basescan.org/tx/...)
 - Guild state transitions must update `guild_context.json` immediately after the on-chain event
@@ -46,7 +46,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 
 - Run `pytest tests/` — all tests must pass
 - Run `ruff check src/` — no lint errors
-- Log any new on-chain tx hashes to `../../submissions/tx_hashes.md`
+- Log any new on-chain tx hashes to `./logs/tx_hashes.md`
 - Add new error patterns to `docs/VALIDATION_PLAN.md` under the relevant section
 
 ## When Unsure

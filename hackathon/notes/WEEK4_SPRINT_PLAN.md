@@ -90,7 +90,7 @@ Day 10 opens with ERC-8004 `register()` for both agents and guild formation befo
 | Orchestrator sends A2A `task/send` (full task: description, input, acceptance criteria, deadline, budget) | **Real** | Full payload logged; message ID captured |
 | Specialist decomposes task into ≥3-step plan using GLM-5.1 | **Real** | Plan logged before execution begins |
 | GLM-5.1 executes task (multi-step; tool use loop) | **Real** | Output file written; structured and non-empty |
-| Execution trace logged | **Real** | Save to `hackathon/notes/glm_trace_<date>.json` |
+| Execution trace logged | **Real** | Save to `./logs/glm_trace_<date>.json` |
 | Specialist computes SHA-256 of deliverable | **Real** | Hash string printed and confirmed |
 
 ### Afternoon (3h): On-chain hash + A2A delivery
@@ -102,7 +102,7 @@ Day 10 opens with ERC-8004 `register()` for both agents and guild formation befo
 | Specialist sends A2A `task/delivered` to Orchestrator (deliverable reference + hash) | **Real** | Message logged; hash in message matches on-chain hash |
 | Orchestrator automated pre-check: hash present ✅ · format valid ✅ · size > 0 ✅ | **Real (minimal)** | Pre-check report printed |
 | Orchestrator presents deliverable + pre-check report to human. **Gate 2**: `Accept deliverable? [y/N]` | **Real** | CLI prompt halts; execution waits |
-| Export A2A trace log | **Real** | Save `hackathon/notes/a2a_trace_<date>.json` (all 7 message events) |
+| Export A2A trace log | **Real** | Save `./logs/a2a_trace_<date>.json` (all 7 message events) |
 
 ### Day 10 Deliverables
 
@@ -132,7 +132,7 @@ Day 10 opens with ERC-8004 `register()` for both agents and guild formation befo
 | Confirm Specialist wallet balance increased by expected amount | **Real** | `eth_getBalance` before/after diff |
 | Orchestrator calls `ERC-8004.giveFeedback()` with 6 fields: task_type, deliverable_hash, acceptance_timestamp, payment_wei, guild_address, a2a_task_id | **Real** | Basescan `DeliveryRecorded` event emitted |
 | **Caller note**: `giveFeedback()` must be called from Marco's EOA or the guild contract — NOT from the Specialist wallet. Verify caller before submitting. | — | If it reverts → switch to Marco's EOA (F2 fallback) |
-| Capture Specialist ERC-8004 **after-state** | **Real** | Save to `hackathon/notes/erc8004_specialist_after.json` |
+| Capture Specialist ERC-8004 **after-state** | **Real** | Save to `./logs/erc8004_specialist_after.json` |
 | Generate before/after delta (side-by-side CLI output or script) | **Real** | Confirm: delivery_count +1, all 6 fields present |
 | Update `guild_context.json`: `task_state: SETTLED` | **Real (JSON file)** | — |
 
@@ -148,8 +148,8 @@ Day 10 opens with ERC-8004 `register()` for both agents and guild formation befo
 
 ### Day 11 Deliverables
 
-- [ ] **Basescan tx #2**: AgentFightClub settlement link — saved to `submissions/tx_hashes.md`
-- [ ] `erc8004_specialist_after.json` committed to `hackathon/notes/`
+- [ ] **Basescan tx #2**: AgentFightClub settlement link — saved to `./logs/tx_hashes.md`
+- [ ] `erc8004_specialist_after.json` committed to `./logs`
 - [ ] Before/after delta: delivery_count delta + all 6 fields visible
 - [ ] Smoke test Run 1: passes end-to-end
 - [ ] Smoke test Run 2: passes (different input)
@@ -189,7 +189,7 @@ Day 10 opens with ERC-8004 `register()` for both agents and guild formation befo
 | Write demo script (2 pages): what to say at each step, which terminal to show, pre-staged steps checklist | `hackathon/notes/DEMO_SCRIPT.md` |
 | Create `submissions/tx_hashes.md`: all Basescan links, agent wallet addresses, ERC-8004 agentIds | Submission artifact |
 | Pre-stage the demo: run the membership proposal + vote steps so only the final 3 txs happen live | State saved in `guild_context.json` |
-| Fallback evidence assembled: pre-recorded Basescan screenshots for each critical tx | `hackathon/notes/screenshots/` |
+| Fallback evidence assembled: pre-recorded Basescan screenshots for each critical tx | `./logs/screenshots/` |
 | Final git status: `git add . && git commit -m "Week 4 build complete — submission ready" && git push` | Clean repo on GitHub |
 
 ### Day 12 Deliverables

@@ -53,7 +53,7 @@ Validates that both agent profiles are readable and that the Specialist's delive
 | # | Check | Evidence | Status |
 |---|---|---|---|
 | 3.1 | Orchestrator Agent ERC-8004 profile readable via 8004scan API | JSON response with: `name`, `capabilities[]`, `a2a_endpoint`, `delivery_count` | `[ ]` |
-| 3.2 | Specialist Agent ERC-8004 profile readable; **before-state** captured | Snapshot saved to `hackathon/notes/erc8004_specialist_before.json` | `[ ]` |
+| 3.2 | Specialist Agent ERC-8004 profile readable; **before-state** captured | Snapshot saved to `./logs/erc8004_specialist_before.json` | `[ ]` |
 | 3.3 | `recordDelivery()` call succeeds after `settle()` | Tx hash; Basescan shows `DeliveryRecorded` event | `[ ]` |
 | 3.4 | Specialist ERC-8004 profile **after-state** shows +1 delivery record | Six fields present: task_type, deliverable_hash, acceptance_timestamp, payment_wei, guild_address, a2a_task_id | `[ ]` |
 | 3.5 | Before/after delta is demo-ready (printable side-by-side) | Script or CLI command that outputs both states for live demo | `[ ]` |
@@ -75,7 +75,7 @@ Validates A2A SDK v1.0.0 message exchange across both agent harnesses.
 | 4.5 | A2A `task/send` (full task delegation) sent Orchestrator → Specialist | Full payload logged: task description, input data, acceptance criteria, deadline, budget | `[ ]` |
 | 4.6 | A2A `task/delivered` received Specialist → Orchestrator (deliverable ref + SHA-256 hash) | Hash matches the file committed on-chain (check 5.2) | `[ ]` |
 | 4.7 | A2A `task/accepted` sent Orchestrator → Specialist after human acceptance | Message logged; Specialist receives confirmation | `[ ]` |
-| 4.8 | Full A2A message log exported | File `hackathon/notes/a2a_trace_<date>.json` with all seven message events | `[ ]` |
+| 4.8 | Full A2A message log exported | File `./logs/a2a_trace_<date>.json` with all seven message events | `[ ]` |
 
 ---
 
@@ -101,7 +101,7 @@ Validates that the Specialist Agent completes a real task using GLM-5.1 long-hor
 | 6.1 | GLM-5.1 API key configured and reachable | Test call returns non-error response | `[ ]` |
 | 6.2 | Specialist Agent decomposes task into a multi-step plan | Plan logged with ≥ 3 steps before execution begins | `[ ]` |
 | 6.3 | Specialist Agent completes all plan steps and produces structured output | Output file written; format matches acceptance criteria from A2A task message | `[ ]` |
-| 6.4 | Agent execution trace logged (each step: plan → tool call → result → next step) | Trace file `hackathon/notes/glm_trace_<date>.json`; readable for demo | `[ ]` |
+| 6.4 | Agent execution trace logged (each step: plan → tool call → result → next step) | Trace file `./logs/glm_trace_<date>.json`; readable for demo | `[ ]` |
 | 6.5 | Orchestrator automated pre-check passes on deliverable | Pre-check report: hash present ✅, format valid ✅, size > 0 ✅ | `[ ]` |
 
 ---
@@ -162,10 +162,10 @@ Artifacts to assemble for the Casual Hackathon submission form.
 | 10.3 | Deliverable hash commit — Basescan tx link | Saved in `submissions/tx_hashes.md` | `[ ]` |
 | 10.4 | AgentFightClub settlement — Basescan tx link | Saved in `submissions/tx_hashes.md` | `[ ]` |
 | 10.5 | Specialist Agent wallet address | Saved in `submissions/tx_hashes.md` | `[ ]` |
-| 10.6 | ERC-8004 Specialist profile before/after screenshots | `hackathon/notes/erc8004_*.json` + screenshots | `[ ]` |
-| 10.7 | A2A message trace log | `hackathon/notes/a2a_trace_<date>.json` | `[ ]` |
+| 10.6 | ERC-8004 Specialist profile before/after screenshots | `./logs/erc8004_*.json` + screenshots | `[ ]` |
+| 10.7 | A2A message trace log | `./logs/a2a_trace_<date>.json` | `[ ]` |
 | 10.8 | Cobo CAW key code/config (Cobo track requirement) | Anonymized config snippet in README | `[ ]` |
-| 10.9 | GLM-5.1 long-horizon task run log (Z.AI track evidence) | `hackathon/notes/glm_trace_<date>.json` | `[ ]` |
+| 10.9 | GLM-5.1 long-horizon task run log (Z.AI track evidence) | `./logs/glm_trace_<date>.json` | `[ ]` |
 | 10.10 | Team info: name, role, wallet address, contact | In submission form | `[ ]` |
 
 ---

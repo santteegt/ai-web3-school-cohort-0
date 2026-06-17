@@ -33,8 +33,8 @@ Python multi-service AI agent coordination app on Base Sepolia. 7-day hackathon 
 - No keys in source files — env vars only
 - Human gates must halt and wait for `y/N`
 - `giveFeedback()` caller: guild contract or Marco's EOA (NOT Specialist wallet — F2)
-- Log all A2A messages to `hackathon/notes/a2a_trace_{date}.json`
-- Log all GLM-5.1 traces to `hackathon/notes/glm_trace_{date}.json`
+- Log all A2A messages to `./logs/a2a_trace_{date}.json`
+- Log all GLM-5.1 traces to `./logs/glm_trace_{date}.json`
 
 ## Don't
 

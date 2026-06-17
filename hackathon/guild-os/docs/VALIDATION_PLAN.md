@@ -37,7 +37,7 @@ Fallback: DAOhaus SDK direct Moloch v3 deploy if ClawBank API fails on Day 8.
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
 | 3.1 | Orchestrator ERC-8004 profile readable | JSON: `name`, `capabilities[]`, `a2a_endpoint`, `delivery_count` | `[ ]` |
-| 3.2 | Specialist ERC-8004 **before-state** captured | Saved to `hackathon/notes/erc8004_specialist_before.json` | `[ ]` |
+| 3.2 | Specialist ERC-8004 **before-state** captured | Saved to `./logs/erc8004_specialist_before.json` | `[ ]` |
 | 3.3 | Reputation feedback proposal submitted via `AgentFightClub.propose()` | Proposal ID returned; `reputation_proposal_id` saved to `guild_context.json` | `[ ]` |
 | 3.4 | Human votes to approve reputation proposal (Gate 3) | Tx hash; `AgentFightClub.vote(reputation_proposal_id, approve=True)` confirmed | `[ ]` |
 | 3.5 | `giveFeedback()` call succeeds after proposal passes | Tx hash; **Basescan tx #3** `DeliveryRecorded` event; saved to `submissions/tx_hashes.md` | `[ ]` |
@@ -59,7 +59,7 @@ Fallback: serve cached profile JSON if 8004scan API is down.
 | 4.5 | `task/send` delivered with full payload | Logged; message ID captured | `[x]` |
 | 4.6 | `task/delivered` received with hash matching on-chain commit | Hash cross-check passes | `[x]` |
 | 4.7 | `task/accepted` sent after human acceptance | Specialist receives confirmation | `[x]` |
-| 4.8 | Full A2A trace log exported | `hackathon/notes/a2a_trace_{date}.json` with 7 events | `[x]` |
+| 4.8 | Full A2A trace log exported | `./logs/a2a_trace_{date}.json` with 7 events | `[x]` |
 
 Fallback: text-body JSON if `Message.metadata` extension fields are rejected.
 
@@ -74,7 +74,7 @@ Fallback: text-body JSON if `Message.metadata` extension fields are rejected.
 | 5.3 | EAS attestation created via `EASClient.attest()` | Attestation UID returned (non-zero); tx visible on Basescan | `[ ]` |
 | 5.4 | Attestation readable via SDK or easscan GraphQL | `eas.getAttestation(uid)` or `base.easscan.org/graphql` returns matching data | `[ ]` |
 | 5.5 | Attestation UID embedded in A2A `task/delivered` message | Logged in `a2a_trace_{date}.json`; field `attestation_uid` present | `[ ]` |
-| 5.6 | easscan attestation link navigable | **easscan attestation #1** — `https://base.easscan.org/attestation/{uid}` saved to `../../submissions/tx_hashes.md` | `[ ]` |
+| 5.6 | easscan attestation link navigable | **easscan attestation #1** — `https://base.easscan.org/attestation/{uid}` saved to `./logs/tx_hashes.md` | `[ ]` |
 
 Prerequisite: `DELIVERY_SCHEMA_UID` registered once against SchemaRegistry `0x4200000000000000000000000000000000000020` on Base mainnet before Step 8.
 
@@ -88,7 +88,7 @@ Prerequisite: `DELIVERY_SCHEMA_UID` registered once against SchemaRegistry `0x42
 | 6.2 | Demo task type locked | Decision noted in `docs/TECH_STACK.md` Decision Log; Hermes agent deployed Day 9 | `[x]` |
 | 6.3 | Task decomposed into ≥ 3-step plan | Plan logged before execution | `[ ]` |
 | 6.4 | All plan steps complete; structured output produced | Output file written; format matches acceptance criteria | `[ ]` |
-| 6.5 | Execution trace logged | `hackathon/notes/glm_trace_{date}.json` readable | `[ ]` |
+| 6.5 | Execution trace logged | `./logs/glm_trace_{date}.json` readable | `[ ]` |
 | 6.6 | Orchestrator pre-check passes | Report: hash ✅ · format ✅ · size ✅ | `[ ]` |
 
 Fallback: deterministic prompt "Write a Python function that computes SHA-256 of a given input and returns the hex digest" if all 3 task types fail on Day 8.
@@ -143,10 +143,10 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 | 10.1 | README with problem, architecture, run instructions, SDK used | `README.md` | `[ ]` |
 | 10.2 | Basescan tx #1 (hash commit) link in README | `submissions/tx_hashes.md` | `[ ]` |
 | 10.3 | Basescan tx #2 (settlement) link in README | `submissions/tx_hashes.md` | `[ ]` |
-| 10.4 | ERC-8004 before/after screenshots | `hackathon/notes/` | `[ ]` |
+| 10.4 | ERC-8004 before/after screenshots | `./logs/` | `[ ]` |
 | 10.5 | CAW Pact config (live proof) | README §SDK Used | `[ ]` |
-| 10.6 | GLM-5.1 trace log | `hackathon/notes/glm_trace_*.json` | `[ ]` |
-| 10.7 | A2A trace log | `hackathon/notes/a2a_trace_*.json` | `[ ]` |
+| 10.6 | GLM-5.1 trace log | `./logs/glm_trace_*.json` | `[ ]` |
+| 10.7 | A2A trace log | `./logs/a2a_trace_*.json` | `[ ]` |
 | 10.8 | Demo video (3–5 min) | Loom / YouTube link | `[ ]` |
 | 10.9 | Team info (name, wallet, contact) | Submission form | `[ ]` |
 
@@ -205,7 +205,7 @@ All sections must be present and complete in `README.md` before Day 13:
 | 11.5.5 | Specialist Agent wallet address (CAW) | `submissions/tx_hashes.md` | `[ ]` |
 | 11.5.6 | ERC-8004 agentId for both agents | `submissions/tx_hashes.md` + README | `[ ]` |
 | 11.5.7 | ERC-8004 `DeliveryRecorded` event tx | `submissions/tx_hashes.md` | `[ ]` |
-| 11.5.8 | Screenshots of Basescan pages for each tx | `hackathon/notes/screenshots/` | `[ ]` |
+| 11.5.8 | Screenshots of Basescan pages for each tx | `./logs/screenshots/` | `[ ]` |
 
 ### 11.6 Compliance and Security Boundaries
 

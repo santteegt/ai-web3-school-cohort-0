@@ -48,7 +48,7 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 
 ### Step 3 — Orchestrator Hunts for Talent
 
-- Orchestrator queries ERC-8004 registry for agents with matching capability claims (MVP: hardcoded Specialist profile from `hackathon/notes/erc8004_specialist_before.json`)
+- Orchestrator queries ERC-8004 registry for agents with matching capability claims (MVP: hardcoded Specialist profile from `./logs/erc8004_specialist_before.json`)
 - Returns shortlist to human for review
 
 ### **GATE 0 — Candidate Selection (Human)**
@@ -93,13 +93,13 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
     "budget_wei": 1000000000000000
   }
   ```
-- Message ID captured; logged to `hackathon/notes/a2a_trace_{date}.json`
+- Message ID captured; logged to `./logs/a2a_trace_{date}.json`
 
 ### Step 7 — Specialist Decomposes and Executes (GLM-5.1)
 
 - Specialist decomposes task into ≥ 3-step plan using GLM-5.1 long-horizon planning
 - Executes plan with tool use loop: plan → tool call → result → next step
-- Full trace logged to `hackathon/notes/glm_trace_{date}.json`
+- Full trace logged to `./logs/glm_trace_{date}.json`
 
 ### Step 8 — Specialist Hashes Deliverable; Creates EAS Attestation
 
@@ -110,7 +110,7 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
   - Data: `{deliverableHash, taskType, guildContract, paymentAmount}`
   - Revocable: `false` (delivery is permanent)
 - Attestation UID returned (stable, non-zero, immutable on-chain)
-- **easscan attestation #1** — `https://base.easscan.org/attestation/{uid}` saved to `../../submissions/tx_hashes.md`
+- **easscan attestation #1** — `https://base.easscan.org/attestation/{uid}` saved to `./logs/tx_hashes.md`
 - UID stored in `guild_context.json`: `attestation_uid`
 
 > **Why EAS over raw `eth_sendTransaction`:** The attestation is cryptographically signed by the Specialist's key (proving the *Specialist* made this delivery claim), carries a stable UID that cross-references the A2A message and ERC-8004 record, and is queryable by judges via easscan without ABI parsing. Same gas cost as a raw tx.
@@ -146,7 +146,7 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 
 - Orchestrator calls AgentFightClub `settle(guild_address, specialist_wallet)`
 - Moloch v3 releases treasury funds to Specialist wallet
-- **Basescan tx #2** — settlement tx link saved to `../../submissions/tx_hashes.md`
+- **Basescan tx #2** — settlement tx link saved to `./logs/tx_hashes.md`
 
 ### Step 13a — Guild Submits Reputation Feedback Proposal
 
@@ -171,13 +171,13 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 
 - Orchestrator calls `ERC-8004.giveFeedback()` with the 6 fields from the approved proposal
 - Emits `DeliveryRecorded` event on Base mainnet
-- **Basescan tx #3** — reputation tx link saved to `../../submissions/tx_hashes.md`
+- **Basescan tx #3** — reputation tx link saved to `./logs/tx_hashes.md`
 - **Caller constraint:** Guild contract address or Marco's EOA — NOT the Specialist Agent's wallet (F2)
 
 ### Step 14 — Guild Context Updated
 
 - `guild_context.json` updated: `task_state: "SETTLED"`
-- Specialist ERC-8004 after-state captured to `hackathon/notes/erc8004_specialist_after.json`
+- Specialist ERC-8004 after-state captured to `./logs/erc8004_specialist_after.json`
 
 ### Step 15 — Rejection / Dispute Path (Stub)
 
