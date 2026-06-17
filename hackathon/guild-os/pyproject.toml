@@ -39,6 +39,12 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "strict"
+# web3 v7.x and uvicorn v0.49 import from websockets.legacy (deprecated since
+# websockets 14.0). We can't fix this — it's upstream code. Suppress only this
+# specific origin so other deprecation warnings stay visible.
+filterwarnings = [
+    "ignore::DeprecationWarning:websockets.legacy",
+]
 
 [tool.ruff]
 target-version = "py311"
