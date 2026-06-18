@@ -1,0 +1,29 @@
+{
+  "name": "a2a-eas-reputation-loop",
+  "version": "1.0.0",
+  "description": "PoC: A2A + EAS + ERC-8004 coordination workflow on Base Sepolia",
+  "type": "module",
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "build": "tsc",
+    "demo": "tsx src/demo.ts",
+    "dev:server": "tsx src/dev-server.ts",
+    "identity": "tsx src/identity.ts",
+    "feedback": "tsx src/feedback.ts"
+  },
+  "dependencies": {
+    "@a2a-js/sdk": "^0.3.13",
+    "@ethereum-attestation-service/eas-sdk": "^2.7.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.0",
+    "express": "^4.19.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0"
+  }
+}

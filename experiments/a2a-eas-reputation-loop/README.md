@@ -1,0 +1,124 @@
+# A2A × EAS × ERC-8004 Reputation Loop — Base Sepolia PoC
+
+> Proof-of-concept: two AI agents coordinate on Base Sepolia using three interlocked standards.
+
+---
+
+## What This PoC Proves
+
+This demo shows that **ERC-8004**, **A2A**, and **EAS** can form a coherent trust loop:
+
+1. **Identity** (ERC-8004): Both agents register on-chain. DEV's registration embeds its A2A endpoint, linking identity → discoverability.
+2. **Coordination** (A2A): CLIENT discovers DEV via its AgentCard and delegates a task over JSON-RPC. Coordination metadata (agentIds, taskId) rides in `message.metadata`.
+3. **Proof of work** (EAS): DEV generates `hello_world.py`, computes its keccak256 hash, and calls `EAS.attest()`. The returned attestation UID is **embedded inside the A2A delivery artifact** — the critical three-standards interlink.
+4. **Verification** (A2A + EAS): CLIENT recomputes the hash from the delivered content, fetches the EAS attestation on-chain, and asserts they match. Only on match does CLIENT send A2A "accepted".
+5. **Reputation** (ERC-8004): CLIENT calls `ReputationRegistry.giveFeedback()`, writing a scored record. `getSummary()` proves the count went 0 → 1.
+
+---
+
+## The 6-Step Workflow
+
+```
+STEP 1  CLIENT & DEV  →  IdentityRegistry.register(agentURI)  →  agentId (ERC-721 NFT)
+            DEV's agentURI encodes { services: [{ name: "A2A", endpoint: "http://localhost:3001" }] }
+
+STEP 2  CLIENT  →  ClientFactory.createFromUrl() resolves /.well-known/agent-card.json
+               →  client.sendMessage() → POST /a2a/jsonrpc { method: "message/send",
+                              message: "Write a hello world script in Python",
+                              metadata: { client_agent_id, dev_agent_id, task_id } }
+
+STEP 3  DEV     →  Generates hello_world.py
+               →  keccak256(content) = deliverableHash
+               →  EAS.attest({ deliverableHash, taskType, a2aTaskId, devAgent })  →  attestationUID
+               →  Returns A2A artifact: { deliverable, deliverable_hash, eas_attestation_uid, eas_schema_uid }
+
+STEP 4  CLIENT  →  Recomputes keccak256(received content)
+               →  eas.getAttestation(uid)  →  checks attested hash == recomputed hash  →  ✅ MATCH
+               →  POST /a2a { method: "message/send", message: "Accepted", metadata: { status: "accepted" } }
+
+STEP 5  DEV     →  Receives "Accepted"
+               →  Replies with A2A review request: "Please rate the delivery"
+
+STEP 6  CLIENT  →  ReputationRegistry.giveFeedback(devAgentId, 100, 0, "code", "accepted", endpoint, feedbackURI, feedbackHash)
+               →  getSummary(devAgentId, [CLIENT_ADDRESS], "code", "") → count: 0 → 1  ✅
+```
+
+---
+
+## How the Three Standards Interlink
+
+```
+ERC-8004 (Identity)          A2A (Coordination)           EAS (Proof of Work)
+─────────────────────        ──────────────────────        ─────────────────────
+DEV registers agentId   ──→  agentId in task metadata ──→  devAgent in schema
+DEV's agentURI has A2A  ──→  CLIENT resolves endpoint
+endpoint                     
+                             A2A artifact embeds     ────→  EAS attestation UID
+                             eas_attestation_uid            (bytes32 deliverableHash
+                                                             attested on-chain by DEV)
+                             
+ERC-8004 reputation     ←──  CLIENT "accepts" via A2A ←──  Only after EAS hash verified
+feedbackURI embeds           after EAS verification
+eas_attestation_uid
+```
+
+**Key**: The EAS UID travels through the A2A artifact → CLIENT verification → ERC-8004 feedbackJSON. This chain proves work occurred, was verified, and was recorded on-chain.
+
+---
+
+## Required Environment Variables
+
+Create `.env` in this directory:
+
+```bash
+PRIVATE_KEY_CLIENT=<pre-funded Base Sepolia EOA private key>
+PRIVATE_KEY_DEV=<pre-funded Base Sepolia EOA private key>
+# Optional:
+# RPC_URL=https://sepolia.base.org
+# DEV_PORT=3001
+```
+
+**Never commit `.env`** — it is in `.gitignore`.
+
+---
+
+## How to Run
+
+```bash
+# Install dependencies (one-time)
+pnpm install
+
+# Run the full 6-step demo (starts DEV server inline)
+pnpm run demo
+
+# Or run the DEV A2A server in a separate terminal:
+pnpm run dev:server
+# then in another terminal:
+pnpm run demo
+```
+
+The demo is **idempotent**: if `state.json` has existing agentIds or schema UID, they are reused.
+
+---
+
+## On-Chain Evidence
+
+See `RUN_LOG.md` for live tx hashes and attestation UIDs from each run.
+
+| Item | Explorer |
+|------|----------|
+| ERC-8004 registration | https://sepolia.basescan.org/tx/<txHash> |
+| EAS attestation | https://base-sepolia.easscan.org/attestation/view/<uid> |
+| giveFeedback tx | https://sepolia.basescan.org/tx/<txHash> |
+
+---
+
+## Project Files (SevenD Level-1)
+
+| File | Purpose |
+|------|---------|
+| `Product.md` | Backlog, acceptance criteria, SDK design decision |
+| `Tech.md` | Stack, structure, setup/run/test commands, env vars |
+| `CLAUDE.md` | Agent rules for this sub-directory |
+| `RUN_LOG.md` | Live on-chain evidence (generated by demo) |
+| `state.json` | Persisted run state (gitignored — local only) |
