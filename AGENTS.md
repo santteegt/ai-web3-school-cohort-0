@@ -536,4 +536,47 @@ These two files together define the **complete working contract** for the projec
 
 ---
 
-*Last updated: 2026-06-06 | Agent: Sensei (Claude via Cowork) | v1.7 — added Section 16: Casual Hackathon platform management*
+## 18. MCP Servers — Recommended Local Configuration
+
+Add the following to `.claude/settings.local.json` (gitignored) to enable agent-assisted EVM interaction and live documentation lookup during development.
+
+```json
+{
+  "mcpServers": {
+    "evm-mcp-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@mcpdotdirect/evm-mcp-server"
+      ],
+      "env": {
+        "ETHERSCAN_API_KEY": "<API-KEY>"
+      }
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "<API-KEY>"
+      }
+    }
+  }
+}
+```
+
+### Server Reference
+
+| Server | Package | Purpose |
+|--------|---------|---------|
+| `evm-mcp-server` | `@mcpdotdirect/evm-mcp-server` | Tools for interacting with 60+ EVM-compatible networks — balance checks, contract reads/writes, tx lookup, ENS resolution, NFT info, and more |
+| `context7` | hosted at `mcp.context7.com` | Up-to-date code docs for any library or framework injected directly into the agent prompt — avoids stale training-data answers |
+
+### Setup Notes
+
+- `CONTEXT7_API_KEY` — obtain from [context7.com](https://context7.com) and store in `.claude/settings.local.json` under `mcpServers.context7.headers`; never commit the key
+- `evm-mcp-server` requires Node/npx; set `ETHERSCAN_API_KEY` in its `env` block to enable contract ABI fetching and network metadata lookups via Etherscan
+- Both servers are passive tools — the agent decides when to call them; no auto-execution
+
+---
+
+*Last updated: 2026-06-18 | Agent: Sensei (Claude via Claude Code) | v1.8 — added Section 18: MCP server configuration*
