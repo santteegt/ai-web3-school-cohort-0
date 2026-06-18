@@ -72,6 +72,6 @@ body:
       options:
         - label: "No hardcoded private keys or API keys"
         - label: "Base Sepolia only — no mainnet call path"
-        - label: "All A2A messages logged to hackathon/notes/"
+        - label: "All A2A messages logged to ./logs/"
         - label: "Human gate halts execution before irreversible on-chain action"
         - label: "Fallback path documented if external dependency is unavailable"

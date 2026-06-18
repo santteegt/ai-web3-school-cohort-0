@@ -18,15 +18,15 @@ Closes #
 ### GuildOS Constraints
 - [ ] No hardcoded private keys, API keys, or seed phrases
 - [ ] Only Base Sepolia testnet — no mainnet call path
-- [ ] All A2A messages are logged to `hackathon/notes/a2a_trace_{date}.json`
-- [ ] All GLM-5.1 calls are logged to `hackathon/notes/glm_trace_{date}.json`
+- [ ] All A2A messages are logged to `./logs/a2a_trace_{date}.json`
+- [ ] All GLM-5.1 calls are logged to `./logs/glm_trace_{date}.json`
 - [ ] Human gate prompts halt execution and wait for `y/N` — no auto-proceed
 - [ ] `giveFeedback()` is called from guild contract or Marco's EOA — NOT the Specialist wallet
 
 ### Diagnostics
 - [ ] `pytest tests/` passes
 - [ ] `ruff check src/` clean
-- [ ] On-chain tx hashes saved to `../../submissions/tx_hashes.md` (if applicable)
+- [ ] On-chain tx hashes saved to `./logs/tx_hashes.md` (if applicable)
 
 ### Documentation
 - [ ] `docs/TECH_STACK.md` Decision Log updated if a library/API choice changed
