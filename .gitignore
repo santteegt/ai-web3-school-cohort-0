@@ -3,6 +3,7 @@ memory/
 
 # Claude local settings — may contain env vars/secrets
 .claude/settings.local.json
+.mcp.json
 
 # Secrets — never commit these
 .env

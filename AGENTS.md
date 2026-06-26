@@ -538,7 +538,7 @@ These two files together define the **complete working contract** for the projec
 
 ## 18. MCP Servers — Recommended Local Configuration
 
-Add the following to `.claude/settings.local.json` (gitignored) to enable agent-assisted EVM interaction and live documentation lookup during development.
+Add the following to `.mcp.json` (gitignored) to enable agent-assisted EVM interaction and live documentation lookup during development.
 
 ```json
 {
@@ -573,7 +573,7 @@ Add the following to `.claude/settings.local.json` (gitignored) to enable agent-
 
 ### Setup Notes
 
-- `CONTEXT7_API_KEY` — obtain from [context7.com](https://context7.com) and store in `.claude/settings.local.json` under `mcpServers.context7.headers`; never commit the key
+- `CONTEXT7_API_KEY` — obtain from [context7.com](https://context7.com) and store in `.mcp.json` under `mcpServers.context7.headers`; never commit the key
 - `evm-mcp-server` requires Node/npx; set `ETHERSCAN_API_KEY` in its `env` block to enable contract ABI fetching and network metadata lookups via Etherscan
 - Both servers are passive tools — the agent decides when to call them; no auto-execution
 
