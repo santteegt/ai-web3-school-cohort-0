@@ -1,0 +1,22 @@
+[project]
+name = "afc-simple"
+version = "0.1.0"
+description = "Agent Fight Club — ClawBank convenience path PoC"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+]
+
+[tool.setuptools]
+py-modules = ["afc_clawbank"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

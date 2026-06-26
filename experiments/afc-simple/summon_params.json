@@ -1,0 +1,14 @@
+{
+  "daoName": "GuildOS-Simple-PoC",
+  "tokenName": "GUILD",
+  "tokenSymbol": "GLD",
+  "lootTokenName": "GUILD-LOOT",
+  "lootTokenSymbol": "GLOOT",
+  "memberSharesRaw": "100000000000000000000",
+  "votingPeriodInSeconds": 60,
+  "gracePeriodInSeconds": 60,
+  "quorum": 1,
+  "minRetention": 66,
+  "sponsorThreshold": 0,
+  "description": "Summoned via afc-simple PoC"
+}
