@@ -43,8 +43,9 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 ### Step 2 — Orchestrator Registers on ERC-8004
 
 - Orchestrator calls `ERC-8004.register(agentURI)` — ERC-721 agentId minted on Base mainnet
-- Orchestrator publishes A2A Agent Card at `localhost:10000/.well-known/agent.json`
-- Guild is now discoverable via the Orchestrator's A2A endpoint
+- `agentURI` points to a static Agent Card JSON (GitHub raw URL or IPFS) — the Orchestrator
+  is an initiator-only agent; it does not run a live A2A server or receive inbound A2A messages
+- Guild is now discoverable via the ERC-8004 registry entry
 
 ### Step 3 — Orchestrator Hunts for Talent
 

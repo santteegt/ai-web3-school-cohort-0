@@ -5,7 +5,7 @@
 **Track:** Cobo | Agentic Economy × Cobo Agentic Wallet (primary) · Z.AI | Web3 × Long-Horizon Task (secondary)  
 **Event:** [AI × Web3 Agentic Builders Hackathon](https://casualhackathon.com/hackathons/cmpsjubkg0003p80kxuzrdyjy)  
 **Deadline:** 2026-06-13 12:00 UTC+8 · **Demo Day:** 2026-06-14  
-**Network:** Base Sepolia testnet  
+**Network:** Base Sepolia (testing) · Base (deployment / full integration)  
 **Team:** Santiago ([@santteegt](https://github.com/santteegt)) — Solo
 
 ---
@@ -92,26 +92,56 @@ cp .env.example .env
 
 | Variable | Purpose | Required |
 |----------|---------|----------|
-| `PRIVATE_KEY` | Founder/Orchestrator EOA signing key (hex) | Yes |
-| `SPECIALIST_WALLET_ADDRESS` | Specialist Agent wallet address | Yes |
-| `RPC_URL` | Base mainnet RPC endpoint | Default: `https://mainnet.base.org` |
-| `GLM_API_KEY` | Z.AI GLM-5.1 API | Yes |
-| `ORCHESTRATOR_PRIVATE_KEY` | Alternative key for ERC-8004 `giveFeedback()` | Optional |
-| `ALCHEMY_API_KEY` | Base RPC (if not using default) | Optional |
+| `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator EOA signing key (hex) | Yes |
+| `SPECIALIST_PRIVATE_KEY` | Specialist Agent EOA signing key (hex) | Yes |
+| `ORCHESTRATOR_WALLET_ADDRESS` | Orchestrator wallet address (used as treasury in guild launch) | Yes |
+| `SPECIALIST_WALLET_ADDRESS` | Specialist Agent wallet address (settlement target) | Yes |
+| `CHAIN_ID` | Active network: `84532` (Base Sepolia) or `8453` (Base) | Default: `8453` |
+| `ALCHEMY_API_KEY` | Alchemy RPC for Base / Base Sepolia | Yes |
+| `GLM_API_KEY` | Z.AI GLM-5.1 API key | Yes |
+| `AGENTFIGHTCLUB_API_KEY` | ClawBank API key (skip to use DAOhaus SDK fallback) | Optional |
+| `EAS_CONTRACT` | EAS contract address on active network | Default: `0x4200000000000000000000000000000000000021` |
+| `EAS_SCHEMA_REGISTRY` | EAS SchemaRegistry address on active network | Default: `0x4200000000000000000000000000000000000020` |
+| `DELIVERY_SCHEMA_UID` | Registered GuildOS delivery schema UID — register once before Step 8 | Yes (Step 8+) |
+| `ERC8004_CONTRACT` | ERC-8004 registry address | Default: `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
+| `REPUTATION_CONTRACT` | ERC-8004 reputation write address | Default: `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
 
 ### Run
+
+Start services in this order — the coordination runner depends on both agents being up.
 
 **Terminal 1 — Orchestrator Agent (MCP server):**
 ```bash
 uv run python -m src.orchestrator.server
-# Starts MCP server on stdio (for Claude Code integration)
+# MCP server on stdio — exposes guild_launch, talent_query, task_invite,
+# task_delegate, deliverable_review, settle, reputation_propose, reputation_write
+# Acts as A2A client: sends task messages to the Specialist; receives responses synchronously
 ```
 
-**Terminal 2 — Specialist Agent:**
+**Terminal 2 — Specialist Agent (A2A server):**
 ```bash
 uv run python -m src.specialist.agent
-# Starts A2A HTTP server on localhost:10001
+# A2A HTTP server on localhost:10001
+# Exposes Agent Card at localhost:10001/.well-known/agent.json
 ```
+
+**Terminal 3 — Coordination Runner (full 15-step MVP loop):**
+```bash
+# Default task (SHA-256 demo)
+uv run python -m src.cli.runner
+
+# Custom task
+uv run python -m src.cli.runner "Audit this ERC-20 staking contract for reentrancy vulnerabilities"
+```
+
+The runner drives the complete coordination loop — guild launch → talent query → four
+human gates (0, 0.5, 1, 2) → A2A task delegation → GLM-5.1 execution → EAS attestation
+→ deliverable review → settlement → DAO reputation proposal (Gate 3) → ERC-8004 write-back.
+Each gate halts at a `[y/N]` prompt; the loop stops if any gate is rejected.
+
+> **Network:** set `CHAIN_ID=84532` for isolated testing on Base Sepolia, or leave the
+> default (`8453`) for full integration on Base. Tx hashes submitted as evidence must
+> be on Base.
 
 ### Tests & Lint
 

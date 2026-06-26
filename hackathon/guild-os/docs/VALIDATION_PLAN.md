@@ -52,7 +52,7 @@ Fallback: serve cached profile JSON if 8004scan API is down.
 
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
-| 4.1 | Orchestrator Agent Card at `localhost:10000/.well-known/agent.json` | `curl` returns valid A2A card | `[ ]` |
+| 4.1 | Orchestrator `agentURI` resolves to valid A2A Agent Card JSON | `curl <agentURI>` returns card with `name`, `url`, `capabilities` | `[ ]` |
 | 4.2 | Specialist Agent Card at `localhost:10001/.well-known/agent.json` | Same | `[ ]` |
 | 4.3 | `task/invite` sent; Specialist receives and parses | Logged in A2A trace | `[x]` |
 | 4.4 | `task/quote` received from Specialist | Fields: `scope`, `estimated_cost_wei`, `deadline_iso` | `[x]` |
