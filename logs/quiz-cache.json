@@ -94,7 +94,27 @@
     "deep-exploration-paths",
     "contract-read",
     "tool-log",
-    "machine-payment"
+    "machine-payment",
+    "bundler",
+    "ai-sovereignty",
+    "audit-trail",
+    "oracle-risk",
+    "defi",
+    "four-segment-prompt",
+    "learning-agents",
+    "model-result",
+    "guardrails",
+    "ai-output",
+    "peft",
+    "tx-simulation",
+    "aa-wallet",
+    "agent-profile",
+    "observability",
+    "abi",
+    "inference-network",
+    "cryptography",
+    "unified-evaluation-framework",
+    "contract-docs"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
