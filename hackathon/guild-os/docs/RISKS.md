@@ -54,7 +54,7 @@
 
 ## F6 — Base Mainnet Congestion During Live Demo (LOW)
 
-**Network (updated 2026-06-08):** All on-chain operations run on **Base mainnet (chain_id 8453)** — AFC has no Base Sepolia support. Explorer: https://basescan.org
+**Network (updated 2026-06-17):** Canonical network is **Base (chain_id 8453)** — all on-chain evidence must be on Base; AFC has no Base Sepolia support. Base Sepolia (84532) is permitted for isolated component testing of services that support it (e.g. EAS, ZeroDev). Controlled by `CHAIN_ID` env var. Explorers: https://basescan.org (Base) · https://sepolia.basescan.org (Base Sepolia)
 
 **Mitigation already designed in:** Pre-stage `propose` and `vote` steps before the live demo. Only `settle()`, EAS attestation, and `giveFeedback()` happen live. Have pre-recorded Basescan + easscan screenshots as a last resort. Pre-fund agent wallets with enough ETH before Day 10 build starts.
 

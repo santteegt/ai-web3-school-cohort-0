@@ -53,15 +53,17 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 
 - **Which library for Base mainnet calls?** → `web3.py` with Alchemy RPC; see `docs/TECH_STACK.md`
 - **AgentFightClub API or DAOhaus SDK?** → Check `docs/RISKS.md` § Decision Log; ClawBank API confirmed working Day 9
-- **Which wallet calls `giveFeedback()`?** → Guild contract address or Marco's EOA — NOT the Specialist wallet (see `docs/RISKS.md §F2`)
-- **Does `reputation_write` need a DAO proposal first?** → Yes — call `reputation_propose` first (submits `AgentFightClub.propose()` with 6 feedback fields); Gate 3 halts for human vote; only then call `reputation_write` → `giveFeedback()`. Never skip the proposal.
+- **Which wallet calls `giveFeedback()`?** → The **guild contract** (`msg.sender`) — via the executable proposal mechanism. Neither the Orchestrator's EOA nor the Specialist's wallet is ever the direct caller (see `docs/RISKS.md §F2`).
+- **Does `reputation_write` need a DAO proposal first?** → Yes — full sequence: (1) `reputation_propose` submits an executable `submitFeedback` Moloch proposal encoding the `giveFeedback()` call; (2) Gate 3 halts for human vote; (3) on passing vote, `AgentFightClub.process(proposal_id)` executes the proposal — `msg.sender = guild contract`. Never call `giveFeedback()` directly from an EOA.
 - **EAS schema not found on `attest()`?** → Check `DELIVERY_SCHEMA_UID` in `.env`; register schema on Base mainnet if missing (see `docs/RISKS.md §F7`)
 - **New A2A message type needed?** → Check `src/shared/a2a.py` for the established pattern; don't invent new types without updating `docs/MVP_FLOW.md`
 - **Is this feature in scope?** → Check `docs/MVP_FLOW.md`; if not in the 15 steps, it's out of scope
 
 ## Don't
 
-- Run any transaction on Ethereum mainnet — Base mainnet (chain_id 8453) only; never Base Sepolia
+- Run any transaction on Ethereum mainnet — never Ethereum mainnet under any circumstance
+- Hardcode chain_id — always read from `CHAIN_ID` env var (8453 = Base canonical/evidence; 84532 = Base Sepolia isolated testing only)
+- Use Base Sepolia for submission evidence — Basescan tx #1/2/3 must be on Base (8453)
 - Hardcode private keys, API keys, or seed phrases in source files
 - Skip human gate prompts — every gate must halt and wait; use `src/cli/gates.py`
 - Add Python packages without updating `requirements.txt`

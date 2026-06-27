@@ -87,19 +87,25 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 - Orchestrator sends A2A `task/send` to Specialist:
   ```json
   {
-    "task_description": "...",
-    "input_data": "...",
-    "acceptance_criteria": ["..."],
+    "task_description": "Implement the EASClient.attest() method in src/shared/eas.py so the Specialist can attest deliverable hashes on Base using the registered DELIVERY_SCHEMA_UID.",
+    "input_data": "Schema: bytes32 deliverableHash, string taskType, address guildContract, uint256 paymentAmount. Contract: 0x4200000000000000000000000000000000000021",
+    "acceptance_criteria": [
+      "attest() returns a non-empty attestation UID",
+      "get_attestation(uid) returns the original fields",
+      "pytest tests/test_eas.py passes"
+    ],
     "deadline": "ISO-8601",
     "budget_wei": 1000000000000000
   }
   ```
+- **Canonical demo task — dogfooding:** the guild mandates "Build GuildOS"; the Specialist implements a GuildOS component ticket. This threads every component in a single run and makes the demo self-referential.
 - Message ID captured; logged to `./logs/a2a_trace_{date}.json`
 
 ### Step 7 — Specialist Decomposes and Executes (GLM-5.1)
 
 - Specialist decomposes task into ≥ 3-step plan using GLM-5.1 long-horizon planning
 - Executes plan with tool use loop: plan → tool call → result → next step
+- Canonical demo: Specialist implements a GuildOS component ticket (dogfooding — the system builds itself)
 - Full trace logged to `./logs/glm_trace_{date}.json`
 
 ### Step 8 — Specialist Hashes Deliverable; Creates EAS Attestation
@@ -149,17 +155,17 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 - Moloch v3 releases treasury funds to Specialist wallet
 - **Basescan tx #2** — settlement tx link saved to `./logs/tx_hashes.md`
 
-### Step 13a — Guild Submits Reputation Feedback Proposal
+### Step 13a — Guild Submits Executable Reputation Feedback Proposal
 
-- After `settle()` confirms, Orchestrator calls `AgentFightClub.propose(reputation_data)` encoding the 6 feedback fields as the proposal payload:
+- After `settle()` confirms, Orchestrator calls `AgentFightClub.propose()` submitting an **executable** `submitFeedback` proposal — a Moloch proposal whose `data` field encodes the `giveFeedback()` call with 6 fields:
   1. `task_type` — capability ID matching mandate category
   2. `deliverable_hash` — SHA-256 from the EAS attestation
   3. `acceptance_timestamp` — on-chain block timestamp from Gate 2
   4. `payment_wei` — amount released in `settle()`
-  5. `guild_address` — guild contract address
+  5. `guild_address` — guild contract address (this becomes `msg.sender` when the proposal executes)
   6. `a2a_task_id` — links to A2A message log
 - Reputation proposal ID saved to `guild_context.json`: `reputation_proposal_id`
-- **Why DAO proposal:** Reputation changes are governed by the guild DAO — no single party (not even the Orchestrator) can unilaterally write to a Specialist's on-chain profile. The vote record is a permanent accountability trail alongside the delivery attestation.
+- **Why executable proposal:** When the proposal passes and is processed, the guild contract itself executes `giveFeedback()` — `msg.sender` is the guild contract address, satisfying the ERC-8004 caller constraint (F2). No single party (not even the Orchestrator's EOA) can unilaterally write to a Specialist's on-chain profile.
 
 ### **GATE 3 — Feedback Approval (Human)**
 
@@ -170,10 +176,11 @@ Step 15  [Rejection path: DISPUTED state recorded; ragequit documented]
 
 ### Step 13b — ERC-8004 Reputation Write-Back (on proposal pass)
 
-- Orchestrator calls `ERC-8004.giveFeedback()` with the 6 fields from the approved proposal
+- On passing vote: `AgentFightClub.process(reputation_proposal_id)` executes the proposal
+- **The proposal execution calls `giveFeedback()` with `msg.sender = guild contract address`** — the Orchestrator's EOA is NOT the caller
 - Emits `DeliveryRecorded` event on Base mainnet
-- **Basescan tx #3** — reputation tx link saved to `./logs/tx_hashes.md`
-- **Caller constraint:** Guild contract address or Marco's EOA — NOT the Specialist Agent's wallet (F2)
+- `reputation_tx` saved to `guild_context.json`; **Basescan tx #3** saved to `./logs/tx_hashes.md`
+- **Caller constraint enforced:** guild contract is always the caller — Specialist wallet calling this directly would revert (F2)
 
 ### Step 14 — Guild Context Updated
 
