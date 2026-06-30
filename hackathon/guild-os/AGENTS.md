@@ -28,6 +28,73 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `GuildContext` | `src/shared/guild_context.py` | Read/write `guild_context.json`; the mock guild state store |
 | `HumanGates` | `src/cli/gates.py` | Gate 0, 0.5, 1, 2, 3, 4 — CLI `y/N` prompts; always halt execution and wait |
 
+## Spec-Driven Development — Issue Templates
+
+GuildOS issues are not free-text tickets — they're the last link in a chain
+that starts with human intent and ends in code an agent can execute without
+guessing:
+
+```
+Human Intent → BDD/Gherkin scenarios (specs/scenarios/*.feature)
+            → feature spec (specs/10-technical-design.md, specs/20-api-contracts.md)
+            → a fully specified ticket
+```
+
+**Why this matters:** a ticket is the only barrier standing between an agent
+and a hallucinated implementation. Given a blueprint, an agent executes.
+Given a vibe, it guesses — and on a project with on-chain calls, caller
+constraints, and DAO-governed money movement, a guess is never a free
+mistake. A complete ticket always carries: acceptance criteria, technical
+constraints (including the tool-call trajectory mode), interface
+definitions, security guardrails, and an AgBOM (Agent Bill of Materials).
+
+Two templates govern this — read both before creating or picking up an issue:
+
+| Template | Use it when | Location |
+|----------|-------------|----------|
+| Issue Ticket Template | Creating a new GitHub issue | `templates/ISSUE_TICKET_TEMPLATE.md` |
+| Task-Execution Prompt | Dispatching an agent to implement an existing ticket | `templates/TASK_EXECUTION_PROMPT.md` |
+
+### Creating an issue
+
+1. Confirm the behavior is already captured as a Given/When/Then scenario in
+   `specs/scenarios/*.feature`. **If it isn't, don't write the ticket yet** —
+   work with the user to draft the scenario first (positive case + at least
+   one negative/should-not-fire case), get their sign-off, and add it to the
+   right feature file — or a new one, following `specs/README.md`'s naming
+   convention — before continuing.
+2. Copy `templates/ISSUE_TICKET_TEMPLATE.md` into the new issue body and fill
+   in every section, linking to the spec instead of restating it wherever
+   possible.
+3. Walk the **Definition of Ready** checklist at the bottom of the template.
+   If any box is unchecked, the ticket is not ready to assign — finish it.
+   An unchecked box is exactly the kind of gap an agent will fill with a guess.
+4. Writing the BDD scenario *with* the user up front, rather than inferring
+   it from a vague request, is what later lets the user review the resulting
+   pull request at LGTM speed — the scenario already states what "done"
+   looks like, so they're confirming, not re-deriving it from the diff.
+
+### Working on an issue
+
+Before touching any source file for a specific issue, read
+`templates/TASK_EXECUTION_PROMPT.md` and follow it as the execution contract
+for that ticket — not just as background reading. In particular:
+
+- Treat the ticket and `specs/` as ground truth, over any inference from the
+  current state of `src/`. Where existing source code disagrees with the
+  spec, the spec wins (see the layered control model in `specs/README.md`).
+- Honor the ticket's tool-call trajectory mode exactly — `EXACT | IN_ORDER`
+  for high-risk or state-mutating calls (anything on-chain, anything that
+  moves funds or writes reputation), `ANY_ORDER` for read-only calls.
+- Stay inside the ticket's AgBOM. A tool, model, or data source not listed
+  there is not authorized for this ticket — stop and ask rather than expand
+  scope silently.
+- Before returning, run the self-verification checklist in the prompt and
+  produce a **Vibe Diff**: a short, plain-English summary of what changed and
+  why, placed at the top of the pull request description. This is what makes
+  the LGTM-speed review in the previous section possible — without it, the
+  reviewer has to reconstruct intent from the diff instead of confirming it.
+
 ## Before Building
 
 1. Read `docs/TECH_STACK.md` — versions and library choices are locked
@@ -100,3 +167,4 @@ Add new components to the Component Map when they are created. Update Don't rule
 | Date | Change |
 |------|--------|
 | 2026-06-30 | Component Map: tools 8→9 (added `payment_propose`), added `WalletProvider`, A2A messages now include `feedback/request`, gates 0,0.5,1,2 → 0,0.5,1,2,3,4. When-Unsure: added payment-proposal (Gate 3) and wallet-provider entries; reputation → Gate 4. Don't: no agent EOA fallback, treasury is DAO-held. Sprint Day 11 reflects payment (Gate 3) + reputation (Gate 4). Mirrors `specs/` + `docs/` design feedback. |
+| 2026-06-30 | Added **Spec-Driven Development — Issue Templates** section (between Component Map and Before Building): the Human Intent → BDD/Gherkin → spec → ticket chain, plus "Creating an issue" and "Working on an issue" workflows. Added `templates/ISSUE_TICKET_TEMPLATE.md` and `templates/TASK_EXECUTION_PROMPT.md`. |
