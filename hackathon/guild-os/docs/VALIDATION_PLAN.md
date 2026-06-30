@@ -10,10 +10,11 @@
 |---|-------|----------|--------|
 | 1.1 | Orchestrator CAW wallet initialized on Base mainnet | Address printed; ETH balance > 0 (fund manually — no faucet on mainnet) | `[x]` |
 | 1.2 | Specialist CAW wallet initialized on Base mainnet | Same | `[x]` |
-| 1.3 | CAW Pact restricts Orchestrator to AgentFightClub contract only | Pact config set; x402 pipeline confirmed working Day 8 | `[x]` |
-| 1.4 | `eth_sendTransaction` via CAW succeeds on Base mainnet | Tx hash returned; visible on https://basescan.org | `[x]` |
+| 1.3 | CAW Pact allowlists the DAO `propose`/`vote`/`process` calls and caps tribute | Pact config set; non-allowlisted call + over-cap tribute both refused at signature level | `[x]` |
+| 1.4 | Allowlisted DAO call via CAW succeeds on Base mainnet | Tx hash returned; visible on https://basescan.org | `[x]` |
+| 1.5 | Wallet layer is provider-agnostic (`WalletProvider`) | Same scoping holds when `WALLET_PROVIDER` swapped (CAW → ZeroDev/Turnkey) | `[ ]` |
 
-Fallback: basic signing (private key in env) if CAW TSS node fails mid-build.
+Fallback: swap `WALLET_PROVIDER` to another scoped provider if CAW TSS node fails mid-build. **No EOA fallback** — agents never sign from a raw private key; halt until a scoped provider is restored.
 
 ---
 
@@ -21,12 +22,13 @@ Fallback: basic signing (private key in env) if CAW TSS node fails mid-build.
 
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
-| 2.1 | `launch()` — guild deployed on Base mainnet with mandate string | Contract address + Basescan tx hash | `[ ]` |
-| 2.2 | `commit()` — treasury funded (≥ 0.001 ETH) | Tx hash; treasury balance readable | `[ ]` |
+| 2.1 | `launch()` — guild summoned on Base with name, governance settings, initial members+shares/loot | dao address + treasury address + Basescan tx hash | `[ ]` |
+| 2.2 | `commit()` — treasury funded with tribute (≥ 0.001 ETH) | Tx hash; treasury balance readable | `[ ]` |
 | 2.3 | `propose()` — Specialist membership proposal on-chain | Proposal ID; Basescan `ProposalSubmitted` event | `[x]` |
 | 2.4 | `vote()` — Human founder approves | Tx hash; proposal state → `Passed` | `[x]` |
-| 2.5 | `settle()` — payment released to Specialist wallet | **Basescan tx #2**; Specialist balance increases | `[ ]` |
-| 2.6 | `guild_context.json` updated after each phase | File readable; all fields present | `[ ]` |
+| 2.5 | `payment_propose()` — payment proposal raised after Gate 2 | `payment_proposal_id`+url saved to `guild_context.json`; carried in `task/accepted` | `[ ]` |
+| 2.6 | `settle()` — process the passed payment proposal; funds released to Specialist | **Basescan tx #2**; Specialist balance increases | `[ ]` |
+| 2.7 | `guild_context.json` updated after each phase | File readable; all fields present | `[ ]` |
 
 Fallback: DAOhaus SDK direct Moloch v3 deploy if ClawBank API fails on Day 8.
 
@@ -38,8 +40,8 @@ Fallback: DAOhaus SDK direct Moloch v3 deploy if ClawBank API fails on Day 8.
 |---|-------|----------|--------|
 | 3.1 | Orchestrator ERC-8004 profile readable | JSON: `name`, `capabilities[]`, `a2a_endpoint`, `delivery_count` | `[ ]` |
 | 3.2 | Specialist ERC-8004 **before-state** captured | Saved to `./logs/erc8004_specialist_before.json` | `[ ]` |
-| 3.3 | Reputation feedback proposal submitted via `AgentFightClub.propose()` | Proposal ID returned; `reputation_proposal_id` saved to `guild_context.json` | `[ ]` |
-| 3.4 | Human votes to approve reputation proposal (Gate 3) | Tx hash; `AgentFightClub.vote(reputation_proposal_id, approve=True)` confirmed | `[ ]` |
+| 3.3 | Specialist triggers feedback via A2A `feedback/request`; Orchestrator submits `submitFeedback` proposal via `AgentFightClub.propose()` | Proposal ID returned; `reputation_proposal_id` saved to `guild_context.json` | `[ ]` |
+| 3.4 | Human votes to approve reputation proposal (Gate 4) | Tx hash; `AgentFightClub.vote(reputation_proposal_id, approve=True)` confirmed | `[ ]` |
 | 3.5 | `giveFeedback()` call succeeds after proposal passes | Tx hash; **Basescan tx #3** `DeliveryRecorded` event; saved to `submissions/tx_hashes.md` | `[ ]` |
 | 3.6 | Specialist profile **after-state** shows +1 delivery | 6 fields present: task_type, hash, timestamp, wei, guild, a2a_id | `[ ]` |
 | 3.7 | Before/after delta printable side-by-side for demo | CLI command or script outputs both states | `[ ]` |
@@ -58,8 +60,9 @@ Fallback: serve cached profile JSON if 8004scan API is down.
 | 4.4 | `task/quote` received from Specialist | Fields: `scope`, `estimated_cost_wei`, `deadline_iso` | `[x]` |
 | 4.5 | `task/send` delivered with full payload | Logged; message ID captured | `[x]` |
 | 4.6 | `task/delivered` received with hash matching on-chain commit | Hash cross-check passes | `[x]` |
-| 4.7 | `task/accepted` sent after human acceptance | Specialist receives confirmation | `[x]` |
-| 4.8 | Full A2A trace log exported | `./logs/a2a_trace_{date}.json` with 7 events | `[x]` |
+| 4.7 | `task/accepted` sent after human acceptance, carrying `payment_proposal_id` + url | Specialist receives confirmation with payment proposal reference | `[x]` |
+| 4.8 | `feedback/request` sent by Specialist after settlement | Orchestrator receives; triggers reputation stage | `[ ]` |
+| 4.9 | Full A2A trace log exported | `./logs/a2a_trace_{date}.json` with all message events (incl. `feedback/request`) | `[x]` |
 
 Fallback: text-body JSON if `Message.metadata` extension fields are rejected.
 
@@ -86,8 +89,8 @@ Prerequisite: `DELIVERY_SCHEMA_UID` registered once against SchemaRegistry `0x42
 |---|-------|----------|--------|
 | 6.1 | GLM-5.1 API key configured and reachable | Test call returns response | `[ ]` |
 | 6.2 | Demo task type locked | Decision noted in `docs/TECH_STACK.md` Decision Log; Hermes agent deployed Day 9 | `[x]` |
-| 6.3 | Task decomposed into ≥ 3-step plan | Plan logged before execution | `[ ]` |
-| 6.4 | All plan steps complete; structured output produced | Output file written; format matches acceptance criteria | `[ ]` |
+| 6.3 | Specialist reads the GitHub issue, then decomposes into ≥ 3-step plan within technical_constraints/AgBOM | Issue loaded; plan logged before execution | `[ ]` |
+| 6.4 | All plan steps complete; structured output produced; hash per `deliverable_format` | Output written; BDD acceptance_criteria pass; hash (zip SHA-256 or commit) ready to attest | `[ ]` |
 | 6.5 | Execution trace logged | `./logs/glm_trace_{date}.json` readable | `[ ]` |
 | 6.6 | Orchestrator pre-check passes | Report: hash ✅ · format ✅ · size ✅ | `[ ]` |
 
@@ -99,14 +102,15 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 
 | # | Tool | Check | Status |
 |---|------|-------|--------|
-| 7.1 | `guild_launch` | Returns guild contract address matching check 2.1 | `[x]` stub |
+| 7.1 | `guild_launch` | Returns dao + treasury address matching check 2.1 | `[x]` stub |
 | 7.2 | `talent_query` | Returns Specialist profile JSON (hardcoded) | `[x]` |
 | 7.3 | `task_invite` | Sends A2A `task/invite`; message ID logged | `[x]` |
-| 7.4 | `task_delegate` | Sends A2A `task/send`; message ID in trace (4.5) | `[x]` |
+| 7.4 | `task_delegate` | Sends A2A `task/send` (full work order); message ID in trace (4.5) | `[x]` |
 | 7.5 | `deliverable_review` | Returns `{hash_match, format_valid, size_check, evaluator_verdict}` | `[x]` |
-| 7.6 | `settle` | Returns settlement tx hash matching check 2.5 | `[x]` stub |
-| 7.7 | `reputation_propose` | Returns reputation proposal ID; saved to `guild_context.json` (check 3.3) | `[ ]` |
-| 7.8 | `reputation_write` | Returns `DeliveryRecorded` tx hash after Gate 3 vote passes (check 3.5) | `[ ]` |
+| 7.6 | `payment_propose` | Returns `payment_proposal_id`+url; saved to `guild_context.json` (check 2.5) | `[ ]` |
+| 7.7 | `settle` | Processes the passed payment proposal; returns settlement tx hash matching check 2.6 | `[ ]` stub |
+| 7.8 | `reputation_propose` | Returns reputation proposal ID; saved to `guild_context.json` (check 3.3) | `[ ]` |
+| 7.9 | `reputation_write` | Returns `DeliveryRecorded` tx hash after Gate 4 vote passes (check 3.5) | `[ ]` |
 
 ---
 
@@ -116,10 +120,11 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 |---|------|-------|--------|
 | 8.1 | Gate 0 | ERC-8004 shortlist displayed; CLI halts; resumes only on `y` | `[ ]` |
 | 8.2 | Gate 0.5 | Quote displayed; `Accept quote? [y/N]` halts execution | `[ ]` |
-| 8.3 | Gate 1 | `vote` called only after human approves; rejection tested | `[x]` |
-| 8.4 | Gate 2 | `settle()` called only after human accepts deliverable | `[ ]` |
-| 8.5 | Gate 3 | `giveFeedback()` called only after human approves reputation proposal vote | `[ ]` |
-| 8.6 | Dispute stub | Gate 2 rejection → `task_state: DISPUTED` in JSON; no settlement tx | `[ ]` |
+| 8.3 | Gate 1 | membership `vote` called only after human approves; rejection tested | `[x]` |
+| 8.4 | Gate 2 | payment proposal raised only after human accepts deliverable | `[ ]` |
+| 8.5 | Gate 3 | `settle()` processes the payment proposal only after human votes+processes it | `[ ]` |
+| 8.6 | Gate 4 | `giveFeedback()` called only after human approves reputation proposal vote | `[ ]` |
+| 8.7 | Dispute stub | Gate 2 (deliverable) or Gate 3 (payment) rejection → `task_state: DISPUTED` in JSON; no settlement tx | `[ ]` |
 
 ---
 
@@ -131,7 +136,7 @@ Fallback: deterministic prompt "Write a Python function that computes SHA-256 of
 | 9.2 | Run 2: Different task input; same outcome | Confirms repeatability | `[ ]` |
 | 9.3 | Both Basescan tx hashes clickable | (1) Hash commit · (2) Settlement — both resolve | `[ ]` |
 | 9.4 | ERC-8004 before/after delta visible | Screenshot or terminal diff captured | `[ ]` |
-| 9.5 | A2A trace exported with 7 events | File present | `[ ]` |
+| 9.5 | A2A trace exported with all message events (incl. `feedback/request`) | File present | `[ ]` |
 | 9.6 | GLM-5.1 trace exported with plan + tool calls | File present | `[ ]` |
 
 ---
@@ -213,10 +218,10 @@ Must be documented in README or a dedicated section:
 
 | # | Requirement | Notes | Status |
 |---|-------------|-------|--------|
-| 11.6.1 | **Permission boundaries** — which actions are automated vs. human-gated | Document the 4 human gates (Gate 0, 0.5, 1, 2); reference `docs/MVP_FLOW.md §Automation Boundaries` | `[ ]` |
+| 11.6.1 | **Permission boundaries** — which actions are automated vs. human-gated | Document the 6 human gates (Gate 0, 0.5, 1, 2, 3, 4); reference `docs/MVP_FLOW.md §Automation Boundaries` | `[ ]` |
 | 11.6.2 | **Failure handling** — what happens when a component fails | Reference `docs/RISKS.md` fallback table; summarise in README | `[ ]` |
-| 11.6.3 | **Human intervention points** — when and why a human must approve | List all 4 gates with the action each gate blocks | `[ ]` |
-| 11.6.4 | **Spending limits** — agent wallets do not have unconstrained fund access | CAW Pact config; describe per-task ceiling and contract allowlist | `[ ]` |
+| 11.6.3 | **Human intervention points** — when and why a human must approve | List all 6 gates with the action each gate blocks | `[ ]` |
+| 11.6.4 | **Spending limits** — agent wallets do not have unconstrained fund access | Treasury is DAO-held; CAW Pact allowlists the DAO `propose`/`vote`/`process` calls and caps tribute; no EOA fallback | `[ ]` |
 
 ### 11.7 Hackathon Contribution Scope
 
@@ -239,3 +244,11 @@ Must be documented in README or a dedicated section:
 | 11.9.1 | Primary track declared: **Cobo \| Agentic Economy × Cobo Agentic Wallet** | Strongest advantage — full economic loop: CAW wallets, treasury, settlement | `[ ]` |
 | 11.9.2 | Secondary track eligibility documented: **Z.AI \| Web3 × Long-Horizon Task** | GLM-5.1 via Hermes; long-horizon trace log as evidence | `[ ]` |
 | 11.9.3 | Track alignment section in README or proposal | `docs/TRACK.md` is the source — summarise in README or link directly | `[ ]` |
+
+---
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-06-30 | **§1** wallet checks reframed to DAO-call allowlist + tribute cap + provider-agnostic swap; no-EOA fallback. **§2** added `payment_propose` (2.5) and redefined `settle` as processing the passed payment proposal (2.6). **§3** reputation now Specialist-triggered (`feedback/request`); gate renumbered to **Gate 4**. **§4** added `feedback/request` check; `task/accepted` carries payment proposal id+url. **§6** adds issue-reading + format-conditional hash. **§7** added `payment_propose`; `settle`/`reputation_write` updated. **§8** gates renumbered to 0,0.5,1,2,3,4 with dispute reachable at Gate 2 or 3. **§11.6** documents 6 gates and DAO-held treasury scoping. Mirrors `specs/` design feedback. |

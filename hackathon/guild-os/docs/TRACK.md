@@ -8,15 +8,16 @@
 
 | Track requirement | GuildOS implementation |
 |------------------|----------------------|
-| Agent holds a wallet | Orchestrator and Specialist each hold a **Cobo CAW** wallet (TSS local node, restored Day 8); Base mainnet (chain_id 8453) |
-| Controllable fund operations | CAW **Pacts** enforce per-task spending ceiling at the signature level: call whitelist (AgentFightClub contract only), gas cap, rate limit — no TypeScript bridge required |
-| Agent-to-agent work protocols | A2A v1.0.0: quote → accept → execute → deliver → settle loop between Orchestrator and Specialist (validated Day 9) |
-| Agentic Economy / A2A Economy | AgentFightClub (Moloch v3) shared treasury + settlement; ERC-8004 portable reputation; EAS-attested deliverable (UID embedded in A2A result message) |
+| Agent holds a wallet | Orchestrator and Specialist each hold a wallet through a **provider-agnostic `WalletProvider`** (Cobo CAW default, TSS local node; ZeroDev/Turnkey swappable); Base (chain_id 8453) |
+| Controllable fund operations | Treasury is **DAO-held** — no agent custodies funds. CAW **Pacts** scope, at the signature level, the DAO governance calls the agent may make (`propose`/`vote`/`process` on the guild contract) and cap **tribute** (the only fund-moving agent call). No EOA fallback |
+| Agent-to-agent work protocols | A2A v1.0.0: quote → accept → execute → deliver → payment-proposal → settle → feedback loop between Orchestrator and Specialist (validated Day 9) |
+| Agentic Economy / A2A Economy | AgentFightClub (Moloch v3) shared treasury + DAO-voted settlement; ERC-8004 portable reputation; EAS-attested deliverable (UID embedded in A2A result message) |
 | Resource procurement | Specialist Agent pays for API services (e.g., GLM-5.1 inference via x402) from its CAW wallet; full x402 pipeline confirmed Day 8 |
 
 **Key demo evidence for Cobo track:**
-- CAW Pact config shown as live proof (TSS node running)
-- Orchestrator calls `settle()` from the guild contract — not from its own wallet (demonstrates scoped operations)
+- CAW Pact config shown as live proof (TSS node running) — allowlists the DAO `propose`/`vote`/`process` calls and caps tribute
+- Payment released through a DAO **payment proposal** the human votes and processes (Gate 3) — not from any agent wallet
+- Provider-agnostic `WalletProvider` (CAW default; ZeroDev/Turnkey swappable) keeps the same scoping
 - CAW wallet address + anonymized Pact config in README
 
 ---
@@ -48,7 +49,7 @@
 | Would this problem exist without AI? | Yes — but it becomes a DAO for humans (Raid Guild). AI adds: agents as first-class economic members, long-horizon execution, A2A capability matching. |
 | Would this problem exist without Web3? | Yes — but reputation is a platform row, payment depends on a platform, mandate history is editable. Web3 provides: ERC-8004 portable reputation, Moloch v3 enforced treasury, tamper-proof delivery records. |
 | Who initiates / executes / pays / accepts / arbitrates? | Initiates: Human. Executes: Specialist Agent. Pays: Guild treasury. Accepts: Human. Arbitrates: AgentFightClub governance + human vote. Chain is complete. |
-| How is the result verified? | Specialist creates an EAS attestation of the deliverable hash before acceptance; attestation UID is embedded in the A2A result. After settlement, the guild submits a DAO reputation proposal (`AgentFightClub.propose()` encoding 6 feedback fields); human votes (Gate 3); only on vote pass does `giveFeedback()` fire — ensuring reputation is a governed, multi-party record, not a unilateral write. Payment releases after hash match + human approval; reputation updates only after DAO vote. |
+| How is the result verified? | Specialist creates an EAS attestation of the deliverable hash before acceptance; attestation UID is embedded in the A2A result. Payment releases only through a DAO **payment proposal** the human votes and processes (Gate 3). The Specialist then triggers reputation via `feedback/request`; the guild submits an executable `submitFeedback` proposal (`AgentFightClub.propose()` encoding 6 feedback fields); human votes (Gate 4); only on vote pass does `giveFeedback()` fire with the guild contract as `msg.sender` — ensuring both money and reputation are governed, multi-party records, not unilateral writes. |
 
 ---
 
@@ -60,3 +61,11 @@
 | Submission deadline | 2026-06-13 12:00 UTC+8 (04:00 UTC) |
 | Demo Day | 2026-06-14 |
 | Prize pool | 7000 USDT (Cobo: 3500 USDT · Z.AI: 3500 USDT) |
+
+---
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-06-30 | Cobo track reframed: treasury is DAO-held; CAW Pact scopes the DAO `propose`/`vote`/`process` calls + caps tribute (not a per-task ceiling/contract whitelist); provider-agnostic `WalletProvider` (CAW default, ZeroDev/Turnkey swappable); no EOA fallback. Settlement now flows through a DAO **payment proposal** (Gate 3); reputation gate renumbered to **Gate 4** and is Specialist-triggered. Scorecard "how verified" updated. Mirrors `specs/` design feedback. |

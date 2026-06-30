@@ -11,8 +11,8 @@
 | Language | Python | 3.11+ | Primary — agent services, CLI, A2A handlers |
 | Agent protocol | A2A SDK | v1.0.0 | `pip install "a2a-sdk[http-server]"` — cross-harness task delegation |
 | LLM execution | Z.AI GLM-5.1 | API | Specialist Agent long-horizon planning; task type locked Day 9 |
-| Orchestrator harness | Claude Code (MCP server) | — | 8 tools registered; entry point `src/orchestrator/server.py` |
-| Agent wallet | Cobo CAW | TSS local node | x402 pipeline working end-to-end; Pact-scoped spending ceiling per task |
+| Orchestrator harness | Claude Code (MCP server) | — | 9 tools registered; entry point `src/orchestrator/server.py` |
+| Agent wallet | Cobo CAW (provider-agnostic) | TSS local node | x402 pipeline working end-to-end; provider-agnostic `WalletProvider` layer (CAW default, ZeroDev/Turnkey swappable); Pact scopes DAO governance calls (propose/vote/process) + caps tribute; no EOA fallback |
 | Treasury + governance | AgentFightClub (Moloch v3) | — | ClawBank API (primary — live, timing issue being fixed); DAOhaus SDK (fallback — see RISKS.md F1) |
 | Agent identity | ERC-8004 Registry | Base mainnet | IdentityRegistry: `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
 | Reputation | ERC-8004 ReputationRegistry | Base mainnet | `0x8004B663056A597Dffe9eCcC1965A193B7388713`; caller constraint applies |
@@ -33,17 +33,18 @@ guild-os/
 ├── src/
 │   ├── orchestrator/
 │   │   ├── server.py          # MCP server — registers tools, starts listener
-│   │   └── tools.py           # 7 MCP tool implementations
+│   │   └── tools.py           # 9 MCP tool implementations
 │   ├── specialist/
 │   │   └── agent.py           # A2A HTTP server — receives tasks, runs GLM-5.1
 │   ├── shared/
-│   │   ├── a2a.py             # A2A client: send/receive invite, quote, send, delivered, accepted
+│   │   ├── a2a.py             # A2A client: send/receive invite, quote, send, delivered, accepted, feedback/request
 │   │   ├── eas.py             # EASClient: attest(), get_attestation() — deliverable hash commitment
 │   │   ├── erc8004.py         # ERC-8004 interface: register(), giveFeedback(), read profile
 │   │   ├── agentfightclub.py  # AgentFightClub interface: launch, commit, propose, vote, settle
+│   │   ├── wallet.py          # WalletProvider: provider-agnostic signing + Pact scoping (CAW default; no EOA fallback)
 │   │   └── guild_context.py   # guild_context.json read/write helper
 │   └── cli/
-│       └── gates.py           # Human gate CLI prompts (Gate 0, 0.5, 1, 2)
+│       └── gates.py           # Human gate CLI prompts (Gate 0, 0.5, 1, 2, 3, 4)
 ├── tests/                     # pytest test files
 ├── docs/                      # Architecture docs (this file + others)
 ├── scripts/
@@ -66,13 +67,15 @@ guild-os/
 
 | Tool | Input | Output | On-chain? |
 |------|-------|--------|-----------|
-| `guild_launch` | mandate string, treasury address | guild contract address + tx hash | Yes |
+| `guild_launch` | guild name, mandate, governance settings, member list (addr+shares/loot), tribute_wei | `{guild_address, treasury_address, launch_tx, commit_tx}` | Yes |
 | `talent_query` | task type | ERC-8004 shortlist JSON | No (mocked) |
 | `task_invite` | specialist a2a endpoint, task spec | A2A `task/invite` message ID | No |
 | `task_delegate` | specialist endpoint, full task | A2A `task/send` message ID | No |
 | `deliverable_review` | deliverable reference, hash | pre-check report: `{hash_match, format_valid, size_check}` | No |
-| `settle` | guild address, specialist wallet | settlement tx hash | Yes |
-| `reputation_write` | 6-field delivery record | `DeliveryRecorded` event tx hash | Yes |
+| `payment_propose` | guild address, specialist wallet, amount_wei, delivery record | `{payment_proposal_id, payment_proposal_url}` | Yes |
+| `settle` | guild address, payment_proposal_id | settlement tx hash (process the passed proposal) | Yes |
+| `reputation_propose` | 6-field delivery record | `{reputation_proposal_id}` (executable submitFeedback proposal) | Yes |
+| `reputation_write` | reputation_proposal_id | `DeliveryRecorded` event tx hash (after Gate 4 passes) | Yes |
 
 ### Specialist Agent — `src/specialist/`
 
@@ -82,33 +85,43 @@ guild-os/
 **Agent card:** `http://localhost:10001/.well-known/agent.json`
 
 Receives: `task/invite` → responds with `task/quote`  
-Receives: `task/send` → executes GLM-5.1 plan → commits hash → sends `task/delivered`
+Receives: `task/send` → reads GitHub issue → executes GLM-5.1 plan → commits hash → sends `task/delivered`  
+After settlement: sends `feedback/request` → triggers the reputation stage
 
 ### Shared Modules — `src/shared/`
 
-**A2A message types used:**
+**A2A message types used (6):**
 - `task/invite` — Orchestrator → Specialist
 - `task/quote` — Specialist → Orchestrator (fields: `scope`, `estimated_cost_wei`, `deadline_iso`)
-- `task/send` — Orchestrator → Specialist (full task payload)
+- `task/send` — Orchestrator → Specialist (full work order: `github_issue_url`, `technical_constraints`, `agbom`, `acceptance_criteria` (BDD), `deliverable_format`, …)
 - `task/delivered` — Specialist → Orchestrator (fields: `deliverable_reference`, `deliverable_hash`, `attestation_uid`, `attestation_url`)
-- `task/accepted` — Orchestrator → Specialist (closes loop)
+- `task/accepted` — Orchestrator → Specialist (closes loop; carries `payment_proposal_id`, `payment_proposal_url`)
+- `feedback/request` — Specialist → Orchestrator (fields: `task_id`, `deliverable_hash`; Specialist asks the guild to record reputation)
 
-**ERC-8004 caller constraint + mechanism:** `giveFeedback()` must NOT be called from the Specialist Agent's own wallet — it will revert (Sybil protection). The correct mechanism is an **executable `submitFeedback` Moloch proposal**: Orchestrator submits `AgentFightClub.propose()` encoding the `giveFeedback()` call; after Gate 3 vote passes, `AgentFightClub.process()` executes the proposal with **`msg.sender = guild contract address`** — never the Orchestrator's or Specialist's EOA. See `docs/RISKS.md §F2`.
+**ERC-8004 caller constraint + mechanism:** `giveFeedback()` must NOT be called from the Specialist Agent's own wallet — it will revert (Sybil protection). The correct mechanism is an **executable `submitFeedback` Moloch proposal**: Orchestrator submits `AgentFightClub.propose()` encoding the `giveFeedback()` call; after the Gate 4 vote passes, `AgentFightClub.process()` executes the proposal with **`msg.sender = guild contract address`** — never the Orchestrator's or Specialist's EOA. See `docs/RISKS.md §F2`.
 
 ### Guild Context Store — `guild_context.json`
 
 ```json
 {
+  "guild_name": null,
   "guild_address": "0x...",
+  "treasury_address": "0x...",
   "mandate": "Build GuildOS — coordinate a Specialist to implement its own tickets",
+  "governance_settings": { "voting_period": null, "grace_period": null, "quorum": null },
   "treasury_wei": "1000000000000000",
-  "member_list": ["0x_orchestrator", "0x_specialist"],
+  "member_list": [
+    { "address": "0x_orchestrator", "shares": 100, "loot": 0 },
+    { "address": "0x_specialist", "shares": 0, "loot": 0 }
+  ],
   "task_state": "ACTIVE",
   "deliverable_hash": null,
   "attestation_uid": null,
   "attestation_url": null,
   "a2a_task_id": null,
   "proposal_id": null,
+  "payment_proposal_id": null,
+  "settlement_tx": null,
   "reputation_proposal_id": null,
   "reputation_tx": null
 }
@@ -127,6 +140,7 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 | `GLM_API_KEY` | Z.AI GLM-5.1 API | — |
 | `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator signing key (EOA) | — |
 | `SPECIALIST_PRIVATE_KEY` | Specialist signing key (EOA) | — |
+| `WALLET_PROVIDER` | Scoped signing provider for `WalletProvider` (`caw` \| `zerodev` \| `turnkey`) | `caw` |
 | `AGENTFIGHTCLUB_API_KEY` | ClawBank Skill API | Optional |
 | `ERC8004_CONTRACT` | IdentityRegistry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
 | `REPUTATION_CONTRACT` | ReputationRegistry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
@@ -166,3 +180,13 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 | — | ZeroDev session keys | Demoted to design exhibit | CAW is primary wallet; ZeroDev kept as fallback reference only |
 | 2026-06-11 | Deliverable hash commitment | **EAS attestation replaces raw `eth_sendTransaction`** | EAS `attest()` is cryptographically signed by Specialist, carries a stable UID cross-referenced in A2A message and ERC-8004 record, and is queryable on easscan without ABI parsing — strictly better than a raw event emission at the same gas cost (see `hackathon/research/EAS_ANALYSIS.md`) |
 | 2026-06-17 | Reputation write-back mechanism | **Executable `submitFeedback` Moloch proposal** | Orchestrator submits proposal encoding `giveFeedback()` call; on passing vote `AgentFightClub.process()` executes it with `msg.sender = guild contract` — satisfies F2 caller constraint; no single party writes reputation unilaterally |
+| 2026-06-30 | Settlement mechanism | **DAO payment proposal + Gate 3** | Treasury is DAO-held; Orchestrator raises a `payment` proposal, `task/accepted` carries its id+url, human votes & processes (Gate 3), `settle()` = process the passed proposal. Reputation renumbered to Gate 4 and made Specialist-triggered via `feedback/request` |
+| 2026-06-30 | Wallet scoping model | **Provider-agnostic `WalletProvider`; scope DAO calls, cap tribute, no EOA fallback** | Treasury funds are DAO-held, so the only value cap is on tribute; the Pact allowlists the DAO `propose`/`vote`/`process` calls. Wallet layer abstracted so CAW can be swapped for ZeroDev/Turnkey with the same scoping. Agents never fall back to raw EOA signing |
+
+---
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-06-30 | Orchestrator tool count 7→9 (added `payment_propose`, `reputation_propose`); `guild_launch` and `settle` signatures updated; new `WalletProvider` (`src/shared/wallet.py`) + `WALLET_PROVIDER` env. A2A message set grown to 6 (added `feedback/request`; `task/accepted` now carries payment-proposal id+url). `guild_context.json` gained `guild_name`, `treasury_address`, `governance_settings`, per-member `shares`/`loot`, `payment_proposal_id`, `settlement_tx`. Gates 0,0.5,1,2 → 0,0.5,1,2,3,4. Two Decision-Log entries added. Mirrors `specs/` design feedback. |

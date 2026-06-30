@@ -12,15 +12,15 @@
 
 ## F2 — ERC-8004 `giveFeedback()` Caller Constraint (HIGH)
 
-**Why:** `giveFeedback()` caller CANNOT be the agent's own wallet — Sybil protection. The guild contract (DAO) or Marco's EOA must be the caller.
+**Why:** `giveFeedback()` caller CANNOT be the agent's own wallet — Sybil protection. The **guild contract** must be the caller, via execution of the passed proposal.
 
-**Impact:** `settle()` must complete → reputation proposal submitted → DAO vote passed → `giveFeedback()` called. All three preconditions must hold. If the Specialist calls it directly, the tx reverts silently.
+**Impact:** settlement complete → Specialist `feedback/request` → `submitFeedback` proposal submitted → DAO vote passed (Gate 4) → proposal execution calls `giveFeedback()` with `msg.sender = guild contract`. If the Specialist (or any agent EOA) calls it directly, the tx reverts silently.
 
-**New flow (2026-06-17):** `giveFeedback()` is now gated behind a DAO proposal (`AgentFightClub.propose()` with reputation data payload) and a human vote (Gate 3). The caller of `giveFeedback()` is still the guild contract address or Marco's EOA — this constraint is unchanged.
+**Flow (updated 2026-06-30):** `giveFeedback()` is gated behind an **executable** `submitFeedback` DAO proposal and a human vote (**Gate 4**, renumbered from Gate 3). The caller is always the guild contract address (the proposal executes the call) — never an agent EOA, never the Specialist wallet.
 
-**Fallback:** Route `giveFeedback()` through Marco's (human founder's) EOA wallet after the DAO vote. If the reputation proposal vote mechanism fails, call `giveFeedback()` directly post-`settle()` using Marco's EOA and note the governance step as a "design exhibit."
+**Fallback:** If the executable-proposal path is unavailable, fall back to a signal proposal + a **human-operated** `process`/`giveFeedback()` from the guild contract or Marco's (human founder's) EOA, noting the governance step as a "design exhibit." **Agents never sign `giveFeedback()` from a raw EOA** — the human-operated exception is the only EOA path.
 
-**Trigger:** If the reputation proposal vote tx reverts, check that `settle()` confirmed first. If `giveFeedback()` reverts, check `msg.sender` before assuming any deeper issue.
+**Trigger:** If the reputation proposal vote tx reverts, check that settlement confirmed first. If `giveFeedback()` reverts, check `msg.sender` before assuming any deeper issue.
 
 ---
 
@@ -32,21 +32,21 @@
 
 ---
 
-## F4 — Agent Wallet Spending Limits (LOW) — ZeroDev replaced by CAW
+## F4 — Wallet Provider Unavailable Mid-Build (LOW) — provider-agnostic scoping
 
-**Status (updated 2026-06-08):** Cobo CAW restored as primary wallet after TSS local node restart. Full x402 pipeline confirmed working. ZeroDev Kernel v3.3 is **demoted to design exhibit only** — no longer on the critical path.
+**Status (updated 2026-06-30):** Cobo CAW is the default `WalletProvider` (TSS local node, full x402 pipeline). The wallet layer is **provider-agnostic** — CAW is swappable for ZeroDev or Turnkey behind the same interface.
 
-**Current approach:** CAW Pacts enforce per-task spending ceiling at the signature level — no TypeScript bridge required.
+**Scoping model:** The treasury is **DAO-held**, so no agent wallet custodies funds. The Pact therefore scopes in detail the **DAO contract calls** the agent may make — `propose`, `vote`, `process` on the guild contract — and caps **tribute** (the only call that moves value out of an agent wallet). Everything else is refused at the signature level.
 
-**Remaining risk:** CAW TSS node is local — a second crash requires the same restart. If the node goes down mid-build, restart it immediately; the API itself is stable.
+**Remaining risk:** CAW TSS node is local — a crash requires a restart. If the node goes down mid-build, restart it immediately, or switch `WALLET_PROVIDER` to another scoped provider (ZeroDev/Turnkey) preserving the same allowlist + tribute cap.
 
-**Fallback:** If CAW becomes permanently unavailable, use basic EOA signing (private key in env) and present ZeroDev session key config as the "intended architecture" code exhibit for Cobo track submission.
+**Fallback:** Swap the wallet provider — **never** fall back to raw EOA signing. If no scoped provider is available, halt the run until one is restored. (Agents must not sign from a bare private key.)
 
 ---
 
 ## F5 — A2A Metadata Extension Fields Rejected (LOW) ✅ CLEARED Day 9
 
-**Status:** A2A coordination loop validated Day 9. All 5 gates passing. Metadata extension fields accepted without schema rejection. This risk is closed.
+**Status:** A2A coordination loop validated Day 9. All gates passing (now 6: 0, 0.5, 1, 2, 3, 4). Metadata extension fields accepted without schema rejection. This risk is closed.
 
 **Fallback (standby):** If metadata validation fails during real task flow (not the test), carry GuildOS-specific fields in the message `text` body as a JSON string. 15-minute fix — do not block on this.
 
@@ -106,10 +106,12 @@ Tier B **drops:** Treasury via AgentFightClub, formal governance, automated sett
 | 2026-06-08 | Cobo CAW | ✅ **Restored** — TSS node restart | Primary wallet; ZeroDev demoted to design exhibit |
 | 2026-06-08 | Network | ⚠️ **Base Sepolia → Base mainnet** | AFC has no Base Sepolia support; chain_id 8453 |
 | 2026-06-09 | AgentFightClub | ✅ Full flow confirmed | launch → commit → propose → vote → settle all working |
-| 2026-06-09 | A2A SDK v1.0.0 | ✅ All 5 gates validated | Metadata accepted; coordination loop working |
+| 2026-06-09 | A2A SDK v1.0.0 | ✅ Coordination loop + gates validated | Metadata accepted; coordination loop working |
 | 2026-06-09 | GLM-5.1 / Hermes | ✅ Specialist stack locked | Hermes agent deployed; long-horizon prompt locked |
-| — | ZeroDev session keys | Demoted — design exhibit only | CAW handles spending limits via Pacts |
+| — | ZeroDev session keys | Retained as alternate `WalletProvider` | Provider-agnostic wallet layer; CAW default, ZeroDev/Turnkey swappable |
 | 2026-06-11 | Deliverable hash commitment | ✅ **EAS attestation adopted** | Replaces raw `eth_sendTransaction`; Specialist signs attestation via EASClient; UID embedded in A2A result (see EAS_ANALYSIS.md) |
+| 2026-06-30 | Settlement | ✅ **DAO payment proposal + Gate 3** | Treasury DAO-held; `payment_propose` → `task/accepted` (id+url) → human vote+process (Gate 3) → `settle` processes it. Reputation → Gate 4, Specialist-triggered via `feedback/request` |
+| 2026-06-30 | Wallet scoping | ✅ **Scope DAO calls + cap tribute; no EOA fallback** | Pact allowlists `propose`/`vote`/`process` + caps tribute; provider-agnostic `WalletProvider`; agents never fall back to raw EOA (F4 rewritten) |
 
 ---
 
@@ -121,3 +123,11 @@ If you find yourself doing any of these without an explicit decision, stop:
 - Integrating Mem0 or LangChain memory — JSON file is the stub; ship it
 - Deploying extra contracts beyond what the demo needs — Base mainnet, keep lean
 - Adding ERC-8183 — AgentFightClub settle is the payment story
+
+---
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-06-30 | **F2** tightened — `giveFeedback()` caller is always the guild contract (via proposal execution); reputation gate renumbered to **Gate 4**; agents never sign from a raw EOA (only a human-operated exception remains). **F4** rewritten — wallet layer is provider-agnostic (`WalletProvider`), Pact scopes DAO `propose`/`vote`/`process` calls + caps tribute (treasury is DAO-held), and there is **no EOA fallback**. **F5** updated to 6 gates. Two Decision-Log rows added. Mirrors `specs/` design feedback. |
