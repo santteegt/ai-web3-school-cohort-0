@@ -4,7 +4,11 @@ Primary: Direct integration via moloch-agent CLI (@raidguild/meta-clawtel)
 Fallback: web3.py direct contract calls if CLI fails (see docs/RISKS.md §F1)
 
 Decision recorded in docs/TECH_STACK.md Decision Log on Day 8.
-Network: Base mainnet (chain_id 8453)
+
+Network is resolved from CHAIN_ID via src/shared/network_config.py — never
+hardcode an RPC URL or assume a fixed network here. AFC has no Base Sepolia
+deployment (see docs/RISKS.md §F6); only CHAIN_ID=8453 (Base) is valid for
+AgentFightClub calls.
 """
 
 from __future__ import annotations
@@ -14,14 +18,20 @@ import logging
 import os
 import subprocess
 
+from src.shared import network_config
+
 logger = logging.getLogger(__name__)
 
-# Config from environment
+# Signing key from environment (secrets never live in config/networks.json)
 PRIVATE_KEY = os.getenv("PRIVATE_KEY", "")
-RPC_URL = os.getenv("RPC_URL", "https://mainnet.base.org")
 
 # moloch-agent CLI
 _MCLI = "moloch-agent"
+
+
+def _rpc_url() -> str:
+    """Resolve the RPC URL for the active CHAIN_ID via network_config."""
+    return network_config.get_rpc_url()
 
 
 def _run_cli(*args: str, timeout: int = 120) -> dict:
@@ -30,7 +40,7 @@ def _run_cli(*args: str, timeout: int = 120) -> dict:
     Raises RuntimeError on non-zero exit or parse failure.
     """
     cmd = [_MCLI] + list(args)
-    env = {**os.environ, "PRIVATE_KEY": PRIVATE_KEY, "RPC_URL": RPC_URL}
+    env = {**os.environ, "PRIVATE_KEY": PRIVATE_KEY, "RPC_URL": _rpc_url()}
 
     logger.info("CLI: %s", " ".join(cmd[:3]) + ("..." if len(cmd) > 3 else ""))
     result = subprocess.run(
@@ -91,7 +101,7 @@ async def launch(mandate: str, treasury_address: str) -> dict:
 
     # Build summon params
     summon_params = {
-        "daoName": "GuildOS-Guild",
+        "daoName": "GuildOS-Genesys",
         "tokenName": "GUILD",
         "tokenSymbol": "GLD",
         "members": [
@@ -108,7 +118,7 @@ async def launch(mandate: str, treasury_address: str) -> dict:
         "sponsorThreshold": "0",
         "proposalOffering": "0",
         "metadata": {
-            "name": "GuildOS Guild",
+            "name": "GuildOS Genesys",
             "description": mandate,
         },
     }
@@ -176,12 +186,12 @@ async def commit(guild_address: str, amount_wei: int) -> str:
     wrap_tx = wrap_result.get("txHash", wrap_result.get("transactionHash", ""))
     logger.info("Wrap tx: %s", wrap_tx)
 
-    # Step 2: Approve WETH for the guild (use WETH address on Base)
-    weth_base = "0x4200000000000000000000000000000000000006"
+    # Step 2: Approve WETH for the guild (network-specific predeploy address)
+    weth_address = network_config.get_contract_address("weth")
     logger.info("Approving WETH for guild %s", guild_address)
     approve_result = _run_cli(
         "approve-token",
-        "--token", weth_base,
+        "--token", weth_address,
         "--amount", str(amount_eth),
     )
     approve_tx = approve_result.get("txHash", approve_result.get("transactionHash", ""))
@@ -192,7 +202,7 @@ async def commit(guild_address: str, amount_wei: int) -> str:
     tribute_result = _run_cli(
         "tribute",
         "--dao", guild_address,
-        "--token", weth_base,
+        "--token", weth_address,
         "--amount", str(amount_eth),
     )
     tribute_tx = tribute_result.get("txHash", tribute_result.get("transactionHash", ""))

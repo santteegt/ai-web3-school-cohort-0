@@ -11,6 +11,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `docs/MVP_FLOW.md` | Before any change to agent coordination logic |
 | `docs/RISKS.md` | Before touching AgentFightClub, ERC-8004, or ZeroDev — fallbacks are already decided |
 | `docs/VALIDATION_PLAN.md` | Definition of done per integration |
+| `config/networks.json` | Before touching any contract address, RPC URL, or explorer link — these are network-specific, not env vars |
 | `guild_context.json` | Current guild state (mock store — one JSON file per session) |
 
 ## Component Map — Use These Names, Never Invent New Ones
@@ -25,6 +26,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `ERC8004` | `src/shared/erc8004.py` | `register()` and `giveFeedback()` — caller constraint: NOT the agent's own wallet (guild contract via proposal execution) |
 | `AgentFightClub` | `src/shared/agentfightclub.py` | `launch`, `commit`, `propose`, `vote`, `settle` — ClawBank API or DAOhaus SDK fallback |
 | `WalletProvider` | `src/shared/wallet.py` | Provider-agnostic signing + Pact scoping (CAW default; ZeroDev/Turnkey swappable); scopes DAO calls + caps tribute; no EOA fallback |
+| `NetworkConfig` | `src/shared/network_config.py` | Loads `config/networks.json` for the active `CHAIN_ID`; the only path to a contract address, RPC URL, or explorer link |
 | `GuildContext` | `src/shared/guild_context.py` | Read/write `guild_context.json`; the mock guild state store |
 | `HumanGates` | `src/cli/gates.py` | Gate 0, 0.5, 1, 2, 3, 4 — CLI `y/N` prompts; always halt execution and wait |
 
@@ -125,7 +127,8 @@ for that ticket — not just as background reading. In particular:
 - **How does payment get released?** → Treasury is DAO-held. After Gate 2, call `payment_propose` (AFC `payment` proposal with deliverable details + specialist address); send `task/accepted` carrying the `payment_proposal_id`+url; **Gate 3** halts for the human to vote+process; `settle(guild_address, payment_proposal_id)` then processes the passed proposal. No agent wallet moves treasury funds.
 - **Does `reputation_write` need a DAO proposal first?** → Yes — full sequence: Specialist sends `feedback/request`; (1) `reputation_propose` submits an executable `submitFeedback` Moloch proposal encoding the `giveFeedback()` call; (2) **Gate 4** halts for human vote; (3) on passing vote, `AgentFightClub.process(proposal_id)` executes the proposal — `msg.sender = guild contract`. Never call `giveFeedback()` directly from an EOA.
 - **Which wallet provider / how is signing scoped?** → Use the `WalletProvider` abstraction (`src/shared/wallet.py`); CAW is the default, ZeroDev/Turnkey swappable via `WALLET_PROVIDER`. The Pact allowlists the DAO `propose`/`vote`/`process` calls and caps tribute. **Never** fall back to raw EOA signing — halt instead.
-- **EAS schema not found on `attest()`?** → Check `DELIVERY_SCHEMA_UID` in `.env`; register schema on Base mainnet if missing (see `docs/RISKS.md §F7`)
+- **Need a contract address, RPC URL, or explorer link?** → Never read it from `os.environ` or hardcode it. Call `src/shared/network_config.py` (`get_contract_address`, `get_rpc_url`, `get_explorer_tx_url`, `get_easscan_attestation_url`, `get_delivery_schema_uid`) — it resolves the value from `config/networks.json` for the active `CHAIN_ID`. Only `CHAIN_ID` itself and secrets (`ALCHEMY_API_KEY`, private keys) live in `.env`.
+- **EAS schema not found on `attest()`?** → Check `network_config.get_delivery_schema_uid()`; register the schema and write the UID into `config/networks.json` (not `.env`) if missing (see `docs/RISKS.md §F7`)
 - **New A2A message type needed?** → Check `src/shared/a2a.py` for the established pattern; don't invent new types without updating `docs/MVP_FLOW.md`
 - **Is this feature in scope?** → Check `docs/MVP_FLOW.md`; if not in the 15 steps, it's out of scope
 
@@ -134,6 +137,7 @@ for that ticket — not just as background reading. In particular:
 - Run any transaction on Ethereum mainnet — never Ethereum mainnet under any circumstance
 - Hardcode chain_id — always read from `CHAIN_ID` env var (8453 = Base canonical/evidence; 84532 = Base Sepolia isolated testing only)
 - Use Base Sepolia for submission evidence — Basescan tx #1/2/3 must be on Base (8453)
+- Hardcode a contract address, RPC URL, or explorer link, or read one from `os.environ` directly — always go through `src/shared/network_config.py`; the values live in `config/networks.json`, not `.env`
 - Hardcode private keys, API keys, or seed phrases in source files
 - Fall back to raw EOA signing for agents — sign only through the scoped `WalletProvider`; halt if no scoped provider is available
 - Move treasury funds outside a DAO proposal — treasury is DAO-held; payment flows only through the Gate-3 payment proposal
@@ -168,3 +172,4 @@ Add new components to the Component Map when they are created. Update Don't rule
 |------|--------|
 | 2026-06-30 | Component Map: tools 8→9 (added `payment_propose`), added `WalletProvider`, A2A messages now include `feedback/request`, gates 0,0.5,1,2 → 0,0.5,1,2,3,4. When-Unsure: added payment-proposal (Gate 3) and wallet-provider entries; reputation → Gate 4. Don't: no agent EOA fallback, treasury is DAO-held. Sprint Day 11 reflects payment (Gate 3) + reputation (Gate 4). Mirrors `specs/` + `docs/` design feedback. |
 | 2026-06-30 | Added **Spec-Driven Development — Issue Templates** section (between Component Map and Before Building): the Human Intent → BDD/Gherkin → spec → ticket chain, plus "Creating an issue" and "Working on an issue" workflows. Added `templates/ISSUE_TICKET_TEMPLATE.md` and `templates/TASK_EXECUTION_PROMPT.md`. |
+| 2026-06-30 | **Network config extracted to `config/networks.json`.** New `NetworkConfig` component (`src/shared/network_config.py`); `erc8004.py`/`agentfightclub.py` refactored to use it instead of hardcoded addresses/`RPC_URL` (also fixes a prior bug where `erc8004.py` hardcoded "Base Sepolia" against every other doc's "Base mainnet"). `ERC8004_CONTRACT`, `REPUTATION_CONTRACT`, `EAS_CONTRACT`, `EAS_SCHEMA_REGISTRY`, `DELIVERY_SCHEMA_UID` removed from `.env`/`.env.example` — only `CHAIN_ID` (selector) and secrets remain there. Added Component Map row, When-Unsure entry, Don't rule, and a "Files — Read Before Coding" row. |

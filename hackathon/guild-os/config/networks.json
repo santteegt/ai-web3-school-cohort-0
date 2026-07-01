@@ -1,0 +1,35 @@
+{
+  "_comment": "Per-network on-chain config, keyed by CHAIN_ID. Components read CHAIN_ID from the environment, then load this file via src/shared/network_config.py — never hardcode a contract address, RPC URL, or explorer link in source. Secrets (ALCHEMY_API_KEY, private keys) stay in .env and are substituted into rpc_url_template at load time; nothing in this file is a secret.",
+  "8453": {
+    "label": "Base",
+    "role": "canonical",
+    "_role_comment": "Only network valid for submission evidence (Basescan tx #1-3, easscan attestation).",
+    "rpc_url_template": "https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+    "explorer_tx_url": "https://basescan.org/tx/",
+    "easscan_attestation_url": "https://base.easscan.org/attestation/",
+    "contracts": {
+      "erc8004_identity_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "erc8004_reputation_registry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "eas": "0x4200000000000000000000000000000000000021",
+      "eas_schema_registry": "0x4200000000000000000000000000000000000020",
+      "weth": "0x4200000000000000000000000000000000000006"
+    },
+    "delivery_schema_uid": null
+  },
+  "84532": {
+    "label": "Base Sepolia",
+    "role": "isolated-test",
+    "_role_comment": "Permitted only for isolated component tests that support it (e.g. EAS). AgentFightClub has no Base Sepolia deployment — never select this network for AFC calls. Never valid for submission evidence.",
+    "rpc_url_template": "https://base-sepolia.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+    "explorer_tx_url": "https://sepolia.basescan.org/tx/",
+    "easscan_attestation_url": "https://base-sepolia.easscan.org/attestation/",
+    "contracts": {
+      "erc8004_identity_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "erc8004_reputation_registry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "eas": "0x4200000000000000000000000000000000000021",
+      "eas_schema_registry": "0x4200000000000000000000000000000000000020",
+      "weth": "0x4200000000000000000000000000000000000006"
+    },
+    "delivery_schema_uid": null
+  }
+}

@@ -1,10 +1,16 @@
 """On-Chain Deliverable Hash Commitment.
 
-Commits the SHA-256 deliverable hash to the guild contract on Base mainnet
-via eth_sendTransaction, then verifies via eth_call readback.
+Commits the SHA-256 deliverable hash to the guild contract via
+eth_sendTransaction, then verifies via eth_call readback.
 
 Validation plan section 5.1–5.4.
-This is REAL on-chain — no mocks. One of the two primary judge-facing evidence items.
+
+SUPERSEDED by EAS attestation — see issue #28 / docs/RISKS.md §F7. This
+module is the F7 raw-tx fallback path, kept only until the EASClient
+(src/shared/eas.py) lands; it is not the target design.
+
+Network is resolved from CHAIN_ID via src/shared/network_config.py — never
+hardcode an RPC URL here.
 """
 
 from __future__ import annotations
@@ -16,11 +22,11 @@ from pathlib import Path
 
 from web3 import Web3
 
+from src.shared import network_config
+
 logger = logging.getLogger(__name__)
 
-# Network config
-RPC_URL = os.getenv("RPC_URL", "https://mainnet.base.org")
-CHAIN_ID = int(os.getenv("CHAIN_ID", "8453"))  # Base mainnet
+# Signing key from environment (secrets never live in config/networks.json)
 PRIVATE_KEY = os.getenv("PRIVATE_KEY", "")
 
 # Guild contract ABI — minimal setDeliverableHash + getDeliverableHash
@@ -58,10 +64,11 @@ GUILD_HASH_ABI = [
 
 
 def _get_w3() -> Web3:
-    """Get a Web3 instance connected to Base mainnet."""
-    w3 = Web3(Web3.HTTPProvider(RPC_URL))
+    """Get a Web3 instance connected to the active CHAIN_ID network."""
+    rpc_url = network_config.get_rpc_url()
+    w3 = Web3(Web3.HTTPProvider(rpc_url))
     if not w3.is_connected():
-        raise ConnectionError(f"Cannot connect to Base mainnet at {RPC_URL}")
+        raise ConnectionError(f"Cannot connect to network at {rpc_url}")
     return w3
 
 
@@ -97,6 +104,7 @@ def commit_hash(
     w3 = _get_w3()
     account = w3.eth.account.from_key(PRIVATE_KEY)
     sender = account.address
+    chain_id = int(network_config.get_chain_id())
     logger.info("Committing hash from %s to guild %s", sender, guild_address)
 
     hash_bytes = _hash_to_bytes32(deliverable_hash)
@@ -115,7 +123,7 @@ def commit_hash(
             "from": sender,
             "nonce": nonce,
             "gasPrice": gas_price,
-            "chainId": CHAIN_ID,
+            "chainId": chain_id,
         })
         signed = account.sign_transaction(tx)
         tx_hash_bytes_raw = w3.eth.send_raw_transaction(signed.raw_transaction)
@@ -135,7 +143,7 @@ def commit_hash(
             "gasPrice": gas_price,
             "nonce": nonce,
             "data": "0x" + hash_bytes.hex(),
-            "chainId": CHAIN_ID,
+            "chainId": chain_id,
         }
         signed = account.sign_transaction(raw_tx)
         tx_hash_bytes_val = w3.eth.send_raw_transaction(signed.raw_transaction)
@@ -150,7 +158,7 @@ def commit_hash(
     status = receipt.get("status", 0)
     logger.info("Tx receipt status: %s, block: %s", status, receipt.get("blockNumber"))
 
-    basescan_url = f"https://basescan.org/tx/{tx_hash}"
+    basescan_url = network_config.get_explorer_tx_url(tx_hash)
 
     # Readback verification via eth_call
     readback_match = False

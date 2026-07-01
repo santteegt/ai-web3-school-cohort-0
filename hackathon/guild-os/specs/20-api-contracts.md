@@ -40,18 +40,34 @@ Exact versions from `uv.lock`. Pin these — do not let an agent default to trai
 
 ## 2. Network & On-Chain Addresses
 
-| Item | Value |
-|------|-------|
-| Canonical network | **Base mainnet — `CHAIN_ID=8453`** (only valid submission-evidence network) |
-| Isolated-test network | Base Sepolia — `CHAIN_ID=84532` (components that support it only; never for evidence) |
-| Block explorer | `https://basescan.org/tx/...` (Sepolia: `https://sepolia.basescan.org/tx/...`) |
-| EAS explorer | `https://base.easscan.org/attestation/{uid}` |
-| RPC | Alchemy (Base) — `ALCHEMY_API_KEY` |
-| ERC-8004 IdentityRegistry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
-| ERC-8004 ReputationRegistry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
-| EAS contract | `0x4200000000000000000000000000000000000021` |
-| EAS SchemaRegistry | `0x4200000000000000000000000000000000000020` |
-| `DELIVERY_SCHEMA_UID` | Registered once before Step 8; pinned in `.env` |
+**Source of truth is `config/networks.json`, not `.env`.** Every value below
+is network-specific (it differs — or could differ — between Base and Base
+Sepolia), so it's keyed by `CHAIN_ID` in that file and resolved through
+`src/shared/network_config.py`. No component reads a contract address, RPC
+URL, or explorer link from an environment variable directly; only `CHAIN_ID`
+itself (the network selector) and secrets (`ALCHEMY_API_KEY`, private keys)
+live in `.env` — see §6.
+
+| Item | Value | Resolved via |
+|------|-------|---------------|
+| Canonical network | **Base — `CHAIN_ID=8453`** (only valid submission-evidence network) | `network_config.is_canonical()` |
+| Isolated-test network | Base Sepolia — `CHAIN_ID=84532` (components that support it only; AgentFightClub has no deployment here; never for evidence) | — |
+| Block explorer | `https://basescan.org/tx/...` (Sepolia: `https://sepolia.basescan.org/tx/...`) | `network_config.get_explorer_tx_url(tx_hash)` |
+| EAS explorer | `https://base.easscan.org/attestation/{uid}` | `network_config.get_easscan_attestation_url(uid)` |
+| RPC | `https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}` (Sepolia: `base-sepolia` subdomain); `ALCHEMY_API_KEY` substituted from env at load time | `network_config.get_rpc_url()` |
+| ERC-8004 IdentityRegistry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` (same on both networks — CREATE2 vanity deploy) | `network_config.get_contract_address("erc8004_identity_registry")` |
+| ERC-8004 ReputationRegistry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` (same on both networks) | `network_config.get_contract_address("erc8004_reputation_registry")` |
+| EAS contract | `0x4200000000000000000000000000000000000021` (OP-stack predeploy — identical on every OP-stack chain) | `network_config.get_contract_address("eas")` |
+| EAS SchemaRegistry | `0x4200000000000000000000000000000000000020` (OP-stack predeploy) | `network_config.get_contract_address("eas_schema_registry")` |
+| WETH | `0x4200000000000000000000000000000000000006` (OP-stack predeploy; used by AgentFightClub `commit()`) | `network_config.get_contract_address("weth")` |
+| `delivery_schema_uid` | Registered once per network before Step 8; written into `config/networks.json`, not `.env` | `network_config.get_delivery_schema_uid()` |
+
+> ASSUMPTION: ERC-8004 registry addresses are listed identically for both
+> networks because every source doc to date only ever cites one set of
+> values (consistent with a CREATE2 vanity deploy at a fixed address per
+> chain). If the two networks are later confirmed to use different
+> addresses, update both entries in `config/networks.json` — the schema
+> already supports per-network divergence.
 
 ### EAS delivery schema
 
@@ -137,15 +153,32 @@ delivery_record:
 
 ## 5. Component Interfaces
 
+### `NetworkConfig` — `src/shared/network_config.py`
+- `get_chain_id() -> str` — reads `CHAIN_ID` from env (default `"8453"`).
+- `get_network_config(chain_id=None) -> dict` — full `config/networks.json` block for the network.
+- `get_contract_address(name, chain_id=None) -> str` — `name` is one of
+  `erc8004_identity_registry`, `erc8004_reputation_registry`, `eas`,
+  `eas_schema_registry`, `weth`.
+- `get_rpc_url(chain_id=None) -> str` — builds the RPC URL, injecting `ALCHEMY_API_KEY`.
+- `get_explorer_tx_url(tx_hash, chain_id=None) -> str`,
+  `get_easscan_attestation_url(uid, chain_id=None) -> str`.
+- `get_delivery_schema_uid(chain_id=None) -> str | None`.
+- `is_canonical(chain_id=None) -> bool` — true only for Base.
+- **Every other component reads network-specific values through this
+  module — never from `os.environ` directly and never hardcoded.**
+
 ### `EASClient` — `src/shared/eas.py`
 - `attest(deliverable_hash, task_type, guild_contract, payment_amount) -> { uid, url, tx_hash }`
-  — Specialist-signed attestation against `DELIVERY_SCHEMA_UID`.
+  — Specialist-signed attestation against `network_config.get_delivery_schema_uid()`.
 - `get_attestation(uid) -> { deliverableHash, taskType, guildContract, paymentAmount }`.
 
 ### `ERC8004` — `src/shared/erc8004.py`
-- `register(agent_uri, signer_private_key) -> tx_hash` — mints the agentId.
-- `give_feedback(caller, <6 fields>) -> tx_hash` — emits `DeliveryRecorded`.
-  **Caller MUST be the guild contract or Marco's EOA — never the Specialist wallet (F2).**
+- `register(agent_uri, signer_private_key) -> tx_hash` — mints the agentId on
+  `network_config.get_contract_address("erc8004_identity_registry")`.
+- `give_feedback(caller, <6 fields>) -> tx_hash` — emits `DeliveryRecorded` on
+  `network_config.get_contract_address("erc8004_reputation_registry")`.
+  **Caller MUST be the guild contract (via DAO proposal execution) — never an
+  agent EOA, never the Specialist wallet (F2).**
 
 ### `AgentFightClub` — `src/shared/agentfightclub.py`
 - `launch(guild_name, mandate, governance_settings, member_list) -> { guild_address, treasury_address, tx_hash }`
@@ -171,10 +204,19 @@ delivery_record:
 
 ## 6. Environment Contract
 
+`.env` holds only the network **selector** (`CHAIN_ID`) and **secrets**.
+Every network-specific value (contract addresses, RPC URL, explorer links,
+`delivery_schema_uid`) lives in `config/networks.json`, keyed by `CHAIN_ID` —
+see §2. A ticket whose "Technical Constraints" section lists a contract
+address or RPC URL as an env var is wrong; it should cite
+`network_config.get_contract_address(...)` / `get_rpc_url()` instead.
+
+### `.env`
+
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `CHAIN_ID` | Active network (8453 canonical / 84532 isolated test) | `8453` |
-| `ALCHEMY_API_KEY` | Base RPC | — (required) |
+| `CHAIN_ID` | Active network — the only switch between Base (8453, canonical) and Base Sepolia (84532, isolated test); resolves into `config/networks.json` | `8453` |
+| `ALCHEMY_API_KEY` | Secret — substituted into `config/networks.json`'s `rpc_url_template` | — (required) |
 | `GLM_API_KEY` | Z.AI GLM-5.1 | — (required) |
 | `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator EOA signing | — (required) |
 | `SPECIALIST_PRIVATE_KEY` | Specialist EOA signing | — (required) |
@@ -182,13 +224,23 @@ delivery_record:
 | `SPECIALIST_WALLET_ADDRESS` | Settlement target | — (required) |
 | `AGENTFIGHTCLUB_API_KEY` | ClawBank API (skip → DAOhaus fallback) | optional |
 | `WALLET_PROVIDER` | Scoped signing provider for `WalletProvider` (`caw` \| `zerodev` \| `turnkey`) | `caw` |
-| `ERC8004_CONTRACT` | IdentityRegistry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
-| `REPUTATION_CONTRACT` | ReputationRegistry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
-| `EAS_CONTRACT` | EAS | `0x4200000000000000000000000000000000000021` |
-| `EAS_SCHEMA_REGISTRY` | EAS SchemaRegistry | `0x4200000000000000000000000000000000000020` |
-| `DELIVERY_SCHEMA_UID` | Registered delivery schema | — (required from Step 8) |
 | `ORCHESTRATOR_A2A_PORT` | Orchestrator A2A port | `10000` |
 | `SPECIALIST_A2A_PORT` | Specialist A2A port | `10001` |
+
+### `config/networks.json` (per `CHAIN_ID`, not an env var)
+
+| Key | Purpose |
+|-----|---------|
+| `rpc_url_template` | RPC base URL with `{ALCHEMY_API_KEY}` placeholder |
+| `explorer_tx_url` | Block-explorer tx URL prefix |
+| `easscan_attestation_url` | easscan attestation URL prefix |
+| `contracts.erc8004_identity_registry` | IdentityRegistry address |
+| `contracts.erc8004_reputation_registry` | ReputationRegistry address |
+| `contracts.eas` | EAS contract address |
+| `contracts.eas_schema_registry` | EAS SchemaRegistry address |
+| `contracts.weth` | WETH predeploy address |
+| `delivery_schema_uid` | Registered delivery schema UID for this network |
+| `role` | `"canonical"` or `"isolated-test"` |
 
 ---
 
@@ -198,7 +250,7 @@ delivery_record:
 |--------|---------|---------|
 | Classes | PascalCase | `OrchestratorServer`, `ERC8004`, `GuildContext` |
 | Functions | snake_case | `guild_launch()`, `send_invite()` |
-| Constants | SCREAMING_SNAKE | `ERC8004_CONTRACT`, `DELIVERY_SCHEMA_UID` |
+| Constants | SCREAMING_SNAKE | `CHAIN_ID`, `DEFAULT_CHAIN_ID`, `CONFIG_PATH` |
 | A2A message types | `noun/verb` | `task/invite`, `task/delivered` |
 | Files | snake_case | `agentfightclub.py`, `guild_context.json` |
 | Git branches | `feat/`, `fix/`, `chore/` | `feat/eas-attestation` |

@@ -30,6 +30,7 @@ Use these canonical names exactly — never invent parallel modules.
 | `ERC8004` | `src/shared/erc8004.py` | `register()` and `give_feedback()` — caller constraint: NOT the agent's own wallet |
 | `AgentFightClub` | `src/shared/agentfightclub.py` | `launch`, `commit`, `propose`, `vote`, `settle` — wraps Moloch v3 (ClawBank API or DAOhaus SDK) |
 | `WalletProvider` | `src/shared/wallet.py` | Provider-agnostic signing + Pact-scoping interface; Cobo CAW is the default implementation, swappable to ZeroDev / Turnkey (see §8 F4 and `scenarios/12_scoped_spending.feature`) |
+| `NetworkConfig` | `src/shared/network_config.py` | Loads `config/networks.json` for the active `CHAIN_ID`; the only path to a contract address, RPC URL, or explorer link — no component reads these from `os.environ` or a literal |
 | `GuildContext` | `src/shared/guild_context.py` | Read/write `guild_context.json`; the mock guild state store |
 | `HumanGates` | `src/cli/gates.py` | Gates 0, 0.5, 1, 2, 3, 4 — CLI `y/N` prompts; always halt and wait |
 | `CoordinationRunner` | `src/cli/runner.py` | Drives the full 15-step loop across the two agents |

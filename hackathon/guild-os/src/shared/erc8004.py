@@ -1,23 +1,31 @@
 """ERC8004 — interface for ERC-8004 IdentityRegistry and ReputationRegistry.
 
-Contracts on Base Sepolia (chain_id 84532):
-  IdentityRegistry:   0x8004A818BFB912233c491871b3d84c89A494BD9e
-  ReputationRegistry: 0x8004B663056A597Dffe9eCcC1965A193B7388713
+Contract addresses are network-specific and loaded from config/networks.json
+via src/shared/network_config.py, keyed by the CHAIN_ID env var — never
+hardcode an address or a network name here (see AGENTS.md Don't: "Hardcode
+chain_id").
 
 CRITICAL: giveFeedback() MUST be called from the guild contract address
-or Marco's EOA — NOT from the Specialist Agent's own wallet. Calling
-from the agent's wallet will cause a silent revert. (See docs/RISKS.md §F2)
+(via DAO proposal execution) — NOT from the Specialist Agent's own wallet,
+and not from a raw agent EOA. Calling from the agent's wallet will cause a
+silent revert. (See docs/RISKS.md §F2)
 """
 
 from __future__ import annotations
 import json
-import os
 from pathlib import Path
 
-IDENTITY_CONTRACT = os.getenv("ERC8004_CONTRACT", "0x8004A818BFB912233c491871b3d84c89A494BD9e")
-REPUTATION_CONTRACT = os.getenv("REPUTATION_CONTRACT", "0x8004B663056A597Dffe9eCcC1965A193B7388713")
+from src.shared import network_config
 
 NOTES_DIR = Path(__file__).parent / "logs"
+
+
+def _identity_contract() -> str:
+    return network_config.get_contract_address("erc8004_identity_registry")
+
+
+def _reputation_contract() -> str:
+    return network_config.get_contract_address("erc8004_reputation_registry")
 
 
 def read_profile(agent_id: int) -> dict:
@@ -43,7 +51,8 @@ def give_feedback(
 ) -> str:
     """Call ReputationRegistry.giveFeedback() with 6 fields.
 
-    Caller must be guild contract or Marco's EOA — NOT the Specialist wallet.
+    Caller must be the guild contract (via DAO proposal execution) — never an
+    agent EOA, never the Specialist wallet. See docs/RISKS.md §F2.
     Returns DeliveryRecorded event tx hash.
     """
     # TODO Day 11: build + submit transaction via web3.py

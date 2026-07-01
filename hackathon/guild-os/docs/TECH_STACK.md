@@ -30,6 +30,8 @@
 
 ```
 guild-os/
+├── config/
+│   └── networks.json          # Per-CHAIN_ID network config: contracts, RPC template, explorer URLs, schema UID
 ├── src/
 │   ├── orchestrator/
 │   │   ├── server.py          # MCP server — registers tools, starts listener
@@ -42,6 +44,7 @@ guild-os/
 │   │   ├── erc8004.py         # ERC-8004 interface: register(), giveFeedback(), read profile
 │   │   ├── agentfightclub.py  # AgentFightClub interface: launch, commit, propose, vote, settle
 │   │   ├── wallet.py          # WalletProvider: provider-agnostic signing + Pact scoping (CAW default; no EOA fallback)
+│   │   ├── network_config.py  # Loads config/networks.json for the active CHAIN_ID — never hardcode an address/RPC URL
 │   │   └── guild_context.py   # guild_context.json read/write helper
 │   └── cli/
 │       └── gates.py           # Human gate CLI prompts (Gate 0, 0.5, 1, 2, 3, 4)
@@ -133,22 +136,43 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 
 ## Environment Variables
 
+Only the **network selector** and **secrets** live in `.env`. Every
+network-specific value (contract addresses, RPC URL template, explorer
+links, the registered `DELIVERY_SCHEMA_UID`) lives in **`config/networks.json`**,
+keyed by `CHAIN_ID`, and is resolved through `src/shared/network_config.py`.
+No component should ever read a contract address from `os.environ` directly —
+see `network_config.get_contract_address()` / `get_rpc_url()` /
+`get_explorer_tx_url()` / `get_easscan_attestation_url()` /
+`get_delivery_schema_uid()`.
+
+### `.env` (selector + secrets only)
+
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `CHAIN_ID` | Active network chain ID | `8453` (Base); `84532` for isolated testing |
-| `ALCHEMY_API_KEY` | RPC endpoint (Base or Base Sepolia per `CHAIN_ID`) | — |
+| `CHAIN_ID` | Active network — the only switch between Base and Base Sepolia; resolves into `config/networks.json` | `8453` (Base); `84532` for isolated testing |
+| `ALCHEMY_API_KEY` | Secret, injected into `config/networks.json`'s `rpc_url_template` for the active network | — |
 | `GLM_API_KEY` | Z.AI GLM-5.1 API | — |
 | `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator signing key (EOA) | — |
 | `SPECIALIST_PRIVATE_KEY` | Specialist signing key (EOA) | — |
 | `WALLET_PROVIDER` | Scoped signing provider for `WalletProvider` (`caw` \| `zerodev` \| `turnkey`) | `caw` |
 | `AGENTFIGHTCLUB_API_KEY` | ClawBank Skill API | Optional |
-| `ERC8004_CONTRACT` | IdentityRegistry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
-| `REPUTATION_CONTRACT` | ReputationRegistry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
-| `EAS_CONTRACT` | EAS contract (Base mainnet) | `0x4200000000000000000000000000000000000021` |
-| `EAS_SCHEMA_REGISTRY` | EAS SchemaRegistry (Base mainnet) | `0x4200000000000000000000000000000000000020` |
-| `DELIVERY_SCHEMA_UID` | Registered GuildOS delivery schema UID | Register once; hardcode in `.env` |
 | `ORCHESTRATOR_A2A_PORT` | Orchestrator A2A endpoint port | `10000` |
 | `SPECIALIST_A2A_PORT` | Specialist A2A endpoint port | `10001` |
+
+### `config/networks.json` (network-specific, per `CHAIN_ID`)
+
+| Key | Purpose |
+|-----|---------|
+| `rpc_url_template` | RPC base URL with an `{ALCHEMY_API_KEY}` placeholder, substituted at load time |
+| `explorer_tx_url` | Basescan (or network-equivalent) tx URL prefix |
+| `easscan_attestation_url` | easscan attestation URL prefix |
+| `contracts.erc8004_identity_registry` | IdentityRegistry address |
+| `contracts.erc8004_reputation_registry` | ReputationRegistry address |
+| `contracts.eas` | EAS contract address |
+| `contracts.eas_schema_registry` | EAS SchemaRegistry address |
+| `contracts.weth` | WETH predeploy address (used by AgentFightClub `commit()`) |
+| `delivery_schema_uid` | Registered GuildOS delivery schema UID for this network — write the result of one-time schema registration here, not into `.env` |
+| `role` | `"canonical"` (Base — only valid submission-evidence network) or `"isolated-test"` (Base Sepolia) |
 
 ---
 
@@ -158,7 +182,7 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 |--------|---------|---------|
 | Classes | PascalCase | `OrchestratorServer`, `ERC8004`, `GuildContext` |
 | Functions | snake_case | `guild_launch()`, `send_task_invite()` |
-| Constants | SCREAMING_SNAKE | `ERC8004_CONTRACT`, `GUILD_CONTEXT_PATH` |
+| Constants | SCREAMING_SNAKE | `CHAIN_ID`, `GUILD_CONTEXT_PATH` |
 | A2A message types | `noun/verb` | `task/invite`, `task/delivered` |
 | Files | snake_case | `agentfightclub.py`, `guild_context.json` |
 | Git branches | `feat/`, `fix/`, `chore/` | `feat/a2a-task-flow` |
@@ -190,3 +214,4 @@ States: `ACTIVE` → `SETTLED` | `DISPUTED`
 | Date | Change |
 |------|--------|
 | 2026-06-30 | Orchestrator tool count 7→9 (added `payment_propose`, `reputation_propose`); `guild_launch` and `settle` signatures updated; new `WalletProvider` (`src/shared/wallet.py`) + `WALLET_PROVIDER` env. A2A message set grown to 6 (added `feedback/request`; `task/accepted` now carries payment-proposal id+url). `guild_context.json` gained `guild_name`, `treasury_address`, `governance_settings`, per-member `shares`/`loot`, `payment_proposal_id`, `settlement_tx`. Gates 0,0.5,1,2 → 0,0.5,1,2,3,4. Two Decision-Log entries added. Mirrors `specs/` design feedback. |
+| 2026-06-30 | **Network config extracted to `config/networks.json`.** `ERC8004_CONTRACT`, `REPUTATION_CONTRACT`, `EAS_CONTRACT`, `EAS_SCHEMA_REGISTRY`, `DELIVERY_SCHEMA_UID` removed from `.env` — they're network-specific and now live in `config/networks.json`, keyed by `CHAIN_ID`. New `src/shared/network_config.py` loader (`get_contract_address`, `get_rpc_url`, `get_explorer_tx_url`, `get_easscan_attestation_url`, `get_delivery_schema_uid`, `is_canonical`). `erc8004.py` and `agentfightclub.py` refactored to use it instead of hardcoded addresses / `RPC_URL` env var; fixes a prior contradiction where `erc8004.py`'s docstring hardcoded "Base Sepolia" while every other doc said Base mainnet. |

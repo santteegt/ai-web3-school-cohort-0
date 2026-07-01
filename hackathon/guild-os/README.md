@@ -90,21 +90,28 @@ cp .env.example .env
 
 ### Environment Variables
 
+`.env` holds only the network **selector** and **secrets**. Every
+network-specific value (contract addresses, RPC URL, explorer links, the
+registered delivery schema UID) lives in `config/networks.json`, keyed by
+`CHAIN_ID`, and is resolved through `src/shared/network_config.py` — not
+read from an env var. See that file before adding a new on-chain address
+anywhere in the code.
+
 | Variable | Purpose | Required |
 |----------|---------|----------|
 | `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator EOA signing key (hex) | Yes |
 | `SPECIALIST_PRIVATE_KEY` | Specialist Agent EOA signing key (hex) | Yes |
 | `ORCHESTRATOR_WALLET_ADDRESS` | Orchestrator wallet address (used as treasury in guild launch) | Yes |
 | `SPECIALIST_WALLET_ADDRESS` | Specialist Agent wallet address (settlement target) | Yes |
-| `CHAIN_ID` | Active network: `84532` (Base Sepolia) or `8453` (Base) | Default: `8453` |
-| `ALCHEMY_API_KEY` | Alchemy RPC for Base / Base Sepolia | Yes |
+| `CHAIN_ID` | Active network: `84532` (Base Sepolia, isolated testing) or `8453` (Base, canonical/evidence) — resolves into `config/networks.json` | Default: `8453` |
+| `ALCHEMY_API_KEY` | Secret, substituted into `config/networks.json`'s RPC URL template | Yes |
 | `GLM_API_KEY` | Z.AI GLM-5.1 API key | Yes |
+| `WALLET_PROVIDER` | Scoped signing provider (`caw` \| `zerodev` \| `turnkey`) | Default: `caw` |
 | `AGENTFIGHTCLUB_API_KEY` | ClawBank API key (skip to use DAOhaus SDK fallback) | Optional |
-| `EAS_CONTRACT` | EAS contract address on active network | Default: `0x4200000000000000000000000000000000000021` |
-| `EAS_SCHEMA_REGISTRY` | EAS SchemaRegistry address on active network | Default: `0x4200000000000000000000000000000000000020` |
-| `DELIVERY_SCHEMA_UID` | Registered GuildOS delivery schema UID — register once before Step 8 | Yes (Step 8+) |
-| `ERC8004_CONTRACT` | ERC-8004 registry address | Default: `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
-| `REPUTATION_CONTRACT` | ERC-8004 reputation write address | Default: `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
+
+Moved to `config/networks.json` (do not set these in `.env`): EAS contract +
+SchemaRegistry addresses, the registered delivery schema UID, and the
+ERC-8004 IdentityRegistry/ReputationRegistry addresses.
 
 ### Run
 
