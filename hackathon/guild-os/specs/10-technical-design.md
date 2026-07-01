@@ -1,7 +1,9 @@
 # 10 — Technical Design: Requirements, Schemas & Flow
 
 > Provenance: `docs/MVP_FLOW.md`, `docs/TECH_STACK.md`, `docs/RISKS.md`,
-> `docs/TRACK.md`, project `CLAUDE.md`, and `hackathon/PROJECT_PROPOSAL.md` (§8 Process Flow).
+> `docs/TRACK.md`, project `CLAUDE.md`, `hackathon/PROJECT_PROPOSAL.md` (§8 Process Flow),
+> and — for §12 only — direct inspection of `src/` (the transport mechanics
+> in §12 describe what the code does today, not a doc-to-doc transcription).
 
 ## TL;DR
 
@@ -12,7 +14,9 @@ ERC-8004 (identity/reputation). Work flows through a **15-step loop** punctuated
 human gates** (0, 0.5, 1, 2, 3, 4). Both the **payment** and the **reputation** write are
 DAO-governed: each is raised as a proposal that a human votes and processes. State lives in
 a single `guild_context.json` mock store. This file is the requirements contract; exact
-signatures and versions are in [`20-api-contracts.md`](20-api-contracts.md).
+signatures and versions are in [`20-api-contracts.md`](20-api-contracts.md). §§1–11 describe
+*what* each integration does; §12 describes *how* the current code actually wires the
+transport underneath — read it before extending any A2A, MCP, or AgentFightClub call site.
 
 ---
 
@@ -317,3 +321,98 @@ deploying extra contracts · adding ERC-8183.
 | Cobo | CAW Pact config shown live (TSS running); Pact allowlists the DAO `propose`/`vote`/`process` calls + caps tribute; provider-agnostic `WalletProvider` (CAW default, ZeroDev/Turnkey swappable); CAW address + anonymized Pact in README |
 | Z.AI | `glm_trace_*.json` with ≥3-step plan execution; non-trivial code output; EAS attestation of the GLM-5.1 output hash on `base.easscan.org` |
 | Both | Basescan settlement tx (processed payment proposal); EAS attestation UID; ERC-8004 before/after reputation delta |
+
+---
+
+## 12. Transport & Integration Mechanics
+
+The sections above describe **what** each integration does — message
+shapes, tool contracts, the standards adopted. This section describes
+**how** the current codebase actually wires those standards together at the
+transport level. It exists because the gap between the two is real: a
+developer extending `src/` on the strength of §§1–11 alone would be missing
+the protobuf/JSON-RPC/REST/stdio/subprocess reality underneath, and one
+integration (AgentFightClub) is documented elsewhere as an API client when
+it is, today, a CLI subprocess wrapper.
+
+### A2A — protobuf over JSON-RPC/REST, not bare JSON
+
+§3 and `specs/20-api-contracts.md` §3 describe A2A messages as JSON dicts
+with a `type` field (`{"type": "task/invite", ...}`). That's the
+**application-level envelope** — accurate, but not the wire format. The
+actual transport, built on the `a2a-sdk` (`a2a.types.a2a_pb2`), is:
+
+- Every message is a **protobuf** `a2a_pb2.Message`, with the JSON envelope
+  serialized into a string and carried inside a `Part.text` field — i.e.
+  the "carry GuildOS fields as a JSON string in the message text body"
+  fallback described in `docs/RISKS.md` §F5 is, in the current
+  implementation, **the only path that exists**, not a fallback from a
+  metadata-extension-fields primary path.
+- The Specialist's A2A server is built from `a2a.server.agent_execution.AgentExecutor`
+  (`SpecialistExecutor.execute(context, event_queue)`), a `LegacyRequestHandler`,
+  and an `InMemoryTaskStore`, mounted onto a `FastAPI` app via
+  `add_a2a_routes_to_fastapi()` — which registers **both** JSON-RPC routes
+  (`create_jsonrpc_routes`) and REST routes (`create_rest_routes`)
+  simultaneously. A client can address either transport.
+- The client side (`src/shared/a2a.py`) uses `a2a.client.client_factory.ClientFactory`
+  to resolve an agent's card and open a session — it does not construct raw
+  HTTP requests by hand.
+
+> ASSUMPTION: the dual JSON-RPC + REST mounting is the `a2a-sdk` v1.1.0
+> default (`LegacyRequestHandler`); if a future SDK version changes this,
+> update this section rather than letting it silently drift from the code.
+
+### Agent discovery — the `.well-known/agent.json` convention
+
+The Specialist publishes its Agent Card via `create_agent_card_routes(AGENT_CARD)`,
+which serves a well-known-URI route (`/.well-known/agent.json`) — the
+standard A2A discovery mechanism. The Orchestrator does **not** implement
+this route (see §1's `OrchestratorServer` entry and the closed decision in
+issue #29): its `agentURI`, registered on ERC-8004, points to a **static**
+JSON file (GitHub raw URL or IPFS), not a live discovery endpoint, because
+the Orchestrator never receives inbound A2A messages.
+
+### MCP — stdio, not HTTP
+
+`OrchestratorServer` (`src/orchestrator/server.py`) runs on
+`mcp.server.stdio.stdio_server()` — the Model Context Protocol's stdio
+transport, which is itself JSON-RPC 2.0 framed over stdin/stdout. There is
+no HTTP server for the Orchestrator's MCP interface; "MCP server" in §1's
+component table means a process Claude Code spawns and talks to over its
+own stdin/stdout, not a network service. This matters for anyone trying to
+reach the Orchestrator's tools from outside the harness that spawned it —
+there is currently no such path.
+
+### AgentFightClub — a CLI subprocess wrapper, not an API client
+
+§6's "ClawBank API (primary) / DAOhaus SDK (fallback)" framing describes the
+*intended* integration paths. The current implementation
+(`src/shared/agentfightclub.py`) is neither: every verb (`launch`, `commit`,
+`propose`, `vote`, `settle`) shells out via `subprocess.run()` to a
+`moloch-agent` CLI binary, passing `PRIVATE_KEY` and an RPC URL through the
+subprocess environment and parsing the CLI's stdout (JSON when available,
+regex-extracted tx hashes / addresses otherwise — see `_run_cli()`). There
+is no `httpx` client and no `web3.py` contract-ABI call anywhere in this
+file. Anyone implementing the F1 fallback (DAOhaus SDK) is introducing the
+project's *first* genuine API/SDK client for this integration, not
+switching between two that already coexist.
+
+### `web3.py`'s actual role today
+
+§1 lists `web3.py` `7.16.0` as the universal RPC/ABI layer for ERC-8004 and
+EAS. As of this writing, neither `erc8004.py` nor `eas.py` (the latter does
+not exist yet — tracked in issue #28) imports `web3` — every ERC-8004
+function is a `raise NotImplementedError` stub. The documented role is the
+**target**, not the current state; treat any spec language that implies
+`web3.py` calls are already working for these two integrations as
+forward-looking, not descriptive.
+
+### `NetworkConfig` — the seam between all of the above and `CHAIN_ID`
+
+`src/shared/network_config.py` is the one module every transport above
+should route through for anything network-specific (contract address, RPC
+URL, explorer link, registered schema UID) — see `config/networks.json` and
+`specs/20-api-contracts.md` §2/§6. It is plumbing, not a protocol in its own
+right, but it's listed here because it's the mechanism that lets the same
+A2A/MCP/AgentFightClub/web3.py code run unchanged against Base or Base
+Sepolia: nothing above should ever branch on `CHAIN_ID` directly.
