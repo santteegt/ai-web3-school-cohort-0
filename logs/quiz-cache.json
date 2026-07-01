@@ -114,7 +114,17 @@
     "inference-network",
     "cryptography",
     "unified-evaluation-framework",
-    "contract-docs"
+    "contract-docs",
+    "block",
+    "budget",
+    "maas",
+    "dev-tooling-agent-workflow",
+    "langchain",
+    "retriever",
+    "task-graph",
+    "explorer-context",
+    "human-in-the-loop",
+    "chunking"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
