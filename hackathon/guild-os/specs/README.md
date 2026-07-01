@@ -50,7 +50,7 @@ Load context shallow-to-deep. Do not skip ahead — each file assumes the prior 
 | # | File | MVP steps covered | Concept |
 |---|------|-------------------|---------|
 | 01 | [`01_guild_formation.feature`](scenarios/01_guild_formation.feature) | Steps 1–2 | Guild launch + treasury funding; Orchestrator ERC-8004 registration |
-| 02 | [`02_talent_discovery.feature`](scenarios/02_talent_discovery.feature) | Step 3 · Gate 0 | Talent-pool skill shortlist; human candidate approval |
+| 02 | [`02_talent_discovery.feature`](scenarios/02_talent_discovery.feature) | Step 2 (Specialist) · Step 3 · Gate 0 | **Specialist's own ERC-8004 registration** (tracked, not fixture); talent-pool skill shortlist; human candidate approval |
 | 03 | [`03_quoting_and_terms.feature`](scenarios/03_quoting_and_terms.feature) | Step 4 · Gate 0.5 | A2A invite + quote exchange; human quote acceptance |
 | 04 | [`04_membership.feature`](scenarios/04_membership.feature) | Step 5 · Gate 1 | Specialist membership proposal + DAO vote |
 | 05 | [`05_task_delegation.feature`](scenarios/05_task_delegation.feature) | Step 6 | A2A `task/send` contract — GitHub issue, constraints, AgBOM, BDD acceptance, deliverable format |

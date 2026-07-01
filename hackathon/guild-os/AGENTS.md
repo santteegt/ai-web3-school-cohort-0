@@ -102,7 +102,7 @@ for that ticket — not just as background reading. In particular:
 1. Read `docs/TECH_STACK.md` — versions and library choices are locked
 2. Read `docs/RISKS.md` Decision Log — fallbacks are already decided; don't re-evaluate
 3. Check the Component Map above — use existing module names and class names exactly
-4. Confirm which sprint Day (8–13) the task belongs to; match that Day's P0 gate
+4. Confirm which Phase (0–4) the issue belongs to; don't start a phase whose blocker phase isn't done — see "Sprint — Phase Gates" below
 
 ## While Building
 
@@ -149,7 +149,33 @@ for that ticket — not just as background reading. In particular:
 - Implement ragequit on-chain — document the path only
 - Add features not in the 15-step MVP flow
 
-## Sprint — Day Gates
+## Sprint — Phase Gates
+
+> Superseded the "Day 8–13" calendar table below on 2026-06-30 — the
+> original hackathon dates had already passed and the team's near-term
+> goal shifted to **dogfooding**: get the Specialist doing real GuildOS
+> work as early as possible, then keep building the rest of the loop
+> (settlement, reputation) in parallel. Phases replace calendar days;
+> GitHub milestones mirror them exactly (Phase 0 → Phase 4).
+
+| Phase | Theme | Gate to move on | Milestone |
+|-------|-------|------------------|-----------|
+| 0 | Wallet Infrastructure | `WalletProvider` (CAW) lands and is validated — nothing on-chain signs before this | [#30](https://github.com/santteegt/ai-web3-school-cohort-0/issues/30) |
+| 0.5 | Agent Identity Bootstrap | Specialist registers on ERC-8004 first, Orchestrator second — both signed through `WalletProvider` | [#5](https://github.com/santteegt/ai-web3-school-cohort-0/issues/5) |
+| 1 | Coordination MVP | Real `task/send` payload built and consumed — first real dogfood delegation reaches Gate 2 | [#32](https://github.com/santteegt/ai-web3-school-cohort-0/issues/32), [#10](https://github.com/santteegt/ai-web3-school-cohort-0/issues/10) |
+| 2 | Evidence & Realism | EAS attestation replaces raw hash commit; guild formation takes real founder parameters | [#28](https://github.com/santteegt/ai-web3-school-cohort-0/issues/28), [#31](https://github.com/santteegt/ai-web3-school-cohort-0/issues/31) |
+| 3 | Economic Loop | Payment proposal passed (Gate 3) · `settle()` tx · reputation proposal passed (Gate 4) · ERC-8004 delta | [#4](https://github.com/santteegt/ai-web3-school-cohort-0/issues/4), [#6](https://github.com/santteegt/ai-web3-school-cohort-0/issues/6), [#7](https://github.com/santteegt/ai-web3-school-cohort-0/issues/7) |
+| 4 | Demo Readiness | Dispute path · E2E smoke test passes · README, demo script, submission form — repo clean | [#13](https://github.com/santteegt/ai-web3-school-cohort-0/issues/13), [#14](https://github.com/santteegt/ai-web3-school-cohort-0/issues/14), [#15](https://github.com/santteegt/ai-web3-school-cohort-0/issues/15), [#16](https://github.com/santteegt/ai-web3-school-cohort-0/issues/16), [#17](https://github.com/santteegt/ai-web3-school-cohort-0/issues/17) |
+
+**Do not start a phase's issues before its blocker phase is done** — Phase
+0 blocks everything (nothing signs on-chain without it); Phase 0.5 depends
+on Phase 0; Phase 1 has no on-chain dependency and can be built in parallel
+with 0/0.5 up to the point where it needs a registered Specialist to
+delegate to. Phases 2–4 have no hard ordering constraint against each
+other beyond their own internal ACs.
+
+<details>
+<summary>Original Day 8–13 calendar table (superseded, kept for history)</summary>
 
 | Day | Date | Theme | P0 Gate |
 |-----|------|-------|---------|
@@ -160,9 +186,11 @@ for that ticket — not just as background reading. In particular:
 | 12 | Jun 12 | Demo Prep | README, demo script, all artifacts — repo clean |
 | 13 | Jun 13 | Submission | Submitted before 12:00 UTC+8 (04:00 UTC) |
 
+</details>
+
 ## Customizing This File
 
-Add new components to the Component Map when they are created. Update Don't rules when a fallback is triggered. Add Day-specific guidance before each morning session starts.
+Add new components to the Component Map when they are created. Update Don't rules when a fallback is triggered. Add phase-specific guidance when a new phase starts.
 
 ---
 
@@ -173,3 +201,4 @@ Add new components to the Component Map when they are created. Update Don't rule
 | 2026-06-30 | Component Map: tools 8→9 (added `payment_propose`), added `WalletProvider`, A2A messages now include `feedback/request`, gates 0,0.5,1,2 → 0,0.5,1,2,3,4. When-Unsure: added payment-proposal (Gate 3) and wallet-provider entries; reputation → Gate 4. Don't: no agent EOA fallback, treasury is DAO-held. Sprint Day 11 reflects payment (Gate 3) + reputation (Gate 4). Mirrors `specs/` + `docs/` design feedback. |
 | 2026-06-30 | Added **Spec-Driven Development — Issue Templates** section (between Component Map and Before Building): the Human Intent → BDD/Gherkin → spec → ticket chain, plus "Creating an issue" and "Working on an issue" workflows. Added `templates/ISSUE_TICKET_TEMPLATE.md` and `templates/TASK_EXECUTION_PROMPT.md`. |
 | 2026-06-30 | **Network config extracted to `config/networks.json`.** New `NetworkConfig` component (`src/shared/network_config.py`); `erc8004.py`/`agentfightclub.py` refactored to use it instead of hardcoded addresses/`RPC_URL` (also fixes a prior bug where `erc8004.py` hardcoded "Base Sepolia" against every other doc's "Base mainnet"). `ERC8004_CONTRACT`, `REPUTATION_CONTRACT`, `EAS_CONTRACT`, `EAS_SCHEMA_REGISTRY`, `DELIVERY_SCHEMA_UID` removed from `.env`/`.env.example` — only `CHAIN_ID` (selector) and secrets remain there. Added Component Map row, When-Unsure entry, Don't rule, and a "Files — Read Before Coding" row. |
+| 2026-06-30 | **Reprioritized around dogfooding.** Replaced the stale "Sprint — Day Gates" (Day 8–13, already past) with **"Sprint — Phase Gates"** (Phase 0 → 4), mirrored by new GitHub milestones; old milestones closed. Goal: get the Specialist doing real work as early as possible, build settlement/reputation in parallel. Issue #5 restructured to register the **Specialist first** (it accrues reputation) and blocked on #30. Issue #30 (`WalletProvider`) reframed as Phase 0 — expanded to also allowlist `ERC-8004.register()`, since registration/guild-formation/membership are on-chain coordination too, not just fund movement; now blocks every other on-chain-signing ticket. New issue #32 files the previously-missing "richer `task/send` payload" ticket — the actual gap blocking a real first delegation. Added a Specialist self-registration Gherkin scenario to `specs/scenarios/02_talent_discovery.feature` and an ERC-8004-register() allowlist scenario to `specs/scenarios/12_scoped_spending.feature`. |

@@ -63,6 +63,7 @@ and processes.
 | Steps | What happens | Scenario file |
 |-------|-------------|---------------|
 | 1–2 | Orchestrator collects founder inputs and launches the guild (summon + tribute); registers its own ERC-8004 profile | [01_guild_formation](scenarios/01_guild_formation.feature) |
+| 2 (Specialist) | Specialist registers its own ERC-8004 profile — once, independent of any guild, before it is discoverable | [02_talent_discovery](scenarios/02_talent_discovery.feature) |
 | 3 · **Gate 0** | Orchestrator hunts for talent; human selects candidate | [02_talent_discovery](scenarios/02_talent_discovery.feature) |
 | 4 · **Gate 0.5** | Orchestrator invites Specialist; Specialist quotes; human accepts | [03_quoting_and_terms](scenarios/03_quoting_and_terms.feature) |
 | 5 · **Gate 1** | Specialist submits membership proposal; human votes to approve | [04_membership](scenarios/04_membership.feature) |
@@ -87,6 +88,7 @@ sequenceDiagram
     participant EAS as EAS
     participant R as ERC-8004
 
+    S->>R: register(agentURI) — once, independent of any guild
     H->>O: launch a guild (name, mandate, governance, members+shares, tribute)
     O->>AFC: summon(guild) + tribute(treasury)
     O->>R: register(agentURI)
