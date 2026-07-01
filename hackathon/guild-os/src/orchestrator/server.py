@@ -78,17 +78,91 @@ TOOL_DEFINITIONS: list[types.Tool] = [
     ),
     types.Tool(
         name="task_delegate",
-        description="Send A2A task/send with full task payload to Specialist.",
+        description=(
+            "Send A2A task/send with the full GuildOS task payload to the Specialist. "
+            "Rejects (before sending) a payload missing acceptance_criteria, missing "
+            "github_issue_url, or carrying an unrecognized deliverable_format."
+        ),
         inputSchema={
             "type": "object",
             "properties": {
                 "specialist_endpoint": {
                     "type": "string",
-                    "description": "A2A endpoint URL of the Specialist",
+                    "description": "A2A endpoint URL of the Specialist (e.g. http://localhost:10001)",
                 },
                 "full_task": {
                     "type": "object",
-                    "description": "Full task payload to delegate",
+                    "description": "Full task/send payload — see specs/20-api-contracts.md §3",
+                    "properties": {
+                        "task_id": {"type": "string"},
+                        "task_description": {
+                            "type": "string",
+                            "description": "e.g. 'Implement the EAS attestation module (EASClient)'",
+                        },
+                        "github_issue_url": {
+                            "type": "string",
+                            "description": "The ticket the Specialist reads and works from",
+                        },
+                        "input_data": {
+                            "type": "string",
+                            "description": "Ticket body / spec excerpt / repo ref",
+                        },
+                        "technical_constraints": {
+                            "type": "object",
+                            "description": "The box the work must stay in",
+                            "properties": {
+                                "repo_branch": {
+                                    "type": "string",
+                                    "description": "Working branch",
+                                },
+                                "library_versions": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                    "description": "Pinned versions the deliverable must use",
+                                },
+                                "env_vars": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                    "description": "Required environment variable names",
+                                },
+                            },
+                        },
+                        "agbom": {
+                            "type": "object",
+                            "description": "Agent Bill of Materials — what the agent may use",
+                            "properties": {
+                                "tools": {"type": "array", "items": {"type": "string"}},
+                                "mcp_servers": {"type": "array", "items": {"type": "string"}},
+                                "data_sources": {"type": "array", "items": {"type": "string"}},
+                            },
+                        },
+                        "acceptance_criteria": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of BDD tests that must pass",
+                        },
+                        "deliverable_format": {
+                            "type": "string",
+                            "enum": ["zip+hash", "github_commit"],
+                        },
+                        "deadline": {
+                            "type": "string",
+                            "description": "ISO-8601",
+                        },
+                        "budget_wei": {
+                            "type": "string",
+                            "description": "Numeric string (wei)",
+                        },
+                    },
+                    "required": [
+                        "task_id",
+                        "task_description",
+                        "github_issue_url",
+                        "acceptance_criteria",
+                        "deliverable_format",
+                        "deadline",
+                        "budget_wei",
+                    ],
                 },
             },
             "required": ["specialist_endpoint", "full_task"],

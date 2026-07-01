@@ -186,7 +186,12 @@ class TestToolCalls:
             mock_a2a.send_task = AsyncMock(return_value="msg-456")
             result = await dispatch("task_delegate", {
                 "specialist_endpoint": "http://localhost:10001",
-                "full_task": {"type": "code-generation", "description": "Build a token"},
+                "full_task": {
+                    "task_description": "Build a token",
+                    "github_issue_url": "https://github.com/santteegt/ai-web3-school-cohort-0/issues/10",
+                    "acceptance_criteria": ["Deliverable file is non-empty"],
+                    "deliverable_format": "github_commit",
+                },
             })
             assert len(result) == 1
             text = result[0].text
