@@ -188,7 +188,12 @@ class TestOrchestratorTools:
 
             result = await tools.task_delegate(
                 "http://localhost:10001",
-                {"task_description": "full task"},
+                {
+                    "task_description": "full task",
+                    "github_issue_url": "https://github.com/santteegt/ai-web3-school-cohort-0/issues/10",
+                    "acceptance_criteria": ["Deliverable file is non-empty"],
+                    "deliverable_format": "github_commit",
+                },
             )
             assert result == "msg-delegate-456"
             mock_a2a.send_task.assert_called_once()
