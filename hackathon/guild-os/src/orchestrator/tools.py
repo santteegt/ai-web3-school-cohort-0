@@ -21,6 +21,17 @@ logger = logging.getLogger(__name__)
 
 ASSETS_DIR = Path(__file__).parent.parent.parent.parent / "assets"
 
+# task/send deliverable_format values — specs/20-api-contracts.md §3
+_VALID_DELIVERABLE_FORMATS = {"zip+hash", "github_commit"}
+
+
+class UnderspecifiedTaskError(ValueError):
+    """Raised when a task/send payload is missing required GuildOS fields.
+
+    See specs/scenarios/05_task_delegation.feature — a malformed payload must
+    never reach the Specialist as if it were complete.
+    """
+
 # Hardcoded Specialist profile for MVP talent_query (see CLAUDE.md: "hardcoded Specialist profile is MVP")
 _DEFAULT_SPECIALIST_PROFILE = {
     "name": "Specialist Agent",
@@ -93,11 +104,31 @@ async def task_invite(specialist_endpoint: str, task_spec: dict) -> str:
 
 
 async def task_delegate(specialist_endpoint: str, full_task: dict) -> str:
-    """Step 6: Send A2A task/send with full task payload after Gate 0.5 acceptance.
+    """Step 6: Validate and send A2A task/send with full task payload after Gate 0.5 acceptance.
+
+    Rejects an under-specified payload before it reaches the Specialist —
+    missing acceptance_criteria, missing github_issue_url, or an
+    unrecognized deliverable_format.
+
+    Raises:
+        UnderspecifiedTaskError: if full_task fails validation.
 
     Returns:
         A2A message ID.
     """
+    if not full_task.get("acceptance_criteria"):
+        raise UnderspecifiedTaskError(
+            "full_task.acceptance_criteria must be a non-empty list of BDD tests"
+        )
+    if not full_task.get("github_issue_url"):
+        raise UnderspecifiedTaskError("full_task.github_issue_url is required")
+    deliverable_format = full_task.get("deliverable_format")
+    if deliverable_format not in _VALID_DELIVERABLE_FORMATS:
+        raise UnderspecifiedTaskError(
+            "full_task.deliverable_format must be one of "
+            f"{sorted(_VALID_DELIVERABLE_FORMATS)}, got {deliverable_format!r}"
+        )
+
     message_id = await a2a_client.send_task(specialist_endpoint, full_task)
 
     # Update guild context with A2A task ID
