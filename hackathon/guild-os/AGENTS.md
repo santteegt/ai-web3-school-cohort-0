@@ -1,18 +1,19 @@
 # CLAUDE.md — GuildOS
 
-You are building **GuildOS**, a Python multi-service application that coordinates AI agents through the A2A protocol, on-chain treasury (AgentFightClub / Moloch v3), and verifiable reputation (ERC-8004) on **Base mainnet (chain_id 8453)**. This is a **7-day hackathon build** ending June 13. Scope is locked — every file in `docs/` defines the boundaries.
+You are building **GuildOS**, a Python multi-service application that coordinates AI agents through the A2A protocol, on-chain treasury (AgentFightClub / Moloch v3), and verifiable reputation (ERC-8004) on **Base** (canonical: chain_id 8453). Scope is locked — `specs/` defines the boundaries; it is the **canonical, permanent source of truth** (finalized 2026-06-30). Code is disposable; the spec is not.
 
 ## Files — Read Before Coding
 
 | File | Read When |
 |------|-----------|
-| `docs/PROBLEM.md` | Before any new feature — understand what we're solving |
-| `docs/TECH_STACK.md` | Before adding imports or calling external services |
-| `docs/MVP_FLOW.md` | Before any change to agent coordination logic |
-| `docs/RISKS.md` | Before touching AgentFightClub, ERC-8004, or ZeroDev — fallbacks are already decided |
-| `docs/VALIDATION_PLAN.md` | Definition of done per integration |
+| `specs/00-overview.md` | Before any new feature — understand what we're solving, the North Star scenario, track alignment |
+| `specs/20-api-contracts.md` | Before adding imports, calling external services, or touching pinned versions/addresses |
+| `specs/10-technical-design.md` | Before any change to agent coordination logic, fallbacks, or component boundaries — includes §12 Transport & Integration Mechanics (what the code actually does at the wire level, not just the contract) |
+| `specs/scenarios/*.feature` | Before implementing or changing any behavior — these are the executable definition of done; find the file covering your change before writing code |
+| `skills/stylebook/SKILL.md` | Before writing a docstring, error message, log line, or comment — the judgment-level stylebook `ruff` can't check |
 | `config/networks.json` | Before touching any contract address, RPC URL, or explorer link — these are network-specific, not env vars |
 | `guild_context.json` | Current guild state (mock store — one JSON file per session) |
+| `docs/*.md` | **Deprecated, historical only** — kept for provenance; do not treat as current. Exception: `docs/VALIDATION_PLAN.md` §11 (hackathon submission requirements) is still live — see [#17](https://github.com/santteegt/ai-web3-school-cohort-0/issues/17) |
 
 ## Component Map — Use These Names, Never Invent New Ones
 
@@ -49,6 +50,23 @@ constraints, and DAO-governed money movement, a guess is never a free
 mistake. A complete ticket always carries: acceptance criteria, technical
 constraints (including the tool-call trajectory mode), interface
 definitions, security guardrails, and an AgBOM (Agent Bill of Materials).
+
+**Two distinct controls, don't conflate them:**
+- **File/component scope** (§5 of the ticket template) is the **enforcer** —
+  it bounds which source files an agent may create or edit, the same role
+  an IAM policy or file-tree allowlist plays. An unlisted file is out of
+  bounds, full stop.
+- **AgBOM** (§7) is the **observer** — a declared inventory of the
+  *external* models, MCP servers/tools, and data sources a ticket is
+  expected to use. It does not gate file edits. It exists for three
+  things: (1) a **dynamic resource inventory** baseline before execution,
+  (2) **behavioral monitoring** to catch intent drift if an agent starts
+  reaching for external tools/libraries the ticket never declared, and (3)
+  **auditability** — a record of why the agent called what it called.
+
+Confusing the two has a real failure mode: a ticket that lists a GuildOS
+source file in its AgBOM but not in §5 will make an executing agent stop
+on the *wrong* file for the *wrong* reason.
 
 Two templates govern this — read both before creating or picking up an issue:
 
@@ -88,19 +106,52 @@ for that ticket — not just as background reading. In particular:
 - Honor the ticket's tool-call trajectory mode exactly — `EXACT | IN_ORDER`
   for high-risk or state-mutating calls (anything on-chain, anything that
   moves funds or writes reputation), `ANY_ORDER` for read-only calls.
-- Stay inside the ticket's AgBOM. A tool, model, or data source not listed
-  there is not authorized for this ticket — stop and ask rather than expand
-  scope silently.
+- Create or edit only the files listed in the ticket's §5 File/component
+  scope — that's the enforced boundary. Track your actual external
+  resource usage against the ticket's AgBOM (§7) as a monitoring/audit
+  check, not a second file gate; an undeclared external tool or model is a
+  drift signal to flag, not grounds to block a file edit §5 already
+  authorized.
 - Before returning, run the self-verification checklist in the prompt and
-  produce a **Vibe Diff**: a short, plain-English summary of what changed and
-  why, placed at the top of the pull request description. This is what makes
-  the LGTM-speed review in the previous section possible — without it, the
-  reviewer has to reconstruct intent from the diff instead of confirming it.
+  produce a **Vibe Diff** — three required parts (what changed, potential
+  breakage points, risk assessment), placed at the top of the pull request
+  description. This is what makes the LGTM-speed review in the next section
+  possible — without it, the reviewer has to reconstruct intent *and* risk
+  from the diff instead of confirming both.
+
+### Reviewing a PR
+
+**LGTM is conditional, not a courtesy.** A reviewer approves a GuildOS PR
+only when all of the following hold — not "looks fine, I'll trust CI to
+catch anything":
+
+- CI (`pytest` + `ruff`, including the `I`/`G` rules — see
+  `skills/stylebook/SKILL.md`) is **green on the PR itself**, not on a
+  local run the author reported. If CI is red or hasn't run, the correct
+  action is requesting changes or waiting, never approving with "should be
+  fine once tests pass."
+- The Vibe Diff's three parts are actually present and load-bearing — a
+  "what changed" that's just a restated file list, a missing "potential
+  breakage points," or a risk assessment that doesn't match what the diff
+  actually touches (e.g. "Low" on a change that edits `WalletProvider`) is
+  grounds to request changes on the PR description alone, before reading
+  the diff.
+- Every checkbox in `.github/PULL_REQUEST_TEMPLATE/default.md` is honestly
+  ticked, not rubber-stamped — an unchecked or skipped box is a question to
+  ask, not a formality to wave through.
+- Any Out-of-Scope Finding in the PR is read and triaged (spun into its own
+  ticket, or explicitly deferred) — approving the PR isn't the same as
+  dismissing what it flagged.
+
+If none of the above raise a concern, LGTM at the confidence the Vibe Diff's
+risk assessment warrants — a Low-risk PR doesn't need the same scrutiny as
+a High-risk one, but "conditional" means the condition was actually checked,
+not skipped because the diff looked reasonable at a glance.
 
 ## Before Building
 
-1. Read `docs/TECH_STACK.md` — versions and library choices are locked
-2. Read `docs/RISKS.md` Decision Log — fallbacks are already decided; don't re-evaluate
+1. Read `specs/20-api-contracts.md` — versions and addresses are locked
+2. Read `specs/10-technical-design.md` §8 (fallback requirements) and `specs/00-overview.md` §9 (decision log) — both already decided; don't re-evaluate
 3. Check the Component Map above — use existing module names and class names exactly
 4. Confirm which Phase (0–4) the issue belongs to; don't start a phase whose blocker phase isn't done — see "Sprint — Phase Gates" below
 
@@ -117,20 +168,20 @@ for that ticket — not just as background reading. In particular:
 - Run `make test` — all tests must pass
 - Run `make lint` — no lint errors
 - Log any new on-chain tx hashes to `./logs/tx_hashes.md`
-- Add new error patterns to `docs/VALIDATION_PLAN.md` under the relevant section
+- If you hit a new failure pattern, add it as a fallback to `specs/10-technical-design.md` §8 (a new F-number) or as a new negative scenario in the relevant `specs/scenarios/*.feature` file — the spec is where recurring risks get recorded now, not `docs/VALIDATION_PLAN.md`
 
 ## When Unsure
 
-- **Which library for Base mainnet calls?** → `web3.py` with Alchemy RPC; see `docs/TECH_STACK.md`
-- **AgentFightClub API or DAOhaus SDK?** → Check `docs/RISKS.md` § Decision Log; ClawBank API confirmed working Day 9
-- **Which wallet calls `giveFeedback()`?** → The **guild contract** (`msg.sender`) — via the executable proposal mechanism. Neither the Orchestrator's EOA nor the Specialist's wallet is ever the direct caller (see `docs/RISKS.md §F2`).
+- **Which library for Base calls?** → `web3.py` with Alchemy RPC; see `specs/20-api-contracts.md` §1
+- **AgentFightClub API or DAOhaus SDK?** → Check `specs/00-overview.md` §9 Decision Log; ClawBank API confirmed working, but the actual current integration is a CLI subprocess wrapper, not either API — see `specs/10-technical-design.md` §12
+- **Which wallet calls `giveFeedback()`?** → The **guild contract** (`msg.sender`) — via the executable proposal mechanism. Neither the Orchestrator's EOA nor the Specialist's wallet is ever the direct caller (see `specs/10-technical-design.md` §8 F2).
 - **How does payment get released?** → Treasury is DAO-held. After Gate 2, call `payment_propose` (AFC `payment` proposal with deliverable details + specialist address); send `task/accepted` carrying the `payment_proposal_id`+url; **Gate 3** halts for the human to vote+process; `settle(guild_address, payment_proposal_id)` then processes the passed proposal. No agent wallet moves treasury funds.
 - **Does `reputation_write` need a DAO proposal first?** → Yes — full sequence: Specialist sends `feedback/request`; (1) `reputation_propose` submits an executable `submitFeedback` Moloch proposal encoding the `giveFeedback()` call; (2) **Gate 4** halts for human vote; (3) on passing vote, `AgentFightClub.process(proposal_id)` executes the proposal — `msg.sender = guild contract`. Never call `giveFeedback()` directly from an EOA.
-- **Which wallet provider / how is signing scoped?** → Use the `WalletProvider` abstraction (`src/shared/wallet.py`); CAW is the default, ZeroDev/Turnkey swappable via `WALLET_PROVIDER`. The Pact allowlists the DAO `propose`/`vote`/`process` calls and caps tribute. **Never** fall back to raw EOA signing — halt instead.
-- **Need a contract address, RPC URL, or explorer link?** → Never read it from `os.environ` or hardcode it. Call `src/shared/network_config.py` (`get_contract_address`, `get_rpc_url`, `get_explorer_tx_url`, `get_easscan_attestation_url`, `get_delivery_schema_uid`) — it resolves the value from `config/networks.json` for the active `CHAIN_ID`. Only `CHAIN_ID` itself and secrets (`ALCHEMY_API_KEY`, private keys) live in `.env`.
-- **EAS schema not found on `attest()`?** → Check `network_config.get_delivery_schema_uid()`; register the schema and write the UID into `config/networks.json` (not `.env`) if missing (see `docs/RISKS.md §F7`)
-- **New A2A message type needed?** → Check `src/shared/a2a.py` for the established pattern; don't invent new types without updating `docs/MVP_FLOW.md`
-- **Is this feature in scope?** → Check `docs/MVP_FLOW.md`; if not in the 15 steps, it's out of scope
+- **Which wallet provider / how is signing scoped?** → Use the `WalletProvider` abstraction (`src/shared/wallet.py`); CAW is the default, ZeroDev/Turnkey swappable via `WALLET_PROVIDER`. The Pact allowlists the DAO `propose`/`vote`/`process` calls, the ERC-8004 `register()` call, and caps tribute. **Never** fall back to raw EOA signing — halt instead. See `specs/scenarios/12_scoped_spending.feature`.
+- **Need a contract address, RPC URL, or explorer link?** → Never read it from `os.environ` or hardcode it. Call `src/shared/network_config.py` (`get_contract_address`, `get_rpc_url`, `get_explorer_tx_url`, `get_easscan_attestation_url`, `get_delivery_schema_uid`) — it resolves the value from `config/networks.json` for the active `CHAIN_ID`. Only `CHAIN_ID` itself and secrets (`ALCHEMY_API_KEY`, private keys) live in `.env`. See `specs/20-api-contracts.md` §2/§6.
+- **EAS schema not found on `attest()`?** → Check `network_config.get_delivery_schema_uid()`; register the schema and write the UID into `config/networks.json` (not `.env`) if missing (see `specs/10-technical-design.md` §8 F7)
+- **New A2A message type needed?** → Check `src/shared/a2a.py` for the established pattern; don't invent new types without adding a scenario to the relevant `specs/scenarios/*.feature` file and updating `specs/20-api-contracts.md` §3
+- **Is this feature in scope?** → Check `specs/10-technical-design.md` §2 and §10 (Constraints & Guardrails); if it doesn't map to a step in the loop or a scenario file, it's out of scope
 
 ## Don't
 
@@ -202,3 +253,11 @@ Add new components to the Component Map when they are created. Update Don't rule
 | 2026-06-30 | Added **Spec-Driven Development — Issue Templates** section (between Component Map and Before Building): the Human Intent → BDD/Gherkin → spec → ticket chain, plus "Creating an issue" and "Working on an issue" workflows. Added `templates/ISSUE_TICKET_TEMPLATE.md` and `templates/TASK_EXECUTION_PROMPT.md`. |
 | 2026-06-30 | **Network config extracted to `config/networks.json`.** New `NetworkConfig` component (`src/shared/network_config.py`); `erc8004.py`/`agentfightclub.py` refactored to use it instead of hardcoded addresses/`RPC_URL` (also fixes a prior bug where `erc8004.py` hardcoded "Base Sepolia" against every other doc's "Base mainnet"). `ERC8004_CONTRACT`, `REPUTATION_CONTRACT`, `EAS_CONTRACT`, `EAS_SCHEMA_REGISTRY`, `DELIVERY_SCHEMA_UID` removed from `.env`/`.env.example` — only `CHAIN_ID` (selector) and secrets remain there. Added Component Map row, When-Unsure entry, Don't rule, and a "Files — Read Before Coding" row. |
 | 2026-06-30 | **Reprioritized around dogfooding.** Replaced the stale "Sprint — Day Gates" (Day 8–13, already past) with **"Sprint — Phase Gates"** (Phase 0 → 4), mirrored by new GitHub milestones; old milestones closed. Goal: get the Specialist doing real work as early as possible, build settlement/reputation in parallel. Issue #5 restructured to register the **Specialist first** (it accrues reputation) and blocked on #30. Issue #30 (`WalletProvider`) reframed as Phase 0 — expanded to also allowlist `ERC-8004.register()`, since registration/guild-formation/membership are on-chain coordination too, not just fund movement; now blocks every other on-chain-signing ticket. New issue #32 files the previously-missing "richer `task/send` payload" ticket — the actual gap blocking a real first delegation. Added a Specialist self-registration Gherkin scenario to `specs/scenarios/02_talent_discovery.feature` and an ERC-8004-register() allowlist scenario to `specs/scenarios/12_scoped_spending.feature`. |
+| 2026-06-30 | **`specs/` finalized as canonical.** DRAFT banner removed from `specs/README.md`; Finalization Checklist executed. All 6 `docs/*.md` files marked deprecated (`VALIDATION_PLAN.md` partially — §11 hackathon submission checklist stays live). This file rewired top-to-bottom: intro, "Files — Read Before Coding," "Before Building," "When Unsure," and the error-pattern note in "After Building" now point at `specs/` instead of `docs/`. `prompts/ISSUE_CODING_SESSION.md` and `prompts/HERMES_CODING.md` ground-truth lists updated to match. See `specs/README.md`'s "docs/ → specs/ Migration Map" for the full file-by-file mapping. |
+| 2026-07-01 | **AgBOM/AC consistency bug fixed across the backlog.** An executing agent correctly stopped on #32 because its AgBOM (§7) omitted `src/orchestrator/server.py`/`tools.py`, which its own §3/§5 required editing. Audited every open ticket — same pattern found and fixed in #4, #5, #6, #10, #13, #30, #31, #32 (each AgBOM now lists every source file its own ACs/Interface Definitions name, not just external libraries/CLIs). `templates/ISSUE_TICKET_TEMPLATE.md` §7 now explicitly requires this, and a new Definition-of-Ready check ("AgBOM completeness") catches it before a ticket is assigned. `templates/TASK_EXECUTION_PROMPT.md` rule 2 now distinguishes this as a **ticket defect** to report back, not a generic scope question. |
+| 2026-07-01 | **AgBOM model corrected — the above fix conflated two different controls.** AgBOM is not a file-edit permission list; it's a *dynamic resource inventory* of external models/MCP-servers/tools/data-sources, used for behavioral monitoring (intent-drift detection) and auditability. File/component scope — the actual enforcement boundary on what an agent may create or edit — belongs in §5 (Interface Definitions), which now carries an explicit "File / component scope (the enforcement boundary)" label. Reverted the GuildOS source-file paths that were stuffed into AgBOM across #4, #5, #6, #10, #13, #30, #31, #32 the same day; §5 now carries complete file scope for each instead (and gained `src/shared/a2a.py` for #32, which was still missing under either model). `templates/ISSUE_TICKET_TEMPLATE.md` §5/§7 and the Definition of Ready rewritten accordingly; `templates/TASK_EXECUTION_PROMPT.md` now names the two controls explicitly and adds a resource-usage audit report to its output. |
+| 2026-07-01 | **Out-of-Scope Findings reporting added.** Now that file/component scope (§5) is strictly enforced, an executing agent needs an explicit channel for things it notices outside that boundary — a bug, a stale reference, a spec/doc inconsistency — so nothing gets silently fixed (scope creep) or silently dropped (lost information). New rule 6 in `templates/TASK_EXECUTION_PROMPT.md`: non-blocking findings go in a new PR output section; blocking findings (can't satisfy the ticket's own ACs without touching the out-of-scope file) escalate as a ticket defect instead. Same section added to `templates/ISSUE_TICKET_TEMPLATE.md` §5 (cross-reference), `prompts/ISSUE_CODING_SESSION.md` and `prompts/HERMES_CODING.md` (PR body contracts), and `.github/PULL_REQUEST_TEMPLATE/default.md` (the actual GitHub-rendered template — also fixed two stale/inverted lines there in passing: the network constraint checkbox had testnet and mainnet backwards, and the Documentation section still pointed at deprecated `docs/*.md` instead of `specs/`). |
+| 2026-07-01 | **`.github/PULL_REQUEST_TEMPLATE/default.md` fully modernized.** Replaced the vestigial "Sprint Day" field and "7D Checklist → Definition → Design Gate" section (from an earlier scaffolding approach with separate Definition/Design GitHub issues — superseded by the single-ticket SDD workflow) with **"Phase"** (0–4, matching the Sprint — Phase Gates table) and **"SDD Ticket Compliance"** (Gherkin Then-clauses, trajectory mode, §5 file scope, §6 security guardrails, regression, negative scenarios). GuildOS Constraints gained the `WalletProvider`-only-signing and DAO-proposal-only-payment rules that were missing. Added a "Resource Usage (AgBOM audit)" section. Moved Vibe Diff to the top of the template — `templates/TASK_EXECUTION_PROMPT.md` always said it belongs there; the template itself never reflected it until now. |
+| 2026-07-01 | **Vibe Diff formalized into 3 required parts; SKILLS.md stylebook added; reviewer-facing Conditional LGTM added.** Vibe Diff now always has What Changed / Potential Breakage Points / Risk Assessment (Low/Medium/High + reason) — was previously just "what changed," and wasn't even referenced in `prompts/ISSUE_CODING_SESSION.md` or `prompts/HERMES_CODING.md` at all (fixed). New `SKILLS.md` — workspace stylebook for docstrings, error messages, logging, and comments (what `ruff` can't check); `ruff` gained `I` (import-sort) and `G` (logging-format) rules to mechanically enforce the two conventions that can be — 13 files auto-fixed, zero behavior change, all 106 tests still pass. New "### Reviewing a PR" section makes LGTM's CI-must-be-green condition explicit and reviewer-facing for the first time — everything before this only told the *agent* not to request review early; nothing told the *reviewer* not to approve early. |
+| 2026-07-01 | **Stylebook relocated to `skills/stylebook/SKILL.md`** (was `SKILLS.md` at the project root). Now a proper skill directory with frontmatter (`name`, `description`), consistent with the layered control model's `skills/` convention (`specs/README.md`) and the fastapi/SevenD/context7-mcp pattern already referenced there. Also fixed a `docs/RISKS.md` citation inside the stylebook's own error-handling section — it was violating its own "cite specs/, never docs/" rule. All references updated: `AGENTS.md` (Files table + Reviewing a PR), `.github/PULL_REQUEST_TEMPLATE/default.md`, `pyproject.toml`'s `[tool.ruff.lint]` comments, `specs/README.md`'s Layered Control Model table. |
+| 2026-07-01 | **Removed all SevenD/7D-framework artifacts.** Deleted `.cursor/rules/7d-framework.mdc` and `.windsurf/rules/7d-framework.md` — both `alwaysApply`/`always_on` IDE rule files from the project's original 7D-framework scaffolding, stale duplicates of `AGENTS.md` predating everything built this session, and actively wrong on network policy ("Base Sepolia only — never mainnet," the inverse of the locked "Base canonical, Base Sepolia isolated-test-only" rule). `AGENTS.md` is the single canonical instruction file now — no IDE-specific always-on rule file duplicates it. Also dropped "SevenD" from `specs/README.md`'s Layered Control Model example-skills list. Historical changelog entries mentioning "SevenD"/"7D" elsewhere in this file describe past actions accurately and were left as-is. |

@@ -80,6 +80,20 @@ matters, it belongs in the Gherkin first.
 
 ## 5. Interface Definitions
 
+- **File / component scope — the enforcement boundary.** Every file or
+  module this ticket creates or edits, using exact Component Map names from
+  `AGENTS.md`. **This list, not §7 AgBOM, is what bounds which source files
+  an executing agent may touch** — it's the project's IAM-policy /
+  file-tree-allowlist equivalent. A file not named here requires stopping
+  and asking, no matter how obviously related it seems: ______
+
+  > An agent working this ticket may notice something outside this scope
+  > that needs attention (a bug, a stale reference, a spec inconsistency).
+  > That's expected and should be **reported in the PR** — see
+  > `templates/TASK_EXECUTION_PROMPT.md`'s Out-of-Scope Findings output —
+  > not fixed here. Don't write this ticket as if the agent will never
+  > notice anything beyond it; write it knowing that finding is supposed to
+  > surface, not vanish.
 - Required MCP server connections: ______
 - Required A2A message types touched — name them; see
   `specs/20-api-contracts.md` §3: ______
@@ -93,19 +107,44 @@ matters, it belongs in the Gherkin first.
 - Human gates this ticket must halt at (name them: Gate 0 / 0.5 / 1 / 2 / 3 / 4)
   and what each gate blocks until approved: ______
 - Caller / signer constraints — e.g. "never the Specialist wallet," "guild
-  contract only via proposal execution." Cite the relevant `docs/RISKS.md`
-  §F-number: ______
+  contract only via proposal execution." Cite the relevant
+  `specs/10-technical-design.md` §8 F-number: ______
 - Spending or scope boundaries this ticket must respect — CAW Pact allowlist,
   tribute cap, network. `CHAIN_ID` must never be hardcoded: ______
 
-## 7. AgBOM (Agent Bill of Materials — authorized inventory for THIS ticket)
+## 7. AgBOM (Agent Bill of Materials)
 
-- **Tools:** ______
-- **Models:** ______
-- **Data sources:** ______
+**What this is NOT:** a file-edit permission list. That's §5 above —
+*File / component scope* is the enforcer; an unlisted file is out of
+bounds regardless of what appears here.
 
-An agent executing this ticket may use *only* what's listed here. Anything
-else requires stopping and asking — see `templates/TASK_EXECUTION_PROMPT.md`.
+**What this IS:** the ticket's declared inventory of *external* resources —
+models, MCP servers/tools, external APIs/CLIs, and external data sources.
+AgBOM is an observer, not a gate on local source code. It exists for three
+distinct purposes:
+
+1. **Dynamic Resource Inventory** — which models, MCP servers, and
+   external data sources this ticket is expected to call during execution,
+   declared as a baseline before the agent starts.
+2. **Behavioral Monitoring (intent-drift detection)** — if the executing
+   agent starts reaching for an external tool, library, or data source not
+   listed here, that's a signal worth surfacing on its own — either this
+   AgBOM is incomplete (a ticket defect, same as a missing file in §5), or
+   the agent has drifted from the ticket's actual scope. Either reading
+   means: stop and flag it, don't silently expand reach.
+3. **Auditability** — after the fact, this declared inventory plus the
+   agent's actual resource-usage log (see `templates/TASK_EXECUTION_PROMPT.md`
+   OUTPUT) is the audit trail for *why* the agent called what it called.
+
+- **Models:** ______ (e.g. "GLM-5.1 via Hermes"; "none" if this ticket makes
+  no LLM calls)
+- **MCP servers / external tools:** ______ (genuinely external
+  services/APIs/CLIs/SDKs — e.g. Cobo CAW SDK, `moloch-agent` CLI, 8004scan
+  API, `web3.py`. **Not** GuildOS source files — those belong in §5)
+- **Data sources:** ______ (spec/doc sections the agent is expected to
+  consult, and any external references — e.g. a specific GitHub issue URL.
+  Tracked here so a reviewer can later confirm the agent's decisions trace
+  back to the right source, not to a hallucinated assumption)
 
 ---
 
@@ -120,6 +159,15 @@ else requires stopping and asking — see `templates/TASK_EXECUTION_PROMPT.md`.
       under ~5,000 tokens — to avoid context rot in the executing agent.
 - [ ] **Authorization tier set:** Read-Only / Draft-Only / Action-Allowed —
       and the bar for that tier (§6) is met.
+- [ ] **File/component scope completeness (§5):** every file path named
+      anywhere in §3's Acceptance Criteria also appears in §5's File/component
+      scope list. Read the two side by side — this is the most common way a
+      ticket fails in practice: an agent correctly stops because a file its
+      own ACs require editing was never authorized in §5.
+- [ ] **AgBOM completeness (§7):** every external model, MCP server, tool,
+      or data source the ticket genuinely needs is declared — for
+      monitoring and audit, not as a second file-edit gate. Don't pad it
+      with GuildOS source files; those belong in §5, not here.
 
 If any box above is unchecked, the ticket is **not ready**. Finish it before
 assigning — don't let an agent fill the gap by guessing.

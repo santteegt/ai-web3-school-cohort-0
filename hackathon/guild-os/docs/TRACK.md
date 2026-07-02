@@ -1,5 +1,11 @@
 # Track Alignment — GuildOS
 
+> ⚠️ **DEPRECATED 2026-06-30 — kept for historical provenance only.**
+> `specs/` is now canonical. See [`specs/00-overview.md`](../specs/00-overview.md)
+> §7 (Track Alignment, evaluation scorecard) and
+> [`specs/README.md`](../specs/README.md)'s Hackathon Reference table. Do not edit
+> this file — update the spec instead.
+
 ## Cobo | Agentic Economy × Cobo Agentic Wallet {#cobo}
 
 **Track thesis:** Can AI agents participate in an agentic economy — accepting work, making payments, managing shared capital, and trading resources — with human-readable, contractually enforced spending boundaries?

@@ -50,6 +50,15 @@ filterwarnings = [
 target-version = "py311"
 src = ["src", "tests"]
 
+[tool.ruff.lint]
+# Default (E4, E7, E9, F) plus:
+#   I — import sorting (future -> stdlib -> local, per skills/stylebook/SKILL.md)
+#   G — logging format (lazy %-style args in logger calls, never f-strings)
+# These two mechanically enforce conventions documented in
+# skills/stylebook/SKILL.md; ruff is the enforcer for anything it CAN
+# check, the stylebook covers what it can't.
+extend-select = ["I", "G"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 

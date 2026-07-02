@@ -1,13 +1,18 @@
 # GuildOS — Specification (North Star)
 
-> 🚧 **DRAFT — NOT YET CANONICAL.** Until this draft is marked finalized, the existing
-> `hackathon/guild-os/docs/` folder remains authoritative for the build. This `specs/`
-> tree is the *target design* and will become the single source of truth on finalization,
-> at which point `docs/` is deprecated. See **Finalization Checklist** at the bottom.
+> ✅ **CANONICAL — finalized 2026-06-30.** This `specs/` tree is now the single source
+> of truth for GuildOS. `hackathon/guild-os/docs/` is **deprecated** — each file there
+> carries a banner pointing to its `specs/` successor and is kept only for historical
+> provenance. Do not edit `docs/` going forward; update `specs/` instead. See
+> **"docs/ → specs/ Migration Map"** below for the file-by-file mapping, and the
+> (now-executed) Finalization Checklist at the bottom for what changed.
 
-> Provenance: built from `docs/PROBLEM.md`, `docs/MVP_FLOW.md`, `docs/TECH_STACK.md`,
-> `docs/RISKS.md`, `docs/VALIDATION_PLAN.md`, `docs/TRACK.md`, project `CLAUDE.md`, and
-> `hackathon/PROJECT_PROPOSAL.md`.
+> Provenance: originally built from `docs/PROBLEM.md`, `docs/MVP_FLOW.md`,
+> `docs/TECH_STACK.md`, `docs/RISKS.md`, `docs/VALIDATION_PLAN.md`, `docs/TRACK.md`,
+> project `CLAUDE.md`, and `hackathon/PROJECT_PROPOSAL.md`. Those files are now
+> deprecated in favor of this tree — treat `specs/` as authoritative even where it
+> has since diverged from its original sources (network config, phase-gated issue
+> tracking, the Transport & Integration Mechanics section, etc.).
 
 ---
 
@@ -99,7 +104,7 @@ flowchart TD
 | Shared repo rules | `AGENTS.md` (repo root; `CLAUDE.md` symlinks to it) | Sensei role, learning path, repo structure, hackathon platform rules |
 | Project agent rules | `hackathon/guild-os/CLAUDE.md` | Component naming, build/Don't rules, sprint gates |
 | **Project spec** | **`hackathon/guild-os/specs/`** | **What to build and how it must behave (this layer)** |
-| Skills | `.agents/skills`, `.claude/skills/`, `skills/` | Reusable procedures (SevenD, context7-mcp, cobo-agentic-wallet-developer, wiki-builder  etc.) |
+| Skills | `.agents/skills`, `.claude/skills/`, `skills/` | Reusable procedures (context7-mcp, cobo-agentic-wallet-developer, wiki-builder, `skills/stylebook` etc.) |
 
 ---
 
@@ -116,12 +121,30 @@ flowchart TD
 
 ---
 
-## Finalization Checklist (draft → canonical; run only on user say-so)
+## `docs/` → `specs/` Migration Map
 
-When the user marks this draft finalized:
+Every deprecated `docs/` file's content now lives here. If you're looking for
+something that used to be in `docs/`, this table says where it went.
 
-1. Remove the DRAFT banner above; stamp `specs/` as canonical.
-2. Add a deprecation note to each `docs/` file pointing to its `specs/` successor.
-3. Rewire `guild-os/CLAUDE.md` "Files — Read Before Coding" to point at `specs/` first.
-4. Update `prompts/ISSUE_CODING_SESSION.md` and `prompts/HERMES_CODING.md` ground-truth
-   lists to read `specs/` instead of `docs/`.
+| Deprecated file | Superseded by | Note |
+|---|---|---|
+| `docs/PROBLEM.md` | [`00-overview.md`](00-overview.md) §1–3 | Problem statement, target users, North Star scenario |
+| `docs/MVP_FLOW.md` | [`10-technical-design.md`](10-technical-design.md) §2 + [`scenarios/`](scenarios/) | Loop table, sequence diagram, and the concrete Given/When/Then behavior per step |
+| `docs/TECH_STACK.md` | [`20-api-contracts.md`](20-api-contracts.md) + [`10-technical-design.md`](10-technical-design.md) §1/§5 | Pinned versions, addresses, env contract, component map, naming conventions |
+| `docs/RISKS.md` | [`10-technical-design.md`](10-technical-design.md) §8/§10 + [`00-overview.md`](00-overview.md) §9 | Fallback requirements (F1–F7), Tier B, scope-creep signals, decision log |
+| `docs/TRACK.md` | [`00-overview.md`](00-overview.md) §7 + this file's Hackathon Reference table | Track alignment, evaluation scorecard, hackathon links |
+| `docs/VALIDATION_PLAN.md` §1–10 | [`scenarios/*.feature`](scenarios/) Then-clauses | Per-integration definition-of-done, now expressed as executable Gherkin assertions |
+| `docs/VALIDATION_PLAN.md` §11 | **Not superseded — still authoritative** | The hackathon platform's submission-requirements checklist is operational tracking, not a spec; it stays in `docs/VALIDATION_PLAN.md` and issue [#17](https://github.com/santteegt/ai-web3-school-cohort-0/issues/17) still points at it directly |
+
+---
+
+## Finalization Checklist (draft → canonical) — ✅ executed 2026-06-30
+
+1. ✅ DRAFT banner replaced with the CANONICAL banner above.
+2. ✅ Deprecation banner added to each `docs/` file, pointing at its `specs/` successor
+   per the Migration Map above (`docs/VALIDATION_PLAN.md` carries a partial banner —
+   see the note in that row).
+3. ✅ `guild-os/AGENTS.md` (`CLAUDE.md` symlink) "Files — Read Before Coding" rewired
+   to `specs/` first; `docs/` demoted to a "deprecated, historical only" row.
+4. ✅ `prompts/ISSUE_CODING_SESSION.md` and `prompts/HERMES_CODING.md` ground-truth
+   reading lists updated to read `specs/` instead of `docs/`.

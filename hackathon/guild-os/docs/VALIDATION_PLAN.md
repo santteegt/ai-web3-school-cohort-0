@@ -1,5 +1,15 @@
 # Validation Plan — GuildOS
 
+> ⚠️ **PARTIALLY DEPRECATED 2026-06-30.** Sections 1–10 (per-integration
+> definition-of-done) are superseded by the executable Given/When/Then
+> assertions in [`specs/scenarios/*.feature`](../specs/scenarios/) — do not
+> edit those sections here, update the relevant `.feature` file instead.
+> **Section 11 (Hackathon Submission Requirements) is NOT deprecated** — it's
+> an operational checklist tied to the external platform, not spec content,
+> and remains directly authoritative. Issue
+> [#17](https://github.com/santteegt/ai-web3-school-cohort-0/issues/17)
+> still points here for it.
+
 > Work through sections in order. Update Status: `[ ]` pending · `[x]` passed · `[!]` blocked / fallback triggered
 
 ---

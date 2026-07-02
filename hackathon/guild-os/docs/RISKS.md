@@ -1,5 +1,11 @@
 # Risks and Fallbacks — GuildOS
 
+> ⚠️ **DEPRECATED 2026-06-30 — kept for historical provenance only.**
+> `specs/` is now canonical. See [`specs/10-technical-design.md`](../specs/10-technical-design.md)
+> §8 (Fallback Requirements, Tier B) and §10 (scope-creep signals), and
+> [`specs/00-overview.md`](../specs/00-overview.md) §9 (decision log). Do not edit
+> this file — update the spec instead.
+
 > This document is a working file. Update the Decision Log as assumptions are validated or invalidated during the build.
 
 ---
