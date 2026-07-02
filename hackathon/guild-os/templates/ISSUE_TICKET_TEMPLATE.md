@@ -140,7 +140,15 @@ distinct purposes:
   no LLM calls)
 - **MCP servers / external tools:** ______ (genuinely external
   services/APIs/CLIs/SDKs — e.g. Cobo CAW SDK, `moloch-agent` CLI, 8004scan
-  API, `web3.py`. **Not** GuildOS source files — those belong in §5)
+  API, `web3.py`, the `evm-mcp-server` MCP server (`@mcpdotdirect/evm-mcp-server`
+  — balance checks, contract reads/writes, tx lookup; configured in
+  `.mcp.json`, see `setup/README.md`), the `context7` MCP server/skill
+  (library/framework docs lookup), the `cobo-agentic-wallet-developer` skill
+  (Cobo CAW SDK integration guidance), the `safishamsi/graphify` skill
+  (turns a cloned dependency/tool/framework repo into a local queryable
+  knowledge graph — useful for medium-to-large codebases you need to
+  understand before integrating). **Not** GuildOS source files — those
+  belong in §5)
 - **Data sources:** ______ (spec/doc sections the agent is expected to
   consult, and any external references — e.g. a specific GitHub issue URL.
   Tracked here so a reviewer can later confirm the agent's decisions trace

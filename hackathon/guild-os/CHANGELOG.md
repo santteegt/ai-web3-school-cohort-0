@@ -86,6 +86,15 @@
   either model). §5/§7 and the Definition of Ready rewritten accordingly.
 - **2026-07-01** — Out-of-Scope Findings cross-reference added to §5,
   pointing at `templates/TASK_EXECUTION_PROMPT.md`'s output section.
+- **2026-07-02** — §7's "MCP servers / external tools" example list
+  expanded to name the project's actual standard toolset: the
+  `evm-mcp-server` MCP server (`@mcpdotdirect/evm-mcp-server`, configured in
+  root `.mcp.json` — balance checks, contract reads/writes, tx lookup), the
+  `context7` MCP server/skill, the `cobo-agentic-wallet-developer` skill,
+  and the `safishamsi/graphify` skill (repo → local queryable knowledge
+  graph, for onboarding onto medium/large dependency codebases). Ticket
+  authors were previously left to invent generic examples; now the template
+  points at the tools actually available in this project.
 
 ---
 
