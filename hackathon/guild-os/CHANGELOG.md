@@ -49,6 +49,14 @@
 - **2026-07-01** — Three execution prompts unified into one. See
   [`templates/TASK_EXECUTION_PROMPT.md`](#templatestask_execution_promptmd)
   and [Deprecated prompts](#deprecated-promptspromptshermes_codingmd-promptsissue_coding_sessionmd).
+- **2026-07-02** — SDD section trimmed: "Two distinct controls" and
+  "Working on an issue" collapsed to short pointers at
+  `templates/TASK_EXECUTION_PROMPT.md`, which now carries the full
+  explanation in more detail than this file restated — same
+  restate-in-two-places drift risk the prompt-unification entry above
+  already fixed once. ~1.9KB removed from a file read at the start of
+  nearly every session. See
+  [`templates/TASK_EXECUTION_PROMPT.md`](#templatestask_execution_promptmd).
 
 ---
 
@@ -222,6 +230,75 @@
   not just fund movement; now blocks every other on-chain-signing ticket.
   New issue #32 files the previously-missing "richer `task/send` payload"
   ticket.
+
+<details>
+<summary>Original Day 8–13 calendar table (superseded by Phase Gates 2026-06-30, kept for history)</summary>
+
+| Day | Date | Theme | P0 Gate |
+|-----|------|-------|---------|
+| 8 | Jun 8 | Validation | `launch` live · A2A test green · GLM-5.1 task locked |
+| 9 | Jun 9 | Wallets + Identity | Both wallets on-chain · ERC-8004 agentIds · Guild funded |
+| 10 | Jun 10 | A2A + Execution | Hash on Base mainnet · Basescan tx #1 saved |
+| 11 | Jun 11 | Settlement + Reputation + E2E | payment proposal passed (Gate 3) · `settle()` tx · reputation proposal passed (Gate 4) · ERC-8004 delta · Smoke test passes |
+| 12 | Jun 12 | Demo Prep | README, demo script, all artifacts — repo clean |
+| 13 | Jun 13 | Submission | Submitted before 12:00 UTC+8 (04:00 UTC) |
+
+</details>
+
+- **2026-07-02** — Relocated this table out of `AGENTS.md`'s "Sprint —
+  Phase Gates" section, where it sat inside a collapsed `<details>` block.
+  That collapse only hides content in rendered GitHub UI — an agent reading
+  the raw markdown file pays the full token cost regardless, so keeping
+  confirmed-obsolete content there provided zero actual context savings.
+  Moved here instead, where it's read on demand rather than every session.
+
+---
+
+## Casual Hackathon — Event Record
+
+> The AI × Web3 Agentic Builders Hackathon has **concluded**. GuildOS
+> (`hackathon/guild-os/`) was the submitted project. This section is the
+> historical record of the event — dates, tracks, and submission
+> requirements — moved here from root `AGENTS.md` §16 on 2026-07-02 since
+> none of it is forward-looking anymore. For the still-useful platform
+> CLI/API reference (reusable if Santiago does a future Casual Hackathon
+> event), see `setup/CASUAL_HACKATHON.md`.
+
+### Event Reference
+
+| Field | Value |
+|---|---|
+| Event name | AI × Web3 Agentic Builders Hackathon |
+| Platform | https://casualhackathon.com |
+| Event page | https://casualhackathon.com/hackathons/cmpsjubkg0003p80kxuzrdyjy |
+| Event ID | `cmpsjubkg0003p80kxuzrdyjy` |
+| Status | **Concluded** |
+| Build period | 2026-06-01 — 2026-06-12 |
+| Submission deadline | 2026-06-13 12:00 UTC+8 (04:00 UTC) |
+| Demo Day | 2026-06-14 |
+| Results | 2026-06-17 |
+| Prize pool | 7000 USDT total (Cobo: 3500 USDT · Z.AI: 3500 USDT) |
+
+### Tracks
+
+| Track | Slug | Focus |
+|---|---|---|
+| Cobo \| Agentic Economy × Cobo Agentic Wallet | `cobo-agentic-economy-cobo-agentic-wallet` | Agent-native payments, trustless work agreements, agent resource procurement, autonomous trading, A2A economy |
+| Z.AI \| Web3 × Long-Horizon Task | `z-ai-web3-long-horizon-task` | Agentic dev tools, 3D world building, creator economy — all powered by GLM-5.1 for long-horizon autonomous execution |
+
+### Key Submission Requirements (from platform)
+
+1. Project name + one-sentence description
+2. GitHub Repo with README (problem, architecture, run instructions, API/SDK used)
+3. Demo link or video (3–5 min recommended)
+4. On-chain / testnet evidence (contract addresses, tx hashes, agent wallet address, screenshots)
+5. Team info (members, roles, wallet addresses, contact)
+6. For Cobo track: CAW key code/config, wallet address, proof of funds execution
+7. For Z.AI track: GLM-5.1 usage, long-horizon task run log, Web3 proof
+
+### Submission Checklist
+
+Tracked at `hackathon/SUBMISSION_CHECKLIST.md`.
 
 ---
 

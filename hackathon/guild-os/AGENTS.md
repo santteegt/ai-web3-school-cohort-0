@@ -51,22 +51,13 @@ mistake. A complete ticket always carries: acceptance criteria, technical
 constraints (including the tool-call trajectory mode), interface
 definitions, security guardrails, and an AgBOM (Agent Bill of Materials).
 
-**Two distinct controls, don't conflate them:**
-- **File/component scope** (§5 of the ticket template) is the **enforcer** —
-  it bounds which source files an agent may create or edit, the same role
-  an IAM policy or file-tree allowlist plays. An unlisted file is out of
-  bounds, full stop.
-- **AgBOM** (§7) is the **observer** — a declared inventory of the
-  *external* models, MCP servers/tools, and data sources a ticket is
-  expected to use. It does not gate file edits. It exists for three
-  things: (1) a **dynamic resource inventory** baseline before execution,
-  (2) **behavioral monitoring** to catch intent drift if an agent starts
-  reaching for external tools/libraries the ticket never declared, and (3)
-  **auditability** — a record of why the agent called what it called.
-
-Confusing the two has a real failure mode: a ticket that lists a GuildOS
-source file in its AgBOM but not in §5 will make an executing agent stop
-on the *wrong* file for the *wrong* reason.
+**Two distinct controls, don't conflate them:** File/component scope (§5)
+is the *enforcer* — it bounds which files an agent may touch. AgBOM (§7) is
+the *observer* — a declared inventory of external resources, for drift
+detection and audit, never a file-edit gate. Full explanation, including
+the failure mode from confusing them, lives in
+`templates/TASK_EXECUTION_PROMPT.md`'s Shared Core — read it there, this
+file doesn't restate it.
 
 Two templates govern this — read both before creating or picking up an issue:
 
@@ -97,27 +88,14 @@ Two templates govern this — read both before creating or picking up an issue:
 ### Working on an issue
 
 Before touching any source file for a specific issue, read
-`templates/TASK_EXECUTION_PROMPT.md` and follow it as the execution contract
-for that ticket — not just as background reading. In particular:
-
-- Treat the ticket and `specs/` as ground truth, over any inference from the
-  current state of `src/`. Where existing source code disagrees with the
-  spec, the spec wins (see the layered control model in `specs/README.md`).
-- Honor the ticket's tool-call trajectory mode exactly — `EXACT | IN_ORDER`
-  for high-risk or state-mutating calls (anything on-chain, anything that
-  moves funds or writes reputation), `ANY_ORDER` for read-only calls.
-- Create or edit only the files listed in the ticket's §5 File/component
-  scope — that's the enforced boundary. Track your actual external
-  resource usage against the ticket's AgBOM (§7) as a monitoring/audit
-  check, not a second file gate; an undeclared external tool or model is a
-  drift signal to flag, not grounds to block a file edit §5 already
-  authorized.
-- Before returning, run the self-verification checklist in the prompt and
-  produce a **Vibe Diff** — three required parts (what changed, potential
-  breakage points, risk assessment), placed at the top of the pull request
-  description. This is what makes the LGTM-speed review in the next section
-  possible — without it, the reviewer has to reconstruct intent *and* risk
-  from the diff instead of confirming both.
+`templates/TASK_EXECUTION_PROMPT.md` and follow it as the execution
+contract for that ticket, not just as background reading — it is
+authoritative (trajectory mode, §5 scope enforcement, AgBOM tracking, the
+Vibe Diff requirement) and this file does not restate it. The one thing
+worth stating here because it's not in that file: treat the ticket and
+`specs/` as ground truth over any inference from the current state of
+`src/` — where existing source code disagrees with the spec, the spec wins
+(see the layered control model in `specs/README.md`).
 
 ### Reviewing a PR
 
@@ -225,19 +203,9 @@ with 0/0.5 up to the point where it needs a registered Specialist to
 delegate to. Phases 2–4 have no hard ordering constraint against each
 other beyond their own internal ACs.
 
-<details>
-<summary>Original Day 8–13 calendar table (superseded, kept for history)</summary>
-
-| Day | Date | Theme | P0 Gate |
-|-----|------|-------|---------|
-| 8 | Jun 8 | Validation | `launch` live · A2A test green · GLM-5.1 task locked |
-| 9 | Jun 9 | Wallets + Identity | Both wallets on-chain · ERC-8004 agentIds · Guild funded |
-| 10 | Jun 10 | A2A + Execution | Hash on Base mainnet · Basescan tx #1 saved |
-| 11 | Jun 11 | Settlement + Reputation + E2E | payment proposal passed (Gate 3) · `settle()` tx · reputation proposal passed (Gate 4) · ERC-8004 delta · Smoke test passes |
-| 12 | Jun 12 | Demo Prep | README, demo script, all artifacts — repo clean |
-| 13 | Jun 13 | Submission | Submitted before 12:00 UTC+8 (04:00 UTC) |
-
-</details>
+The original Day 8–13 calendar table (superseded by Phase Gates
+2026-06-30) has moved to `CHANGELOG.md`'s "Process — Issues & Milestones"
+section — kept there for history, not loaded here every session.
 
 ## Customizing This File
 
