@@ -12,6 +12,7 @@ silent revert. (See docs/RISKS.md §F2)
 """
 
 from __future__ import annotations
+
 import json
 from pathlib import Path
 

@@ -122,10 +122,9 @@ async def handle_task_send(message: dict) -> dict:
     # Commit hash on-chain (Validation plan 5.3 — Basescan tx #1)
     on_chain_tx = None
     try:
-        from src.shared.onchain_hash import commit_hash
-
         # Get guild address from guild context
         from src.shared import guild_context
+        from src.shared.onchain_hash import commit_hash
         ctx = guild_context.load()
         guild_address = ctx.get("guild_address", "")
         if guild_address:

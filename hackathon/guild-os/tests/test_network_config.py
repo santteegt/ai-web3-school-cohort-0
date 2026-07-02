@@ -8,7 +8,6 @@ failure, and canonical-network detection.
 from __future__ import annotations
 
 import pytest
-
 from src.shared import network_config
 
 

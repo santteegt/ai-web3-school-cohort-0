@@ -18,7 +18,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Gate 0 — Candidate Selection (Validation 8.1)
 # ---------------------------------------------------------------------------

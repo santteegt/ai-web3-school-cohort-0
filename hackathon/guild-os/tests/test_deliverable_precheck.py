@@ -17,7 +17,6 @@ from unittest.mock import patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # deliverable_review MCP tool — structured report
 # ---------------------------------------------------------------------------
@@ -144,8 +143,8 @@ class TestPreCheckAutoTrigger:
     @pytest.mark.asyncio
     async def test_pre_check_after_specialist_delivered(self, tmp_path, monkeypatch):
         """After handle_task_send returns task/delivered, pre-check can verify it."""
-        from src.specialist.agent import handle_task_send
         from src.orchestrator.tools import deliverable_review
+        from src.specialist.agent import handle_task_send
 
         # Run from tmp_path so deliverable file lands there
         monkeypatch.chdir(tmp_path)

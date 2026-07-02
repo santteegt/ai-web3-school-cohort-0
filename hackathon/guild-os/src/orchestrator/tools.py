@@ -15,8 +15,7 @@ from pathlib import Path
 
 from src.shared import a2a as a2a_client
 from src.shared import agentfightclub as afc
-from src.shared import erc8004
-from src.shared import guild_context
+from src.shared import erc8004, guild_context
 
 logger = logging.getLogger(__name__)
 

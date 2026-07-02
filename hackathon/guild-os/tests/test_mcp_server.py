@@ -18,9 +18,8 @@ import hashlib
 import json
 from unittest.mock import AsyncMock, patch
 
-import pytest
-
 import mcp.types as types
+import pytest
 
 
 def async_return(value):
