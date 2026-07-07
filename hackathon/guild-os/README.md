@@ -99,15 +99,12 @@ anywhere in the code.
 
 | Variable | Purpose | Required |
 |----------|---------|----------|
-| `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator EOA signing key (hex) | Yes |
-| `SPECIALIST_PRIVATE_KEY` | Specialist Agent EOA signing key (hex) | Yes |
 | `ORCHESTRATOR_WALLET_ADDRESS` | Orchestrator wallet address (used as treasury in guild launch) | Yes |
 | `SPECIALIST_WALLET_ADDRESS` | Specialist Agent wallet address (settlement target) | Yes |
 | `CHAIN_ID` | Active network: `84532` (Base Sepolia, isolated testing) or `8453` (Base, canonical/evidence) — resolves into `config/networks.json` | Default: `8453` |
 | `ALCHEMY_API_KEY` | Secret, substituted into `config/networks.json`'s RPC URL template | Yes |
-| `GLM_API_KEY` | Z.AI GLM-5.1 API key | Yes |
 | `WALLET_PROVIDER` | Scoped signing provider (`caw` \| `zerodev` \| `turnkey`) | Default: `caw` |
-| `AGENTFIGHTCLUB_API_KEY` | ClawBank API key (skip to use DAOhaus SDK fallback) | Optional |
+| `CLAWBANK_API_KEY` | ClawBank API key (skip to use DAOhaus SDK fallback) | Optional |
 
 Moved to `config/networks.json` (do not set these in `.env`): EAS contract +
 SchemaRegistry addresses, the registered delivery schema UID, and the

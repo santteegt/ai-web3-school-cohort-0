@@ -157,11 +157,8 @@ see `network_config.get_contract_address()` / `get_rpc_url()` /
 |----------|---------|---------|
 | `CHAIN_ID` | Active network — the only switch between Base and Base Sepolia; resolves into `config/networks.json` | `8453` (Base); `84532` for isolated testing |
 | `ALCHEMY_API_KEY` | Secret, injected into `config/networks.json`'s `rpc_url_template` for the active network | — |
-| `GLM_API_KEY` | Z.AI GLM-5.1 API | — |
-| `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator signing key (EOA) | — |
-| `SPECIALIST_PRIVATE_KEY` | Specialist signing key (EOA) | — |
 | `WALLET_PROVIDER` | Scoped signing provider for `WalletProvider` (`caw` \| `zerodev` \| `turnkey`) | `caw` |
-| `AGENTFIGHTCLUB_API_KEY` | ClawBank Skill API | Optional |
+| `CLAWBANK_API_KEY` | ClawBank Skill API | Optional |
 | `ORCHESTRATOR_A2A_PORT` | Orchestrator A2A endpoint port | `10000` |
 | `SPECIALIST_A2A_PORT` | Specialist A2A endpoint port | `10001` |
 

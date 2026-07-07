@@ -217,12 +217,9 @@ address or RPC URL as an env var is wrong; it should cite
 |----------|---------|---------|
 | `CHAIN_ID` | Active network — the only switch between Base (8453, canonical) and Base Sepolia (84532, isolated test); resolves into `config/networks.json` | `8453` |
 | `ALCHEMY_API_KEY` | Secret — substituted into `config/networks.json`'s `rpc_url_template` | — (required) |
-| `GLM_API_KEY` | Z.AI GLM-5.1 | — (required) |
-| `ORCHESTRATOR_PRIVATE_KEY` | Orchestrator EOA signing | — (required) |
-| `SPECIALIST_PRIVATE_KEY` | Specialist EOA signing | — (required) |
 | `ORCHESTRATOR_WALLET_ADDRESS` | Treasury / launch caller | — (required) |
 | `SPECIALIST_WALLET_ADDRESS` | Settlement target | — (required) |
-| `AGENTFIGHTCLUB_API_KEY` | ClawBank API (skip → DAOhaus fallback) | optional |
+| `CLAWBANK_API_KEY` | ClawBank API (skip → DAOhaus fallback) | optional |
 | `WALLET_PROVIDER` | Scoped signing provider for `WalletProvider` (`caw` \| `zerodev` \| `turnkey`) | `caw` |
 | `ORCHESTRATOR_A2A_PORT` | Orchestrator A2A port | `10000` |
 | `SPECIALIST_A2A_PORT` | Specialist A2A port | `10001` |
