@@ -6,9 +6,10 @@ memory/
 .mcp.json
 
 # Secrets — never commit these
-.env
-.env.local
-.env.*
+**/.env
+**/.env.local
+**/.env.*
+!.env.example
 *.pem
 *.key
 secrets.json

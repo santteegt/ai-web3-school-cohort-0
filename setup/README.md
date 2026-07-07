@@ -19,6 +19,8 @@ ln -sf ~/AIxWeb3_School/memory ~/.claude/projects/-Users-santteegt-AIxWeb3-Schoo
 
 ## MCP Servers — Recommended Local Configuration
 
+### Claude
+
 Add the following to `.mcp.json` (gitignored) to enable agent-assisted EVM
 interaction and live documentation lookup during development.
 
@@ -46,7 +48,11 @@ interaction and live documentation lookup during development.
 }
 ```
 
-### Server Reference
+### OpenCode
+
+The `/opencode.jsonc` contains the list useful MCP servers during development. Make sure to set the environment variables in `/.env.example`
+
+### MCP Server Reference
 
 | Server | Package | Purpose |
 |--------|---------|---------|

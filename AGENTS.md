@@ -298,7 +298,7 @@ Network, wallet, and other build constants are defined once in
 ## 17. MCP Servers — Recommended Local Configuration
 
 One-time local setup for agent-assisted EVM interaction and live
-documentation lookup — full `.mcp.json` config, server reference, and setup
+documentation lookup — full `.mcp.json` (Claude) / `opencode.jsonc` (OpenCode) config, server reference, and setup
 notes moved to [`setup/README.md`](setup/README.md).
 
 ---

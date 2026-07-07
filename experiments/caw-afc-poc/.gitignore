@@ -28,11 +28,6 @@ env/
 # uv
 .uv/
 
-# Environment variables
-.env
-.env.local
-!.env.example
-
 # State files
 state.json
 pact-config.json
