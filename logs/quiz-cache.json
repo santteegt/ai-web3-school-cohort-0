@@ -124,7 +124,20 @@
     "task-graph",
     "explorer-context",
     "human-in-the-loop",
-    "chunking"
+    "chunking",
+    "erc-7702",
+    "model-serving",
+    "validation",
+    "agent-stop-conditions",
+    "slashing",
+    "data-portability",
+    "governance-ai",
+    "state-management",
+    "mcp-client",
+    "supervised-fine-tuning",
+    "remix-ide",
+    "encrypted-data",
+    "contract-upgrade"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
