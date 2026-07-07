@@ -21,6 +21,8 @@ dependencies = [
     "pydantic>=2.0.0",
     # Cryptography / signing
     "eth-account>=0.11.0",
+    # Wallet provider — Cobo Agentic Wallet (CAW) for scoped TSS signing
+    "cobo-agentic-wallet>=0.1.0",
     # ASGI server (SpecialistAgent)
     "uvicorn>=0.30.0",
     # Web framework (A2A route mounting)

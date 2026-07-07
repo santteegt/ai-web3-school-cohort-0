@@ -2,13 +2,16 @@
 
 Contract addresses are network-specific and loaded from config/networks.json
 via src/shared/network_config.py, keyed by the CHAIN_ID env var — never
-hardcode an address or a network name here (see AGENTS.md Don't: "Hardcode
-chain_id").
+hardcode an address or a network name here.
+
+register() signs through WalletProvider (CAW TSS) — no raw EOA key is ever
+read. The Pact allowlist covers the IdentityRegistry's register() selector
+exactly (see config/pact.json).
 
 CRITICAL: giveFeedback() MUST be called from the guild contract address
 (via DAO proposal execution) — NOT from the Specialist Agent's own wallet,
 and not from a raw agent EOA. Calling from the agent's wallet will cause a
-silent revert. (See docs/RISKS.md §F2)
+silent revert (specs/10-technical-design.md §8 F2).
 """
 
 from __future__ import annotations
@@ -17,6 +20,7 @@ import json
 from pathlib import Path
 
 from src.shared import network_config
+from src.shared.wallet import UnsignedTx, get_wallet_provider
 
 NOTES_DIR = Path(__file__).parent / "logs"
 
@@ -31,14 +35,41 @@ def _reputation_contract() -> str:
 
 def read_profile(agent_id: int) -> dict:
     """Read ERC-8004 profile via 8004scan API or cached JSON fallback."""
-    # TODO Day 9: call 8004scan API; fallback to cached JSON if unavailable
     raise NotImplementedError
 
 
-def register(agent_uri: str, signer_private_key: str) -> str:
-    """Call IdentityRegistry.register(agentURI). Returns tx hash."""
-    # TODO Day 9: build + submit transaction via web3.py
-    raise NotImplementedError
+async def register(agent_uri: str) -> str:
+    """Call IdentityRegistry.register(agentURI) through WalletProvider.
+
+    Builds the register calldata (selector + ABI-encoded agentURI), then
+    signs through the scoped WalletProvider. The Pact authorizes this
+    call because register() is on the ERC-8004 allowlist.
+
+    The full broadcast + confirmation path lands in issue #5; this scaffold
+    wires the WalletProvider seam so register() never touches a raw key.
+
+    Returns:
+        Transaction hash once confirmed on-chain.
+    """
+    wallet = get_wallet_provider()
+    identity_addr = _identity_contract()
+
+    from eth_abi import encode
+
+    register_selector = "0xf2c298be"
+    calldata = register_selector + encode(
+        ["string"], [agent_uri]
+    ).hex()
+
+    tx: UnsignedTx = {
+        "to": identity_addr,
+        "data": calldata,
+        "value": "0",
+        "chainId": int(network_config.get_chain_id()),
+    }
+
+    result = await wallet.sign(tx)
+    return result.tx_hash or ""
 
 
 def give_feedback(
@@ -52,11 +83,10 @@ def give_feedback(
 ) -> str:
     """Call ReputationRegistry.giveFeedback() with 6 fields.
 
-    Caller must be the guild contract (via DAO proposal execution) — never an
-    agent EOA, never the Specialist wallet. See docs/RISKS.md §F2.
-    Returns DeliveryRecorded event tx hash.
+    Caller must be the guild contract (via DAO proposal execution) — never
+    an agent EOA, never the Specialist wallet (specs/10-technical-design.md
+    §8 F2). Returns DeliveryRecorded event tx hash.
     """
-    # TODO Day 11: build + submit transaction via web3.py
     raise NotImplementedError
 
 
