@@ -201,7 +201,7 @@ class TestPactSpec:
 
 
 class TestRegisterGuild:
-    """register_guild() adds the dynamic DAO address to the allowlist."""
+    """register_guild_contract() adds the dynamic DAO address to the allowlist."""
 
     def test_guild_address_added_after_register(self):
         al = PactAllowlist()
@@ -211,9 +211,9 @@ class TestRegisterGuild:
         al.check(DAO_ADDR, SEL_PROPOSE)
         al.check(DAO_ADDR, SEL_VOTE)
 
-    def test_register_guild_invalidates_pact(self, monkeypatch):
+    def test_register_guild_contract_invalidates_pact(self, monkeypatch):
         monkeypatch.setenv("AGENT_WALLET_API_KEY", "fake")
         monkeypatch.setenv("AGENT_WALLET_WALLET_ID", "fake")
         provider = CoboWalletProvider()
-        provider.register_guild(DAO_ADDR)
+        provider.register_guild_contract(DAO_ADDR)
         assert provider._pact is None

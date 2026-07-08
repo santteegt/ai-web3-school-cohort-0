@@ -168,7 +168,7 @@ async def launch(mandate: str, treasury_address: str) -> dict:
             f"Could not parse DAO address from receipt tx {tx_hash}"
         )
 
-    _get_wallet().register_guild(dao_address)
+    _get_wallet().register_guild_contract(dao_address)
     logger.info("Guild deployed at: %s (tx: %s)", dao_address, tx_hash)
 
     return {

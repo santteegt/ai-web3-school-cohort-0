@@ -165,7 +165,7 @@ class WalletProviderProtocol(Protocol):
 
     async def sign(self, tx: UnsignedTx) -> SignedTx: ...
 
-    def register_guild(self, guild_address: str) -> None: ...
+    def register_guild_contract(self, guild_address: str) -> None: ...
 
 
 class CoboWalletProvider:
@@ -191,7 +191,7 @@ class CoboWalletProvider:
         self._pact: dict[str, Any] | None = None
         self._allowlist = _build_default_allowlist()
 
-    def register_guild(self, guild_address: str) -> None:
+    def register_guild_contract(self, guild_address: str) -> None:
         """Add the dynamic guild/DAO contract to the allowlist.
 
         Called after guild_launch() returns the DAO address. The guild's
@@ -324,7 +324,7 @@ class StubWalletProvider:
             f"implemented — use 'caw' for now"
         )
 
-    def register_guild(self, guild_address: str) -> None:
+    def register_guild_contract(self, guild_address: str) -> None:
         raise NotImplementedError(
             f"WALLET_PROVIDER={self._name} is declared swappable but not yet "
             f"implemented — use 'caw' for now"

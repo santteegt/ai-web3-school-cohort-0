@@ -30,7 +30,7 @@
       "eas": "0x4200000000000000000000000000000000000021",
       "eas_schema_registry": "0x4200000000000000000000000000000000000020",
       "weth": "0x4200000000000000000000000000000000000006",
-      "afc_summoner": "0x97aaa5be8b38795245f1c38a883b44cccdfb3e11"
+      "afc_summoner": ""
     },
     "delivery_schema_uid": null
   }
