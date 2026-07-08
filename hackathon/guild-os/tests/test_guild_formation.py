@@ -20,19 +20,19 @@ import pytest
 # ---------------------------------------------------------------------------
 
 class TestLaunch:
-    """Test guild contract deployment via moloch-agent CLI."""
+    """Test guild contract deployment via moloch-agent + WalletProvider."""
 
     @pytest.mark.asyncio
     async def test_launch_calls_summon(self):
-        """launch() invokes moloch-agent summon with correct params."""
+        """launch() builds calldata, signs via WalletProvider, returns guild address."""
         from src.shared.agentfightclub import launch
 
-        with patch("src.shared.agentfightclub._run_cli") as mock_cli, \
-             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
-            mock_cli.side_effect = [
-                {"address": "0xSingerAddress000000000000000000000000000"},  # account
-                {"txHash": "0xabc123", "daoAddress": "0x1234567890abcdef1234567890abcdef12345678"},  # summon
-            ]
+        fake_tx = {"to": "0x97aaa5be8b38795245f1c38a883b44cccdfb3e11", "data": "0x1f1bb0ef", "value": "0", "chainId": 8453}
+        with patch("src.shared.agentfightclub._build_calldata", return_value=fake_tx), \
+             patch("src.shared.agentfightclub._sign_and_broadcast", return_value="0xabc123"), \
+             patch("src.shared.agentfightclub._parse_dao_from_receipt", return_value="0x1234567890abcdef1234567890abcdef12345678"), \
+             patch("src.shared.agentfightclub._get_wallet"), \
+             patch.dict(os.environ, {"AGENT_WALLET_ADDRESS": "0xSingerAddress000000000000000000000000000"}):
             result = await launch(
                 mandate="Build DeFi tools",
                 treasury_address="0xTreasury00000000000000000000000000000000",
@@ -40,18 +40,15 @@ class TestLaunch:
 
         assert result["guild_address"] == "0x1234567890abcdef1234567890abcdef12345678"
         assert result["tx_hash"] == "0xabc123"
-        # Verify summon was called
-        assert mock_cli.call_count == 2  # account + summon
 
     @pytest.mark.asyncio
-    async def test_launch_requires_private_key(self):
-        """launch() raises if PRIVATE_KEY not set."""
+    async def test_launch_requires_agent_wallet_address(self):
+        """launch() raises if AGENT_WALLET_ADDRESS not set."""
         from src.shared.agentfightclub import launch
 
         with patch.dict(os.environ, {}, clear=False):
-            # Ensure PRIVATE_KEY is empty
-            os.environ.pop("PRIVATE_KEY", None)
-            with pytest.raises(RuntimeError, match="PRIVATE_KEY"):
+            os.environ.pop("AGENT_WALLET_ADDRESS", None)
+            with pytest.raises(RuntimeError, match="AGENT_WALLET_ADDRESS"):
                 await launch(mandate="test", treasury_address="0x0")
 
 
@@ -64,33 +61,24 @@ class TestCommit:
 
     @pytest.mark.asyncio
     async def test_commit_three_step_flow(self):
-        """commit() calls wrap-eth, approve-token, and tribute."""
+        """commit() builds calldata for wrap-eth, approve-token, tribute; signs each via WalletProvider."""
         from src.shared.agentfightclub import commit
 
-        with patch("src.shared.agentfightclub._run_cli") as mock_cli, \
-             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
-            mock_cli.side_effect = [
-                {"txHash": "0xwrap_tx"},      # wrap-eth
-                {"txHash": "0xapprove_tx"},   # approve-token
-                {"txHash": "0xtribute_tx"},   # tribute
-            ]
+        fake_tx = {"to": "0x0", "data": "0x0", "value": "0", "chainId": 8453}
+        with patch("src.shared.agentfightclub._build_calldata", return_value=fake_tx) as mock_build, \
+             patch("src.shared.agentfightclub._sign_and_broadcast", side_effect=[
+                 "0xwrap_tx", "0xapprove_tx", "0xtribute_tx",
+             ]) as mock_sign, \
+             patch("src.shared.agentfightclub._get_wallet"), \
+             patch("src.shared.network_config.get_contract_address", return_value="0xWETH000000000000000000000000000000000"):
             result = await commit(
                 guild_address="0x1234567890abcdef1234567890abcdef12345678",
                 amount_wei=1_000_000_000_000_000,
             )
 
         assert result == "0xtribute_tx"
-        assert mock_cli.call_count == 3
-
-    @pytest.mark.asyncio
-    async def test_commit_requires_private_key(self):
-        """commit() raises if PRIVATE_KEY not set."""
-        from src.shared.agentfightclub import commit
-
-        with patch.dict(os.environ, {}, clear=False):
-            os.environ.pop("PRIVATE_KEY", None)
-            with pytest.raises(RuntimeError, match="PRIVATE_KEY"):
-                await commit(guild_address="0x0", amount_wei=1000)
+        assert mock_build.call_count == 3
+        assert mock_sign.call_count == 3
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,45 @@
+{
+  "_comment": "Pact policy configuration for the WalletProvider. Keyed by CHAIN_ID, same as config/networks.json. Holds function selectors (static), tribute cap, CAW chain identifier mapping, and completion conditions. Contract ADDRESSES are NOT here — they live in config/networks.json and are resolved via src/shared/network_config.py. This file is the Pact-spec template; WalletProvider combines addresses (from network_config) + selectors (from here) into the CAW target_in allowlist.",
+  "8453": {
+    "caw_chain_id": "BASE_ETH",
+    "tribute_cap": "0.01",
+    "always_review": true,
+    "completion_conditions": [
+      {"type": "tx_count", "threshold": "20"},
+      {"type": "time_elapsed", "threshold": "3600"}
+    ],
+    "selectors": {
+      "moloch": {
+        "summon": "0x1f1bb0ef",
+        "sponsor": "0x0a796e19",
+        "propose": "0x3a82ffc8",
+        "vote": "0x67f61f07",
+        "process": "0x706a6e93"
+      },
+      "erc8004": {
+        "register": "0xf2c298be"
+      }
+    }
+  },
+  "84532": {
+    "caw_chain_id": "TBASE_SETH",
+    "tribute_cap": "0.01",
+    "always_review": true,
+    "completion_conditions": [
+      {"type": "tx_count", "threshold": "20"},
+      {"type": "time_elapsed", "threshold": "3600"}
+    ],
+    "selectors": {
+      "moloch": {
+        "summon": "0x1f1bb0ef",
+        "sponsor": "0x0a796e19",
+        "propose": "0x3a82ffc8",
+        "vote": "0x67f61f07",
+        "process": "0x706a6e93"
+      },
+      "erc8004": {
+        "register": "0xf2c298be"
+      }
+    }
+  }
+}

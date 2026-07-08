@@ -21,16 +21,18 @@ import pytest
 # ---------------------------------------------------------------------------
 
 class TestPropose:
-    """Test Specialist membership proposal via moloch-agent CLI."""
+    """Test Specialist membership proposal via moloch-agent + WalletProvider."""
 
     @pytest.mark.asyncio
     async def test_propose_calls_mint_shares(self):
-        """propose() invokes moloch-agent mint-shares with correct params."""
+        """propose() builds mint-shares calldata, signs via WalletProvider, returns proposal ID."""
         from src.shared.agentfightclub import propose
 
-        with patch("src.shared.agentfightclub._run_cli") as mock_cli, \
-             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
-            mock_cli.return_value = {"proposalId": "42"}
+        fake_tx = {"to": "0x0", "data": "0x0", "value": "0", "chainId": 8453}
+        with patch("src.shared.agentfightclub._build_calldata", return_value=fake_tx), \
+             patch("src.shared.agentfightclub._sign_and_broadcast", return_value="0xpropose_tx"), \
+             patch("src.shared.agentfightclub._read_latest_proposal_id", return_value="42"), \
+             patch("src.shared.agentfightclub._get_wallet"):
             with patch.dict(os.environ, {"SPECIALIST_WALLET_ADDRESS": "0xSpecialist0000000000000000000000000000000"}):
                 result = await propose(
                     guild_address="0xGuild000000000000000000000000000000000",
@@ -38,30 +40,13 @@ class TestPropose:
                 )
 
         assert result == "42"
-        # Verify mint-shares was called with correct args
-        mock_cli.assert_called_once_with(
-            "mint-shares",
-            "--dao", "0xGuild000000000000000000000000000000000",
-            "--to", "0xSpecialist0000000000000000000000000000000",
-            "--shares", "1000000000000000000",
-        )
-
-    @pytest.mark.asyncio
-    async def test_propose_requires_private_key(self):
-        """propose() raises if PRIVATE_KEY not set."""
-        from src.shared.agentfightclub import propose
-
-        with patch("src.shared.agentfightclub.PRIVATE_KEY", ""):
-            with pytest.raises(RuntimeError, match="PRIVATE_KEY"):
-                await propose(guild_address="0x0", specialist_erc8004_id=1)
 
     @pytest.mark.asyncio
     async def test_propose_requires_specialist_wallet(self):
         """propose() raises if SPECIALIST_WALLET_ADDRESS not set."""
         from src.shared.agentfightclub import propose
 
-        with patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"), \
-             patch.dict(os.environ, {}, clear=False):
+        with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("SPECIALIST_WALLET_ADDRESS", None)
             with pytest.raises(RuntimeError, match="SPECIALIST_WALLET_ADDRESS"):
                 await propose(guild_address="0x0", specialist_erc8004_id=1)
@@ -72,19 +57,17 @@ class TestPropose:
 # ---------------------------------------------------------------------------
 
 class TestVote:
-    """Test Specialist membership vote via moloch-agent CLI."""
+    """Test Specialist membership vote via moloch-agent + WalletProvider."""
 
     @pytest.mark.asyncio
     async def test_vote_sponsor_and_vote(self):
-        """vote() calls sponsor then vote."""
+        """vote() builds sponsor + vote calldata, signs each via WalletProvider."""
         from src.shared.agentfightclub import vote
 
-        with patch("src.shared.agentfightclub._run_cli") as mock_cli, \
-             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
-            mock_cli.side_effect = [
-                {"txHash": "0xsponsor_tx"},  # sponsor
-                {"txHash": "0xvote_tx"},      # vote
-            ]
+        fake_tx = {"to": "0x0", "data": "0x0", "value": "0", "chainId": 8453}
+        with patch("src.shared.agentfightclub._build_calldata", return_value=fake_tx) as mock_build, \
+             patch("src.shared.agentfightclub._sign_and_broadcast", side_effect=["0xsponsor_tx", "0xvote_tx"]) as mock_sign, \
+             patch("src.shared.agentfightclub._get_wallet"):
             result = await vote(
                 guild_address="0xGuild000000000000000000000000000000000",
                 proposal_id="42",
@@ -92,34 +75,34 @@ class TestVote:
             )
 
         assert result == "0xvote_tx"
-        assert mock_cli.call_count == 2
+        assert mock_build.call_count == 2
+        assert mock_sign.call_count == 2
 
     @pytest.mark.asyncio
     async def test_vote_continues_if_sponsor_fails(self):
         """vote() continues even if sponsor fails (already sponsored)."""
         from src.shared.agentfightclub import vote
 
-        with patch("src.shared.agentfightclub._run_cli") as mock_cli, \
-             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
-            mock_cli.side_effect = [
-                RuntimeError("already sponsored"),  # sponsor fails
-                {"txHash": "0xvote_tx"},            # vote succeeds
-            ]
+        fake_tx = {"to": "0x0", "data": "0x0", "value": "0", "chainId": 8453}
+
+        build_call_count = 0
+
+        def build_side_effect(*args, **kwargs):
+            nonlocal build_call_count
+            build_call_count += 1
+            if build_call_count == 1:
+                raise RuntimeError("already sponsored")
+            return fake_tx
+
+        with patch("src.shared.agentfightclub._build_calldata", side_effect=build_side_effect), \
+             patch("src.shared.agentfightclub._sign_and_broadcast", return_value="0xvote_tx"), \
+             patch("src.shared.agentfightclub._get_wallet"):
             result = await vote(
                 guild_address="0xGuild000000000000000000000000000000000",
                 proposal_id="42",
             )
 
         assert result == "0xvote_tx"
-
-    @pytest.mark.asyncio
-    async def test_vote_requires_private_key(self):
-        """vote() raises if PRIVATE_KEY not set."""
-        from src.shared.agentfightclub import vote
-
-        with patch("src.shared.agentfightclub.PRIVATE_KEY", ""):
-            with pytest.raises(RuntimeError, match="PRIVATE_KEY"):
-                await vote(guild_address="0x0", proposal_id="1")
 
 
 # ---------------------------------------------------------------------------
@@ -150,8 +133,7 @@ class TestMembershipProposeTool:
             })
 
             with patch("src.shared.agentfightclub.propose") as mock_propose, \
-                 patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"), \
-                 patch.dict(os.environ, {"SPECIALIST_WALLET_ADDRESS": "0xSpec00000000000000000000000000000000000"}):
+                  patch.dict(os.environ, {"SPECIALIST_WALLET_ADDRESS": "0xSpec00000000000000000000000000000000000"}):
 
                 async def fake_propose(*args, **kwargs):
                     return "99"

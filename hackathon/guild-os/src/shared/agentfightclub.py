@@ -1,14 +1,12 @@
 """AgentFightClub — interface for Moloch v3 guild treasury and governance.
 
-Primary: Direct integration via moloch-agent CLI (@raidguild/meta-clawtel)
-Fallback: web3.py direct contract calls if CLI fails (see docs/RISKS.md §F1)
-
-Decision recorded in docs/TECH_STACK.md Decision Log on Day 8.
+Calldata is built by ``moloch-agent --build-only --full`` (no PRIVATE_KEY
+passed to the subprocess). Signing and broadcast go through WalletProvider
+(CAW TSS by default). No raw EOA key is ever read or held by this module.
 
 Network is resolved from CHAIN_ID via src/shared/network_config.py — never
 hardcode an RPC URL or assume a fixed network here. AFC has no Base Sepolia
-deployment (see docs/RISKS.md §F6); only CHAIN_ID=8453 (Base) is valid for
-AgentFightClub calls.
+deployment; only CHAIN_ID=8453 (Base) is valid for AgentFightClub calls.
 """
 
 from __future__ import annotations
@@ -17,69 +15,107 @@ import json
 import logging
 import os
 import subprocess
+import tempfile
 
-from src.shared import network_config
+from src.shared import network_config, wallet
+from src.shared.wallet import UnsignedTx, get_wallet_provider
 
 logger = logging.getLogger(__name__)
 
-# Signing key from environment (secrets never live in config/networks.json)
-PRIVATE_KEY = os.getenv("PRIVATE_KEY", "")
-
-# moloch-agent CLI
 _MCLI = "moloch-agent"
+
+_SUMMON_BAAL_TOPIC0 = "0xcf2f09cd0dbc149b12a3630a11b7d73476660f3d08d3dc7dcc79c6dec555ee7a"
+
+_wallet: wallet.WalletProviderProtocol | None = None
+
+
+def _get_wallet() -> wallet.WalletProviderProtocol:
+    global _wallet
+    if _wallet is None:
+        _wallet = get_wallet_provider()
+    return _wallet
 
 
 def _rpc_url() -> str:
-    """Resolve the RPC URL for the active CHAIN_ID via network_config."""
     return network_config.get_rpc_url()
 
 
-def _run_cli(*args: str, timeout: int = 120) -> dict:
-    """Run moloch-agent CLI command and return parsed JSON output.
+def _build_calldata(*args: str, timeout: int = 120) -> UnsignedTx:
+    """Build unsigned calldata via moloch-agent --build-only --full.
 
-    Raises RuntimeError on non-zero exit or parse failure.
+    No PRIVATE_KEY is passed to the subprocess — the CLI only encodes the
+    transaction data. Returns the unsigned tx dict {to, data, value, chainId}.
     """
-    cmd = [_MCLI] + list(args)
-    env = {**os.environ, "PRIVATE_KEY": PRIVATE_KEY, "RPC_URL": _rpc_url()}
+    cmd = [_MCLI, *args, "--build-only", "--full"]
+    env = {**os.environ, "PRIVATE_KEY": "", "RPC_URL": _rpc_url()}
 
-    logger.info("CLI: %s", " ".join(cmd[:3]) + ("..." if len(cmd) > 3 else ""))
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        timeout=timeout,
-        env=env,
-    )
+    logger.info("Building calldata: %s", " ".join(cmd[:3]))
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=env,
+        )
+    except FileNotFoundError as exc:
+        raise RuntimeError(
+            "moloch-agent not found — install with: npm install -g @raidguild/meta-clawtel"
+        ) from exc
 
     if result.returncode != 0:
         stderr = result.stderr.strip()
-        logger.error("CLI error: %s", stderr)
-        raise RuntimeError(f"moloch-agent failed (exit {result.returncode}): {stderr}")
+        logger.error("moloch-agent error: %s", stderr)
+        raise RuntimeError(
+            f"moloch-agent failed (exit {result.returncode}): {stderr}"
+        )
 
-    # Try to parse JSON output
     stdout = result.stdout.strip()
-    if not stdout:
-        return {"raw": ""}
-
     try:
-        return json.loads(stdout)
-    except json.JSONDecodeError:
-        # Some commands return plain text
-        return {"raw": stdout}
+        output = json.loads(stdout)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"moloch-agent returned non-JSON: {stdout[:200]}"
+        ) from exc
+
+    tx = output.get("tx")
+    if not tx or "to" not in tx or "data" not in tx:
+        raise RuntimeError(
+            f"moloch-agent output missing tx field: {list(output.keys())}"
+        )
+    return tx
 
 
-# ---------------------------------------------------------------------------
-# Guild operations
-# ---------------------------------------------------------------------------
+async def _sign_and_broadcast(tx: UnsignedTx) -> str:
+    """Sign via WalletProvider and return the confirmed tx hash."""
+    result = await _get_wallet().sign(tx)
+    if not result.tx_hash:
+        raise RuntimeError(
+            f"WalletProvider returned no tx_hash (status: {result.status})"
+        )
+    logger.info("Tx confirmed: %s", result.tx_hash)
+    return result.tx_hash
+
+
+def _parse_dao_from_receipt(tx_hash: str) -> str | None:
+    """Parse the DAO address from the SummonBaal event in the tx receipt."""
+    if not tx_hash or tx_hash.startswith("0xdead"):
+        return None
+
+    from web3 import Web3
+
+    w3 = Web3(Web3.HTTPProvider(_rpc_url()))
+    receipt = w3.eth.get_transaction_receipt(tx_hash)
+    for log in receipt["logs"]:
+        topics = log.get("topics", [])
+        if topics and topics[0].hex().lower() == _SUMMON_BAAL_TOPIC0.lower():
+            raw = topics[1].hex()
+            return "0x" + raw[-40:]
+    return None
 
 
 async def launch(mandate: str, treasury_address: str) -> dict:
     """Deploy guild contract (Moloch v3 DAO) with mandate string.
-
-    Uses moloch-agent summon with minimal params:
-    - Short voting/grace periods for demo (60s each)
-    - Founder as initial member with 1 share
-    - Mandate stored in DAO metadata
 
     Args:
         mandate: Guild mission statement / mandate string
@@ -88,31 +124,23 @@ async def launch(mandate: str, treasury_address: str) -> dict:
     Returns:
         dict with guild_address and tx_hash.
     """
-    if not PRIVATE_KEY:
-        raise RuntimeError("PRIVATE_KEY env var not set — cannot sign transactions")
+    account_addr = os.getenv("AGENT_WALLET_ADDRESS", "")
+    if not account_addr:
+        raise RuntimeError("AGENT_WALLET_ADDRESS env var not set")
 
-    # Get signer address first
-    account_info = _run_cli("account")
-    signer_address = account_info.get("address", "")
-    if not signer_address:
-        raise RuntimeError(f"Could not get signer address from 'account': {account_info}")
-
-    logger.info("Signer address: %s", signer_address)
-
-    # Build summon params
     summon_params = {
         "daoName": "GuildOS-Genesys",
         "tokenName": "GUILD",
         "tokenSymbol": "GLD",
         "members": [
             {
-                "address": signer_address,
-                "shares": "1000000000000000000",  # 1 share (18 decimals)
+                "address": account_addr,
+                "shares": "1000000000000000000",
                 "loot": "0",
             }
         ],
-        "votingPeriod": "60",     # 60 seconds for demo
-        "gracePeriod": "60",      # 60 seconds for demo
+        "votingPeriod": "60",
+        "gracePeriod": "60",
         "quorum": "0",
         "minRetention": "0",
         "sponsorThreshold": "0",
@@ -123,34 +151,24 @@ async def launch(mandate: str, treasury_address: str) -> dict:
         },
     }
 
-    # Write params to temp file for moloch-agent
-    import tempfile
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(summon_params, f, indent=2)
         params_path = f.name
 
     try:
-        result = _run_cli("summon", "--params", params_path, timeout=180)
+        tx = _build_calldata("summon", "--params", params_path, timeout=180)
     finally:
         os.unlink(params_path)
 
-    # Parse result — moloch-agent returns tx hash and DAO address
-    tx_hash = result.get("txHash", result.get("transactionHash", ""))
-    dao_address = result.get("daoAddress", result.get("contractAddress", ""))
+    tx_hash = await _sign_and_broadcast(tx)
 
+    dao_address = _parse_dao_from_receipt(tx_hash)
     if not dao_address:
-        # Try to extract from raw output
-        raw = result.get("raw", "")
-        if "0x" in raw:
-            # Look for 0x address pattern
-            import re
-            addresses = re.findall(r"0x[a-fA-F0-9]{40}", raw)
-            if addresses:
-                dao_address = addresses[-1]  # Last address is usually the DAO
+        raise RuntimeError(
+            f"Could not parse DAO address from receipt tx {tx_hash}"
+        )
 
-    if not dao_address:
-        raise RuntimeError(f"Could not extract DAO address from summon result: {result}")
-
+    _get_wallet().register_guild_contract(dao_address)
     logger.info("Guild deployed at: %s (tx: %s)", dao_address, tx_hash)
 
     return {
@@ -160,199 +178,154 @@ async def launch(mandate: str, treasury_address: str) -> dict:
 
 
 async def commit(guild_address: str, amount_wei: int) -> str:
-    """Fund treasury via wrap-eth → approve-token → tribute flow.
-
-    Moloch v3 requires WETH, so we:
-    1. Wrap ETH to WETH
-    2. Approve WETH for the DAO
-    3. Submit tribute to fund the treasury
+    """Fund treasury via wrap-eth -> approve-token -> tribute flow.
 
     Args:
         guild_address: Deployed guild contract address
-        amount_wei: Amount in wei to fund (e.g. 1_000_000_000_000_000 = 0.001 ETH)
+        amount_wei: Amount in wei to fund
 
     Returns:
         Transaction hash of the tribute/funding tx.
     """
-    if not PRIVATE_KEY:
-        raise RuntimeError("PRIVATE_KEY env var not set — cannot sign transactions")
-
-    # Convert wei to ETH for CLI
     amount_eth = amount_wei / 1e18
-
-    # Step 1: Wrap ETH → WETH
-    logger.info("Wrapping %s ETH to WETH", amount_eth)
-    wrap_result = _run_cli("wrap-eth", "--amount", str(amount_eth))
-    wrap_tx = wrap_result.get("txHash", wrap_result.get("transactionHash", ""))
-    logger.info("Wrap tx: %s", wrap_tx)
-
-    # Step 2: Approve WETH for the guild (network-specific predeploy address)
     weth_address = network_config.get_contract_address("weth")
+
+    logger.info("Wrapping %s ETH to WETH", amount_eth)
+    wrap_tx = _build_calldata("wrap-eth", "--amount", str(amount_eth))
+    await _sign_and_broadcast(wrap_tx)
+
     logger.info("Approving WETH for guild %s", guild_address)
-    approve_result = _run_cli(
+    approve_tx = _build_calldata(
         "approve-token",
         "--token", weth_address,
         "--amount", str(amount_eth),
     )
-    approve_tx = approve_result.get("txHash", approve_result.get("transactionHash", ""))
-    logger.info("Approve tx: %s", approve_tx)
+    await _sign_and_broadcast(approve_tx)
 
-    # Step 3: Submit tribute to fund treasury
     logger.info("Submitting tribute to guild %s", guild_address)
-    tribute_result = _run_cli(
+    tribute_tx = _build_calldata(
         "tribute",
         "--dao", guild_address,
         "--token", weth_address,
         "--amount", str(amount_eth),
     )
-    tribute_tx = tribute_result.get("txHash", tribute_result.get("transactionHash", ""))
-
-    if not tribute_tx:
-        raw = tribute_result.get("raw", "")
-        if "0x" in raw:
-            import re
-            txs = re.findall(r"0x[a-fA-F0-9]{64}", raw)
-            if txs:
-                tribute_tx = txs[-1]
-
-    logger.info("Tribute tx: %s", tribute_tx)
-    return tribute_tx
-
-
-# ---------------------------------------------------------------------------
-# Membership operations (Issue #2)
-# ---------------------------------------------------------------------------
+    tribute_hash = await _sign_and_broadcast(tribute_tx)
+    logger.info("Tribute tx: %s", tribute_hash)
+    return tribute_hash
 
 
 async def propose(guild_address: str, specialist_erc8004_id: int) -> str:
     """Submit Specialist membership proposal via mint-shares (no tribute).
 
-    Creates a proposal to grant the Specialist shares (voting membership).
     Returns proposal ID.
     """
-    if not PRIVATE_KEY:
-        raise RuntimeError("PRIVATE_KEY env var not set")
-
-    # Get specialist wallet address from ERC-8004 or use provided address
     specialist_wallet = os.getenv("SPECIALIST_WALLET_ADDRESS", "")
     if not specialist_wallet:
         raise RuntimeError("SPECIALIST_WALLET_ADDRESS env var not set")
 
-    result = _run_cli(
+    tx = _build_calldata(
         "mint-shares",
         "--dao", guild_address,
         "--to", specialist_wallet,
-        "--shares", "1000000000000000000",  # 1 share
+        "--shares", "1000000000000000000",
     )
+    await _sign_and_broadcast(tx)
 
-    proposal_id = result.get("proposalId", result.get("proposal", ""))
-    if not proposal_id:
-        raw = result.get("raw", "")
-        if raw:
-            proposal_id = raw.strip()
-
+    proposal_id = _read_latest_proposal_id(guild_address)
     logger.info("Membership proposal created: %s", proposal_id)
     return str(proposal_id)
 
 
 async def vote(guild_address: str, proposal_id: str, approve: bool = True) -> str:
-    """Cast membership vote. Returns tx hash.
-
-    For demo: auto-approve (single human operator).
-    """
-    if not PRIVATE_KEY:
-        raise RuntimeError("PRIVATE_KEY env var not set")
-
-    # Sponsor first (required before voting)
+    """Cast membership vote. Returns tx hash."""
     try:
-        sponsor_result = _run_cli(
-            "sponsor",
-            "--dao", guild_address,
-            "--proposal", proposal_id,
+        sponsor_tx = _build_calldata(
+            "sponsor", "--dao", guild_address, "--proposal", proposal_id
         )
-        sponsor_tx = sponsor_result.get("txHash", "")
-        logger.info("Sponsor tx: %s", sponsor_tx)
-    except RuntimeError as e:
-        logger.warning("Sponsor failed (may already be sponsored): %s", e)
+        await _sign_and_broadcast(sponsor_tx)
+    except RuntimeError as exc:
+        logger.warning("Sponsor failed (may already be sponsored): %s", exc)
 
-    # Vote
-    result = _run_cli(
+    vote_tx = _build_calldata(
         "vote",
         "--dao", guild_address,
         "--proposal", proposal_id,
         "--approved", str(approve).lower(),
     )
-
-    tx_hash = result.get("txHash", result.get("transactionHash", ""))
-    if not tx_hash:
-        raw = result.get("raw", "")
-        if "0x" in raw:
-            import re
-            txs = re.findall(r"0x[a-fA-F0-9]{64}", raw)
-            if txs:
-                tx_hash = txs[-1]
-
+    tx_hash = await _sign_and_broadcast(vote_tx)
     logger.info("Vote tx: %s", tx_hash)
     return tx_hash
 
 
-# ---------------------------------------------------------------------------
-# Settlement (Day 11)
-# ---------------------------------------------------------------------------
-
-
 async def settle(guild_address: str, specialist_wallet: str) -> str:
-    """Release treasury payment to Specialist wallet.
-
-    Uses payment proposal: payment → sponsor → vote → grace → process.
-    For demo with short periods: sponsor + vote + process in sequence.
+    """Release treasury payment to Specialist wallet via proposal process.
 
     Returns tx hash (Basescan tx #2).
     """
-    if not PRIVATE_KEY:
-        raise RuntimeError("PRIVATE_KEY env var not set")
-
-    # Create payment proposal
-    payment_result = _run_cli(
+    payment_tx = _build_calldata(
         "payment",
         "--dao", guild_address,
         "--recipient", specialist_wallet,
-        "--amount", "0.001",  # Match commit amount
+        "--amount", "0.001",
     )
+    await _sign_and_broadcast(payment_tx)
 
-    proposal_id = payment_result.get("proposalId", "")
-    if not proposal_id:
-        raw = payment_result.get("raw", "")
-        if raw:
-            proposal_id = raw.strip()
-
+    proposal_id = _read_latest_proposal_id(guild_address)
     logger.info("Payment proposal: %s", proposal_id)
 
-    # Sponsor
     try:
-        _run_cli("sponsor", "--dao", guild_address, "--proposal", proposal_id)
-    except RuntimeError as e:
-        logger.warning("Sponsor failed: %s", e)
+        sponsor_tx = _build_calldata(
+            "sponsor", "--dao", guild_address, "--proposal", proposal_id
+        )
+        await _sign_and_broadcast(sponsor_tx)
+    except RuntimeError as exc:
+        logger.warning("Sponsor failed: %s", exc)
 
-    # Vote approve
-    _run_cli("vote", "--dao", guild_address, "--proposal", proposal_id, "--approved", "true")
+    vote_tx = _build_calldata(
+        "vote",
+        "--dao", guild_address,
+        "--proposal", proposal_id,
+        "--approved", "true",
+    )
+    await _sign_and_broadcast(vote_tx)
 
-    # Wait for grace period (60s) then process
     import asyncio
+
     logger.info("Waiting 65s for grace period...")
     await asyncio.sleep(65)
 
-    # Process
-    process_result = _run_cli("process", "--dao", guild_address, "--proposal", proposal_id)
-    tx_hash = process_result.get("txHash", process_result.get("transactionHash", ""))
-
-    if not tx_hash:
-        raw = process_result.get("raw", "")
-        if "0x" in raw:
-            import re
-            txs = re.findall(r"0x[a-fA-F0-9]{64}", raw)
-            if txs:
-                tx_hash = txs[-1]
-
+    process_tx = _build_calldata(
+        "process", "--dao", guild_address, "--proposal", proposal_id
+    )
+    tx_hash = await _sign_and_broadcast(process_tx)
     logger.info("Settlement tx: %s", tx_hash)
     return tx_hash
+
+
+def _read_latest_proposal_id(dao_address: str) -> str:
+    """Read the current proposalCount from the DAO to get the latest proposal ID."""
+    import urllib.request
+
+    payload = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "method": "eth_call",
+            "params": [{"to": dao_address, "data": "0xda35c664"}, "latest"],
+            "id": 1,
+        }
+    ).encode()
+    req = urllib.request.Request(
+        _rpc_url(),
+        data=payload,
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            body = json.loads(resp.read())
+        hex_count = body.get("result", "0x0")
+        return str(int(hex_count, 16))
+    except Exception as exc:
+        logger.warning("Could not read proposalCount: %s", exc)
+        raise RuntimeError(
+            f"Failed to read proposalCount from DAO {dao_address}: {exc}"
+        ) from exc

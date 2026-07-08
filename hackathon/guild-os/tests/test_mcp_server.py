@@ -217,8 +217,7 @@ class TestToolCalls:
     async def test_guild_launch_returns_result_or_error(self, dispatch):
         """Check 7.1: guild_launch is callable (returns result or error)."""
         with patch("src.shared.agentfightclub.launch") as mock_launch, \
-             patch("src.shared.agentfightclub.commit") as mock_commit, \
-             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
+             patch("src.shared.agentfightclub.commit") as mock_commit:
 
             async def fake_launch(**kwargs):
                 return {"guild_address": "0xTest", "tx_hash": "0xTestTx"}
@@ -236,8 +235,7 @@ class TestToolCalls:
     @pytest.mark.asyncio
     async def test_settle_returns_result_or_error(self, dispatch):
         """Check 7.6: settle is callable (returns result or error)."""
-        with patch("src.shared.agentfightclub.settle") as mock_settle, \
-             patch("src.shared.agentfightclub.PRIVATE_KEY", "0xfake"):
+        with patch("src.shared.agentfightclub.settle") as mock_settle:
 
             mock_settle.side_effect = async_return("0xSettleTx")
 
