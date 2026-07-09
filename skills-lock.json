@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/cobo-agentic-wallet-developer/SKILL.md",
       "computedHash": "07f30314caaf2a4792f80e440e04b6ee05b6a0aeb7e6f8b4730cfacc4122d5a9"
+    },
+    "mcp-builder": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mcp-builder/SKILL.md",
+      "computedHash": "826e46adf81e1372282e205c34e1a2ee876e72148007726e4a2512599d2fef7b"
     }
   }
 }
