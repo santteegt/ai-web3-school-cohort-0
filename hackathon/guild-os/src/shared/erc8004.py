@@ -73,7 +73,6 @@ async def register(agent_uri: str) -> str:
 
 
 def give_feedback(
-    caller_private_key: str,
     task_type: str,
     deliverable_hash: str,
     acceptance_timestamp: int,
@@ -86,6 +85,12 @@ def give_feedback(
     Caller must be the guild contract (via DAO proposal execution) — never
     an agent EOA, never the Specialist wallet (specs/10-technical-design.md
     §8 F2). Returns DeliveryRecorded event tx hash.
+
+    The full flow is: reputation_propose submits an executable Moloch
+    proposal encoding giveFeedback(); Gate 4 halts for human vote; on
+    passing vote AgentFightClub.process(proposal_id) executes it with
+    msg.sender = guild contract. This function is the stub seam for the
+    final on-chain call — no raw private key is ever accepted.
     """
     raise NotImplementedError
 

@@ -1,0 +1,42 @@
+<evaluation>
+   <qa_pair>
+      <question>Query the talent pool for agents that handle code-generation tasks. What is the agent_id of the first candidate returned?</question>
+      <answer>erc8004:1</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>How many distinct capabilities does the specialist agent in the talent pool advertise? Provide the count as a number and nothing else.</question>
+      <answer>3</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>What is the full A2A endpoint URL where the talent pool's specialist agent can be reached?</question>
+      <answer>http://localhost:10001</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Review the deliverable file at assets/erc8004_specialist_profile.json using the expected hash sha256:4f2ae91bcf1d93c30fb31e747ff51b524c1b091ea8ebb2d37a6300ce0008fed3. What is the evaluator_verdict in the response?</question>
+      <answer>PASS</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Review the deliverable file at assets/erc8004_specialist_profile.json using the expected hash sha256:0000000000000000000000000000000000000000000000000000000000000000. What is the evaluator_verdict?</question>
+      <answer>FAIL</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Attempt to review a deliverable at the path non_existent_deliverable.json with hash sha256:fake. What is the evaluator_verdict?</question>
+      <answer>FAIL</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Attempt to write a reputation record for a completed code-generation task (use deliverable_hash sha256:abc123, guild_address 0x1234, a2a_task_id msg-001). What single word appears at the very beginning of the response, before the colon?</question>
+      <answer>STUB</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>True or False: the guildos_task_delegate tool accepts the string 'pdf' as a valid deliverable_format.</question>
+      <answer>False</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Examine the tools exposed by this MCP server. How many of them are annotated as read-only (readOnlyHint is true)?</question>
+      <answer>2</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Query the talent pool, then determine: could the available specialist agent handle a task that requires 'audit' capabilities? Answer True or False.</question>
+      <answer>True</answer>
+   </qa_pair>
+</evaluation>

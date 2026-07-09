@@ -1,329 +1,438 @@
-"""OrchestratorServer — MCP server entry point.
+"""OrchestratorServer — MCP server entry point (FastMCP).
 
-Registers 7 tools and starts the MCP listener on stdio.
-Run: python -m src.orchestrator.server
+Exposes 7 tools over stdio to drive the GuildOS coordination
+loop. Run: python -m src.orchestrator.server
 
-Tools:
-  1. guild_launch       — Deploy guild contract + fund treasury (stub for Issue #1)
-  2. talent_query       — Return ERC-8004 shortlist (hardcoded MVP)
-  3. task_invite        — Send A2A task/invite to Specialist
-  4. task_delegate      — Send A2A task/send to Specialist
-  5. deliverable_review — Run pre-check on deliverable
-  6. settle             — Release payment (stub for Issue #1)
-  7. reputation_write   — Call ERC-8004 giveFeedback (stub for Issue #1)
+Server name: guildos_mcp  (follows the {service}_mcp convention)
+Transport:   stdio (JSON-RPC 2.0) — specs/10-technical-design.md §12
+
+Tools (all prefixed guildos_ to avoid collisions with other MCP servers):
+  1. guildos_guild_launch        — Deploy guild contract + fund treasury
+  2. guildos_talent_query        — Return ERC-8004 shortlist (hardcoded MVP)
+  3. guildos_task_invite         — Send A2A task/invite to Specialist
+  4. guildos_task_delegate       — Send A2A task/send to Specialist
+  5. guildos_deliverable_review  — Run pre-check on deliverable
+  6. guildos_settle              — Release payment (stub for Issue #1)
+  7. guildos_reputation_write    — Call ERC-8004 giveFeedback (stub)
+
+DRIFT NOTE: AGENTS.md Component Map and specs/10-technical-design.md §6 list
+9 tools (adds payment_propose, reputation_propose). tools.py implements 2
+extra functions (membership_propose, membership_vote) that are neither in the
+spec's 9 nor registered here. This is mid-migration — reconcile before Phase 3
+(payment_propose / reputation_propose must exist for the economic loop).
 """
 
 from __future__ import annotations
 
 import json
+import logging
+from functools import wraps
+from typing import Any, Literal
 
-import anyio
-import mcp.types as types
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
+from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.orchestrator import tools as orchestrator_tools
 
-# Tool definitions — input schemas for each of the 7 MCP tools
-TOOL_DEFINITIONS: list[types.Tool] = [
-    types.Tool(
-        name="guild_launch",
-        description="Deploy guild contract via AgentFightClub and fund treasury. Returns guild_address + 2 tx hashes.",
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "mandate": {
-                    "type": "string",
-                    "description": "Guild mandate / mission statement",
-                },
-                "treasury_address": {
-                    "type": "string",
-                    "description": "Address to receive initial treasury funding",
-                },
-            },
-            "required": ["mandate", "treasury_address"],
-        },
-    ),
-    types.Tool(
-        name="talent_query",
-        description="Return ERC-8004 shortlist of candidate agents. MVP: returns hardcoded Specialist profile.",
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "task_type": {
-                    "type": "string",
-                    "description": "Type of task to match agents for",
-                },
-            },
-            "required": ["task_type"],
-        },
-    ),
-    types.Tool(
-        name="task_invite",
-        description="Send A2A task/invite to Specialist; receive task/quote response.",
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "specialist_endpoint": {
-                    "type": "string",
-                    "description": "A2A endpoint URL of the Specialist (e.g. http://localhost:10001)",
-                },
-                "task_spec": {
-                    "type": "object",
-                    "description": "Task specification to send",
-                },
-            },
-            "required": ["specialist_endpoint", "task_spec"],
-        },
-    ),
-    types.Tool(
-        name="task_delegate",
-        description=(
-            "Send A2A task/send with the full GuildOS task payload to the Specialist. "
-            "Rejects (before sending) a payload missing acceptance_criteria, missing "
-            "github_issue_url, or carrying an unrecognized deliverable_format."
-        ),
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "specialist_endpoint": {
-                    "type": "string",
-                    "description": "A2A endpoint URL of the Specialist (e.g. http://localhost:10001)",
-                },
-                "full_task": {
-                    "type": "object",
-                    "description": "Full task/send payload — see specs/20-api-contracts.md §3",
-                    "properties": {
-                        "task_id": {"type": "string"},
-                        "task_description": {
-                            "type": "string",
-                            "description": "e.g. 'Implement the EAS attestation module (EASClient)'",
-                        },
-                        "github_issue_url": {
-                            "type": "string",
-                            "description": "The ticket the Specialist reads and works from",
-                        },
-                        "input_data": {
-                            "type": "string",
-                            "description": "Ticket body / spec excerpt / repo ref",
-                        },
-                        "technical_constraints": {
-                            "type": "object",
-                            "description": "The box the work must stay in",
-                            "properties": {
-                                "repo_branch": {
-                                    "type": "string",
-                                    "description": "Working branch",
-                                },
-                                "library_versions": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "Pinned versions the deliverable must use",
-                                },
-                                "env_vars": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "Required environment variable names",
-                                },
-                            },
-                        },
-                        "agbom": {
-                            "type": "object",
-                            "description": "Agent Bill of Materials — what the agent may use",
-                            "properties": {
-                                "tools": {"type": "array", "items": {"type": "string"}},
-                                "mcp_servers": {"type": "array", "items": {"type": "string"}},
-                                "data_sources": {"type": "array", "items": {"type": "string"}},
-                            },
-                        },
-                        "acceptance_criteria": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "List of BDD tests that must pass",
-                        },
-                        "deliverable_format": {
-                            "type": "string",
-                            "enum": ["zip+hash", "github_commit"],
-                        },
-                        "deadline": {
-                            "type": "string",
-                            "description": "ISO-8601",
-                        },
-                        "budget_wei": {
-                            "type": "string",
-                            "description": "Numeric string (wei)",
-                        },
-                    },
-                    "required": [
-                        "task_id",
-                        "task_description",
-                        "github_issue_url",
-                        "acceptance_criteria",
-                        "deliverable_format",
-                        "deadline",
-                        "budget_wei",
-                    ],
-                },
-            },
-            "required": ["specialist_endpoint", "full_task"],
-        },
-    ),
-    types.Tool(
-        name="deliverable_review",
-        description="Run automated pre-check on Specialist deliverable (hash, format, size).",
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "deliverable_reference": {
-                    "type": "string",
-                    "description": "Path to the deliverable file",
-                },
-                "deliverable_hash": {
-                    "type": "string",
-                    "description": "Expected SHA-256 hash (sha256:hex format)",
-                },
-            },
-            "required": ["deliverable_reference", "deliverable_hash"],
-        },
-    ),
-    types.Tool(
-        name="settle",
-        description="Release payment to Specialist via AgentFightClub settle(). Returns settlement tx hash.",
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "guild_address": {
-                    "type": "string",
-                    "description": "Guild contract address",
-                },
-                "specialist_wallet": {
-                    "type": "string",
-                    "description": "Specialist wallet address for payment",
-                },
-            },
-            "required": ["guild_address", "specialist_wallet"],
-        },
-    ),
-    types.Tool(
-        name="reputation_write",
-        description="Call ERC-8004 giveFeedback() with delivery record. Routes via guild contract (not Specialist wallet).",
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "delivery_record": {
-                    "type": "object",
-                    "description": "6-field delivery record",
-                },
-            },
-            "required": ["delivery_record"],
-        },
-    ),
-]
+logger = logging.getLogger(__name__)
 
 
-def create_server() -> Server:
-    """Create and configure the MCP server with all 7 tools."""
-    server = Server("guildos-orchestrator")
+# ---------------------------------------------------------------------------
+# Pydantic input models — validated before the tool body runs
+# ---------------------------------------------------------------------------
 
-    @server.list_tools()
-    async def list_tools() -> list[types.Tool]:
-        """Return all 7 registered tools."""
-        return TOOL_DEFINITIONS
+class TechnicalConstraints(BaseModel):
+    """The box the deliverable work must stay in."""
 
-    @server.call_tool()
-    async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
-        """Dispatch tool calls to the appropriate handler."""
+    model_config = ConfigDict(extra="forbid")
+
+    repo_branch: str | None = Field(default=None, description="Working branch")
+    library_versions: list[str] = Field(
+        default_factory=list,
+        description="Pinned versions the deliverable must use",
+    )
+    env_vars: list[str] = Field(
+        default_factory=list,
+        description="Required environment variable names",
+    )
+
+
+class AgBOM(BaseModel):
+    """Agent Bill of Materials — what the agent may use."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    tools: list[str] = Field(default_factory=list)
+    mcp_servers: list[str] = Field(default_factory=list)
+    data_sources: list[str] = Field(default_factory=list)
+
+
+class TaskPayload(BaseModel):
+    """Full task/send payload — see specs/20-api-contracts.md §3.
+
+    Pydantic validates required fields and the deliverable_format enum at the
+    MCP boundary; tools.py retains defense-in-depth checks (UnderspecifiedTaskError)
+    for direct callers that bypass the server.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    task_id: str = Field(..., description="Unique task identifier")
+    task_description: str = Field(
+        ...,
+        description="e.g. 'Implement the EAS attestation module (EASClient)'",
+    )
+    github_issue_url: str = Field(
+        ..., description="The ticket the Specialist reads and works from"
+    )
+    input_data: str | None = Field(
+        default=None, description="Ticket body / spec excerpt / repo ref"
+    )
+    technical_constraints: TechnicalConstraints | None = None
+    agbom: AgBOM | None = None
+    acceptance_criteria: list[str] = Field(
+        ..., min_length=1, description="List of BDD tests that must pass"
+    )
+    deliverable_format: Literal["zip+hash", "github_commit"] = Field(
+        ..., description="Deliverable format"
+    )
+    deadline: str = Field(..., description="ISO-8601 deadline")
+    budget_wei: str = Field(..., description="Numeric string (wei)")
+
+
+class DeliveryRecord(BaseModel):
+    """6-field ERC-8004 delivery record."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    task_type: str = Field(..., description="Type of task completed")
+    deliverable_hash: str = Field(
+        ..., description="SHA-256 hash in sha256:hex format"
+    )
+    acceptance_timestamp: int = Field(
+        default=0, description="Unix timestamp of acceptance"
+    )
+    payment_wei: int = Field(default=0, description="Payment amount in wei")
+    guild_address: str = Field(default="", description="Guild contract address")
+    a2a_task_id: str = Field(default="", description="A2A message ID")
+
+
+# ---------------------------------------------------------------------------
+# Server
+# ---------------------------------------------------------------------------
+
+mcp = FastMCP("guildos_mcp")
+
+
+def _handle_errors(func):
+    """Wrap a tool function with STUB convention + JSON serialization.
+
+    NotImplementedError (unimplemented integrations) is caught and returned
+    as a STUB message so the agent knows to skip the step. All other
+    exceptions propagate — FastMCP's Tool.run() catches them and the MCP
+    protocol layer marks the CallToolResult ``isError=True``, surfacing
+    the message to the agent for corrective action.
+    """
+
+    @wraps(func)
+    async def wrapper(*args: Any, **kwargs: Any) -> str:
         try:
-            if name == "guild_launch":
-                result = await orchestrator_tools.guild_launch(
-                    mandate=arguments["mandate"],
-                    treasury_address=arguments["treasury_address"],
-                )
-            elif name == "talent_query":
-                result = await orchestrator_tools.talent_query(
-                    task_type=arguments["task_type"],
-                )
-            elif name == "task_invite":
-                result = await orchestrator_tools.task_invite(
-                    specialist_endpoint=arguments["specialist_endpoint"],
-                    task_spec=arguments["task_spec"],
-                )
-            elif name == "task_delegate":
-                result = await orchestrator_tools.task_delegate(
-                    specialist_endpoint=arguments["specialist_endpoint"],
-                    full_task=arguments["full_task"],
-                )
-            elif name == "deliverable_review":
-                result = await orchestrator_tools.deliverable_review(
-                    deliverable_reference=arguments["deliverable_reference"],
-                    deliverable_hash=arguments["deliverable_hash"],
-                )
-            elif name == "settle":
-                result = await orchestrator_tools.settle(
-                    guild_address=arguments["guild_address"],
-                    specialist_wallet=arguments["specialist_wallet"],
-                )
-            elif name == "reputation_write":
-                result = await orchestrator_tools.reputation_write(
-                    delivery_record=arguments["delivery_record"],
-                )
-            else:
-                return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
-
-            # Serialize result
-            if isinstance(result, str):
-                text = result
-            elif isinstance(result, list):
-                text = json.dumps(result, indent=2)
-            else:
-                text = json.dumps(result, indent=2, default=str)
-
-            return [types.TextContent(type="text", text=text)]
-
+            result = await func(*args, **kwargs)
         except NotImplementedError as e:
-            return [types.TextContent(
-                type="text",
-                text=f"STUB: {e}. This integration is not yet built — see Issue #1.",
-            )]
-        except Exception as e:
-            return [types.TextContent(
-                type="text",
-                text=f"ERROR: {type(e).__name__}: {e}",
-            )]
+            return (
+                f"STUB: {e}. This integration is not yet built — see Issue #1."
+            )
+        return _to_json(result)
 
-    return server
+    return wrapper
 
 
-async def run_server() -> None:
-    """Start the MCP server on stdio."""
-    server = create_server()
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options(),
-        )
+def _to_json(result: Any) -> str:
+    """Serialize a tool result to JSON text."""
+    if isinstance(result, str):
+        return result
+    return json.dumps(result, indent=2, default=str)
 
-TOOLS = {
-    "guild_launch": orchestrator_tools.guild_launch,
-    "talent_query": orchestrator_tools.talent_query,
-    "task_invite": orchestrator_tools.task_invite,
-    "task_delegate": orchestrator_tools.task_delegate,
-    "deliverable_review": orchestrator_tools.deliverable_review,
-    "settle": orchestrator_tools.settle,
-    "reputation_write": orchestrator_tools.reputation_write,
-}
 
-__all__ = [
-    "create_server",
-    "run_server",
-    "TOOLS",
-]
+# --- Tool 1: guild_launch ----------------------------------------------------
 
+@mcp.tool(
+    name="guildos_guild_launch",
+    title="Guild Launch",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=True,
+        idempotentHint=False,
+        openWorldHint=True,
+    ),
+)
+@_handle_errors
+async def guildos_guild_launch(
+    mandate: str = Field(..., description="Guild mandate / mission statement"),
+    treasury_address: str = Field(
+        ..., description="Address to receive initial treasury funding"
+    ),
+) -> str:
+    """Deploy guild contract via AgentFightClub and fund treasury.
+
+    Step 1 of the 15-step MVP flow. Deploys the Moloch v3 guild contract,
+    commits 0.001 ETH to the treasury, and records the guild address in
+    guild_context.json.
+
+    Args:
+        mandate: Guild mandate / mission statement.
+        treasury_address: Address to receive initial treasury funding.
+
+    Returns:
+        JSON with guild_address, launch_tx, and commit_tx.
+    """
+    return await orchestrator_tools.guild_launch(
+        mandate=mandate, treasury_address=treasury_address
+    )
+
+
+# --- Tool 2: talent_query ----------------------------------------------------
+
+@mcp.tool(
+    name="guildos_talent_query",
+    title="Talent Query",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
+@_handle_errors
+async def guildos_talent_query(
+    task_type: str = Field(..., description="Type of task to match agents for"),
+) -> str:
+    """Return ERC-8004 shortlist of candidate agents.
+
+    Step 3 of the MVP flow. MVP returns a hardcoded Specialist profile from
+    assets/erc8004_specialist_profile.json (live registry query + LLM ranking
+    is post-hackathon).
+
+    Args:
+        task_type: Type of task to match agents for.
+
+    Returns:
+        JSON list of candidate agent profiles.
+    """
+    return await orchestrator_tools.talent_query(task_type=task_type)
+
+
+# --- Tool 3: task_invite -----------------------------------------------------
+
+@mcp.tool(
+    name="guildos_task_invite",
+    title="Task Invite",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=True,
+    ),
+)
+@_handle_errors
+async def guildos_task_invite(
+    specialist_endpoint: str = Field(
+        ..., description="A2A endpoint URL (e.g. http://localhost:10001)"
+    ),
+    task_spec: dict[str, Any] = Field(
+        ..., description="Task specification to send"
+    ),
+) -> str:
+    """Send A2A task/invite to Specialist; receive task/quote response.
+
+    Step 4 (part 1) of the MVP flow. Sends an A2A invite message to the
+    Specialist agent and returns the A2A message ID.
+
+    Args:
+        specialist_endpoint: A2A endpoint URL of the Specialist.
+        task_spec: Task specification object to send.
+
+    Returns:
+        A2A message ID of the invite.
+    """
+    return await orchestrator_tools.task_invite(
+        specialist_endpoint=specialist_endpoint, task_spec=task_spec
+    )
+
+
+# --- Tool 4: task_delegate ---------------------------------------------------
+
+@mcp.tool(
+    name="guildos_task_delegate",
+    title="Task Delegate",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=True,
+    ),
+)
+@_handle_errors
+async def guildos_task_delegate(
+    specialist_endpoint: str = Field(
+        ..., description="A2A endpoint URL (e.g. http://localhost:10001)"
+    ),
+    full_task: TaskPayload = Field(
+        ..., description="Full task/send payload — see specs/20-api-contracts.md §3"
+    ),
+) -> str:
+    """Send A2A task/send with the full GuildOS task payload to the Specialist.
+
+    Step 6 of the MVP flow. Rejects (before sending) a payload missing
+    acceptance_criteria, missing github_issue_url, or carrying an unrecognized
+    deliverable_format.
+
+    Args:
+        specialist_endpoint: A2A endpoint URL of the Specialist.
+        full_task: Validated task payload (TaskPayload model).
+
+    Returns:
+        A2A message ID.
+    """
+    return await orchestrator_tools.task_delegate(
+        specialist_endpoint=specialist_endpoint,
+        full_task=full_task.model_dump(),
+    )
+
+
+# --- Tool 5: deliverable_review ----------------------------------------------
+
+@mcp.tool(
+    name="guildos_deliverable_review",
+    title="Deliverable Review",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
+@_handle_errors
+async def guildos_deliverable_review(
+    deliverable_reference: str = Field(
+        ..., description="Path to the deliverable file"
+    ),
+    deliverable_hash: str = Field(
+        ..., description="Expected SHA-256 hash (sha256:hex format)"
+    ),
+) -> str:
+    """Run automated pre-check on Specialist deliverable (hash, format, size).
+
+    Step 10 of the MVP flow. Reads the deliverable file (paths outside the
+    working directory or system temp are rejected), computes its SHA-256 hash,
+    and verifies format and non-zero size.
+
+    Args:
+        deliverable_reference: Path to the deliverable file.
+        deliverable_hash: Expected SHA-256 hash (sha256:hex format).
+
+    Returns:
+        JSON with hash_match, format_valid, size_check, evaluator_verdict.
+    """
+    return await orchestrator_tools.deliverable_review(
+        deliverable_reference=deliverable_reference,
+        deliverable_hash=deliverable_hash,
+    )
+
+
+# --- Tool 6: settle ----------------------------------------------------------
+
+@mcp.tool(
+    name="guildos_settle",
+    title="Settle",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=True,
+        idempotentHint=False,
+        openWorldHint=True,
+    ),
+)
+@_handle_errors
+async def guildos_settle(
+    guild_address: str = Field(..., description="Guild contract address"),
+    specialist_wallet: str = Field(
+        ..., description="Specialist wallet address for payment"
+    ),
+) -> str:
+    """Release payment to Specialist via AgentFightClub settle().
+
+    Step 12 of the MVP flow. Processes the passed payment proposal and sends
+    the settlement transaction. Returns the settlement tx hash (Basescan tx #2).
+
+    Args:
+        guild_address: Guild contract address.
+        specialist_wallet: Specialist wallet address for payment.
+
+    Returns:
+        Settlement tx hash.
+    """
+    return await orchestrator_tools.settle(
+        guild_address=guild_address, specialist_wallet=specialist_wallet
+    )
+
+
+# --- Tool 7: reputation_write ------------------------------------------------
+
+@mcp.tool(
+    name="guildos_reputation_write",
+    title="Reputation Write",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=True,
+        idempotentHint=False,
+        openWorldHint=True,
+    ),
+)
+@_handle_errors
+async def guildos_reputation_write(
+    delivery_record: DeliveryRecord = Field(
+        ..., description="6-field delivery record"
+    ),
+) -> str:
+    """Call ERC-8004 giveFeedback() with delivery record.
+
+    Step 13 of the MVP flow. The caller is the guild contract (msg.sender)
+    via DAO proposal execution — never an agent EOA, never the Specialist
+    wallet (F2). No private key is read; the eventual implementation signs
+    through WalletProvider. Currently a stub.
+
+    Args:
+        delivery_record: 6-field delivery record (DeliveryRecord model).
+
+    Returns:
+        DeliveryRecorded event tx hash.
+    """
+    return await orchestrator_tools.reputation_write(
+        delivery_record=delivery_record.model_dump(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Entrypoint
+# ---------------------------------------------------------------------------
 
 def main() -> None:
-    """Entry point for `python -m src.orchestrator.server`."""
-    anyio.run(run_server)
+    """Entry point for ``python -m src.orchestrator.server``."""
+    mcp.run()
+
+
+__all__ = [
+    "mcp",
+    "main",
+    "guildos_guild_launch",
+    "guildos_talent_query",
+    "guildos_task_invite",
+    "guildos_task_delegate",
+    "guildos_deliverable_review",
+    "guildos_settle",
+    "guildos_reputation_write",
+]
 
 
 if __name__ == "__main__":

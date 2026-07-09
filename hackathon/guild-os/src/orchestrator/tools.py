@@ -11,6 +11,7 @@ import hashlib
 import json
 import logging
 import os
+import tempfile
 from pathlib import Path
 
 from src.shared import a2a as a2a_client
@@ -23,6 +24,36 @@ ASSETS_DIR = Path(__file__).parent.parent.parent.parent / "assets"
 
 # task/send deliverable_format values — specs/20-api-contracts.md §3
 _VALID_DELIVERABLE_FORMATS = {"zip+hash", "github_commit"}
+
+# Maximum deliverable file size deliverable_review will read into memory (100 MB)
+_MAX_DELIVERABLE_BYTES = 100 * 1024 * 1024
+
+
+def _allowed_deliverable_roots() -> list[Path]:
+    """Directories whose descendants may be read by deliverable_review.
+
+    Defaults to cwd + the system temp dir. Extra roots may be added via
+    the DELIVERABLE_ALLOWED_DIRS env var (colon-separated).
+    """
+    roots = [Path.cwd().resolve(), Path(tempfile.gettempdir()).resolve()]
+    env_roots = os.getenv("DELIVERABLE_ALLOWED_DIRS", "")
+    for entry in env_roots.split(":"):
+        entry = entry.strip()
+        if entry:
+            roots.append(Path(entry).resolve())
+    return roots
+
+
+def _is_path_safe(path: Path) -> bool:
+    """Reject directory traversal — resolved path must be under an allowed root."""
+    try:
+        resolved = path.resolve()
+    except (OSError, RuntimeError):
+        return False
+    return any(
+        resolved == root or root in resolved.parents
+        for root in _allowed_deliverable_roots()
+    )
 
 
 class UnderspecifiedTaskError(ValueError):
@@ -148,6 +179,19 @@ async def deliverable_review(deliverable_reference: str, deliverable_hash: str) 
     """
     path = Path(deliverable_reference)
 
+    # Sanitize: reject directory traversal or paths outside allowed roots
+    if not _is_path_safe(path):
+        return {
+            "hash_match": False,
+            "format_valid": False,
+            "size_check": False,
+            "evaluator_verdict": "FAIL",
+            "error": (
+                f"Path escapes allowed deliverable directories: "
+                f"{deliverable_reference}"
+            ),
+        }
+
     # Check file exists and read content
     if not path.exists():
         return {
@@ -160,6 +204,18 @@ async def deliverable_review(deliverable_reference: str, deliverable_hash: str) 
 
     content = path.read_bytes()
     size = len(content)
+
+    if size > _MAX_DELIVERABLE_BYTES:
+        return {
+            "hash_match": False,
+            "format_valid": False,
+            "size_check": False,
+            "evaluator_verdict": "FAIL",
+            "error": (
+                f"File exceeds {_MAX_DELIVERABLE_BYTES} bytes "
+                f"(got {size})"
+            ),
+        }
 
     # Compute SHA-256 hash
     actual_hash = "sha256:" + hashlib.sha256(content).hexdigest()
@@ -278,7 +334,11 @@ async def membership_vote(guild_address: str, proposal_id: str, approve: bool = 
 async def reputation_write(delivery_record: dict) -> str:
     """Step 13: Call ERC-8004 giveFeedback() with 6-field delivery record.
 
-    Caller: guild contract address or Marco's EOA — NOT the Specialist wallet (F2).
+    Caller: the guild contract (msg.sender) via DAO proposal execution —
+    never an agent EOA, never the Specialist wallet (F2). The full path is
+    reputation_propose -> Gate 4 -> AgentFightClub.process(proposal_id);
+    this tool is the stub seam for that flow. No private key is read here —
+    the eventual implementation signs through WalletProvider.
 
     Args:
         delivery_record: {task_type, deliverable_hash, acceptance_timestamp,
@@ -287,11 +347,7 @@ async def reputation_write(delivery_record: dict) -> str:
     Returns:
         DeliveryRecorded event tx hash.
     """
-    # Use guild contract address or orchestrator EOA as caller (F2 constraint)
-    caller_key = os.getenv("ORCHESTRATOR_PRIVATE_KEY", "")
-
     tx_hash = erc8004.give_feedback(
-        caller_private_key=caller_key,
         task_type=delivery_record["task_type"],
         deliverable_hash=delivery_record["deliverable_hash"],
         acceptance_timestamp=delivery_record.get("acceptance_timestamp", 0),
