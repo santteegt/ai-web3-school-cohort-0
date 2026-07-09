@@ -155,6 +155,31 @@ class TestSpecialistHandlers:
 
 
 # ---------------------------------------------------------------------------
+# Specialist AGENT_CARD transport declaration
+# ---------------------------------------------------------------------------
+
+class TestAgentCardTransport:
+    """AGENT_CARD must declare supported_interfaces or a2a.client.client_factory.
+    ClientFactory.create() raises 'no compatible transports found' regardless
+    of message content, since it has nothing to match its client_set against.
+    """
+
+    def test_agent_card_declares_a_jsonrpc_interface(self):
+        from a2a.utils.constants import PROTOCOL_VERSION_1_0, TransportProtocol
+        from src.specialist.agent import AGENT_CARD, SPECIALIST_BASE_URL
+
+        assert len(AGENT_CARD.supported_interfaces) > 0
+        jsonrpc_interfaces = [
+            i for i in AGENT_CARD.supported_interfaces
+            if i.protocol_binding == TransportProtocol.JSONRPC
+        ]
+        assert len(jsonrpc_interfaces) == 1
+        interface = jsonrpc_interfaces[0]
+        assert interface.url.startswith(SPECIALIST_BASE_URL)
+        assert interface.protocol_version == PROTOCOL_VERSION_1_0
+
+
+# ---------------------------------------------------------------------------
 # OrchestratorTools tests (A2A-wired tools)
 # ---------------------------------------------------------------------------
 
