@@ -21,6 +21,8 @@ import asyncio
 import json
 import logging
 import os
+import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from src.cli import gates
@@ -30,6 +32,27 @@ from src.shared.a2a import send_accepted
 from src.specialist.agent import handle_task_invite, handle_task_send
 
 logger = logging.getLogger(__name__)
+
+# Dogfood delegation target — the real, open ticket this delegation unblocks
+# (see issue #32: "this ticket is what gives that one (#10) something real to read").
+DOGFOOD_GITHUB_ISSUE_URL = "https://github.com/santteegt/ai-web3-school-cohort-0/issues/10"
+
+# Pinned dependency versions for GuildOS's own runtime — specs/20-api-contracts.md §1.
+PINNED_LIBRARY_VERSIONS = [
+    "a2a-sdk[http-server]==1.1.0",
+    "web3==7.16.0",
+    "mcp==1.27.2",
+    "eth-account==0.13.7",
+    "httpx==0.28.1",
+    "pydantic==2.13.4",
+    "fastapi==0.136.3",
+    "uvicorn==0.49.0",
+    "click==8.4.1",
+    "python-dotenv==1.2.2",
+    "pytest==9.0.3",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.15.16",
+]
 
 
 async def run_coordination_loop(
@@ -165,9 +188,43 @@ async def run_coordination_loop(
     # ---------------------------------------------------------------
     print("\n  ▶ Step 6: Delegating task to Specialist via A2A...")
     full_task = {
+        "task_id": str(uuid.uuid4()),
         "task_description": task_description,
-        "input_data": "",
-        "acceptance_criteria": ["Deliverable is a valid JSON file", "SHA-256 hash matches on-chain commit"],
+        "github_issue_url": DOGFOOD_GITHUB_ISSUE_URL,
+        "input_data": (
+            "Repo: santteegt/ai-web3-school-cohort-0, path hackathon/guild-os/. "
+            "Read the linked GitHub issue body plus specs/10-technical-design.md, "
+            "specs/20-api-contracts.md §3, and "
+            "specs/scenarios/06_specialist_execution.feature for full ticket context."
+        ),
+        "technical_constraints": {
+            "repo_branch": "main",
+            "library_versions": PINNED_LIBRARY_VERSIONS,
+            "env_vars": ["GLM_API_KEY"],
+        },
+        "agbom": {
+            "tools": ["GLM-5.1 API client (Z.AI, via Hermes)", "file I/O", "git"],
+            "mcp_servers": [],
+            "data_sources": [
+                "specs/scenarios/06_specialist_execution.feature",
+                "specs/10-technical-design.md §8 (Fallback Requirements)",
+                "specs/20-api-contracts.md §3 (A2A Message Contracts)",
+            ],
+        },
+        "acceptance_criteria": [
+            "Specialist reads the GitHub issue at task.github_issue_url and loads its "
+            "prompt instructions before planning begins",
+            "Plan contains at least 3 steps, logged before execution starts; each tool "
+            "call is drawn only from task.agbom.tools/mcp_servers/data_sources",
+            "Execution stays within task.technical_constraints (repo branch, pinned "
+            "library versions, declared env vars)",
+            "Output satisfies every BDD test listed in task.acceptance_criteria and the "
+            "deliverable file is non-empty",
+            "The resulting deliverable hash is computed per deliverable_format and "
+            "handed off for EAS attestation",
+        ],
+        "deliverable_format": "github_commit",
+        "deadline": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
         "budget_wei": "1000000000000000",
     }
     delegate_msg_id = await tools.task_delegate(
