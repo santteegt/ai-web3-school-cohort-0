@@ -126,7 +126,7 @@ uv run python -m src.orchestrator.server
 ```bash
 uv run python -m src.specialist.agent
 # A2A HTTP server on localhost:10001
-# Exposes Agent Card at localhost:10001/.well-known/agent.json
+# Exposes Agent Card at localhost:10001/.well-known/agent-card.json
 ```
 
 **Terminal 3 — Coordination Runner (full 15-step MVP loop):**

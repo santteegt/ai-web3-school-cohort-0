@@ -21,7 +21,7 @@ Feature: Talent discovery and candidate selection
     Given the Specialist is not yet registered on ERC-8004
     When the Specialist registers its profile via the ERC-8004 protocol, signed through its scoped WalletProvider
     Then an agentId is minted for the Specialist on Base
-    And the Specialist agentURI points to its live A2A Agent Card at /.well-known/agent.json
+    And the Specialist agentURI points to its live A2A Agent Card at /.well-known/agent-card.json
     And this registration happens once, independently of any single guild's formation
     And the Specialist is now discoverable by talent_query
 

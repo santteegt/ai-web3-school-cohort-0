@@ -356,6 +356,15 @@ actual transport, built on the `a2a-sdk` (`a2a.types.a2a_pb2`), is:
   `add_a2a_routes_to_fastapi()` — which registers **both** JSON-RPC routes
   (`create_jsonrpc_routes`) and REST routes (`create_rest_routes`)
   simultaneously. A client can address either transport.
+- The executor uses the **async Task lifecycle** (A2A spec §3.1.1): on entry
+  it enqueues a `TaskStatusUpdateEvent(WORKING)`, performs the work, then
+  enqueues a `TaskStatusUpdateEvent(COMPLETED)` whose `status.message`
+  carries the GuildOS response payload (the same JSON dict, still inside a
+  `Part.text`). This makes the `InMemoryTaskStore` functional — tasks are
+  persisted and queryable via `tasks/get` / `tasks/list` — whereas the
+  earlier immediate-`Message`-only path left the store empty. The client
+  side (`_send_to_agent`) extracts the payload from either a bare `message`
+  oneof (backward compat) or a `task` oneof (`task.status.message`).
 - The client side (`src/shared/a2a.py`) uses `a2a.client.client_factory.ClientFactory`
   to resolve an agent's card and open a session — it does not construct raw
   HTTP requests by hand.
@@ -364,10 +373,10 @@ actual transport, built on the `a2a-sdk` (`a2a.types.a2a_pb2`), is:
 > default (`LegacyRequestHandler`); if a future SDK version changes this,
 > update this section rather than letting it silently drift from the code.
 
-### Agent discovery — the `.well-known/agent.json` convention
+### Agent discovery — the `.well-known/agent-card.json` convention
 
 The Specialist publishes its Agent Card via `create_agent_card_routes(AGENT_CARD)`,
-which serves a well-known-URI route (`/.well-known/agent.json`) — the
+which serves a well-known-URI route (`/.well-known/agent-card.json`) — the
 standard A2A discovery mechanism. The Orchestrator does **not** implement
 this route (see §1's `OrchestratorServer` entry and the closed decision in
 issue #29): its `agentURI`, registered on ERC-8004, points to a **static**

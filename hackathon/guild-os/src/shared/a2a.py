@@ -57,6 +57,40 @@ def _build_send_request(message: a2a_pb2.Message) -> a2a_pb2.SendMessageRequest:
     return a2a_pb2.SendMessageRequest(message=message)
 
 
+def _extract_response(resp: a2a_pb2.StreamResponse) -> dict:
+    """Extract the GuildOS payload from a single A2A StreamResponse.
+
+    Handles both the 'message' oneof (immediate response) and the 'task'
+    oneof (async Task lifecycle, payload in task.status.message).
+    """
+    result = {}
+    which = resp.WhichOneof("payload")
+    if which == "message":
+        msg = resp.message
+        for part in msg.parts:
+            if part.text:
+                try:
+                    result = json.loads(part.text)
+                except (json.JSONDecodeError, ValueError):
+                    result = {"text": part.text}
+        result["message_id"] = msg.message_id
+        result["task_id"] = msg.task_id
+    elif which == "task":
+        task = resp.task
+        if task.status.HasField("message"):
+            msg = task.status.message
+            for part in msg.parts:
+                if part.text:
+                    try:
+                        result = json.loads(part.text)
+                    except (json.JSONDecodeError, ValueError):
+                        result = {"text": part.text}
+            result["message_id"] = msg.message_id
+        result["task_id"] = task.id
+        result["task_state"] = a2a_pb2.TaskState.Name(task.status.state)
+    return result
+
+
 async def _send_to_agent(agent_url: str, message: a2a_pb2.Message) -> dict:
     """Send a message to an A2A agent and return the response as a dict.
 
@@ -74,24 +108,7 @@ async def _send_to_agent(agent_url: str, message: a2a_pb2.Message) -> dict:
     if not responses:
         return {}
 
-    # Extract the last response content
-    resp = responses[-1]
-    result = {}
-    which = resp.WhichOneof("response")
-    if which == "message":
-        msg = resp.message
-        for part in msg.parts:
-            if part.text:
-                try:
-                    result = json.loads(part.text)
-                except (json.JSONDecodeError, ValueError):
-                    result = {"text": part.text}
-        result["message_id"] = msg.message_id
-        result["task_id"] = msg.task_id
-    elif which == "task":
-        task = resp.task
-        result = {"task_id": task.id, "status": str(task.status)}
-    return result
+    return _extract_response(responses[-1])
 
 
 async def send_invite(specialist_endpoint: str, task_spec: dict) -> str:

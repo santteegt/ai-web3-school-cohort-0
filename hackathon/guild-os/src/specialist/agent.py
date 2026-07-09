@@ -181,12 +181,16 @@ class SpecialistExecutor(AgentExecutor):
     async def execute(
         self, context: RequestContext, event_queue: EventQueue
     ) -> None:
-        """Process incoming A2A messages and respond appropriately."""
+        """Process incoming A2A messages via the async Task lifecycle.
+
+        Emits TaskStatusUpdateEvent(WORKING) on entry, performs the work,
+        then emits TaskStatusUpdateEvent(COMPLETED) carrying the GuildOS
+        response payload in the terminal status's message field.
+        """
         message = context.message
         if not message:
             return
 
-        # Extract text content from parts
         text_content = ""
         for part in message.parts:
             if part.text:
@@ -202,6 +206,17 @@ class SpecialistExecutor(AgentExecutor):
 
         msg_type = payload.get("type", "unknown")
         task_id = context.task_id or str(uuid.uuid4())
+        context_id = context.context_id or ""
+
+        await event_queue.enqueue_event(
+            a2a_pb2.TaskStatusUpdateEvent(
+                task_id=task_id,
+                context_id=context_id,
+                status=a2a_pb2.TaskStatus(
+                    state=a2a_pb2.TASK_STATE_WORKING,
+                ),
+            )
+        )
 
         if msg_type == "task/invite":
             response = await handle_task_invite(payload)
@@ -214,30 +229,37 @@ class SpecialistExecutor(AgentExecutor):
         else:
             response = {"type": "error", "message": f"Unknown message type: {msg_type}"}
 
-        # Publish response message
         response_msg = a2a_pb2.Message(
             message_id=str(uuid.uuid4()),
             role=a2a_pb2.ROLE_AGENT,
             parts=[a2a_pb2.Part(text=json.dumps(response))],
             task_id=task_id,
-            context_id=context.context_id or "",
+            context_id=context_id,
         )
-        event = a2a_pb2.StreamResponse(message=response_msg)
-        event_queue.enqueue(event)
+        await event_queue.enqueue_event(
+            a2a_pb2.TaskStatusUpdateEvent(
+                task_id=task_id,
+                context_id=context_id,
+                status=a2a_pb2.TaskStatus(
+                    state=a2a_pb2.TASK_STATE_COMPLETED,
+                    message=response_msg,
+                ),
+            )
+        )
 
     async def cancel(
         self, context: RequestContext, event_queue: EventQueue
     ) -> None:
         """Handle task cancellation."""
-        event = a2a_pb2.StreamResponse(
-            task=a2a_pb2.Task(
-                id=context.task_id or "",
+        await event_queue.enqueue_event(
+            a2a_pb2.TaskStatusUpdateEvent(
+                task_id=context.task_id or "",
+                context_id=context.context_id or "",
                 status=a2a_pb2.TaskStatus(
                     state=a2a_pb2.TASK_STATE_CANCELED,
                 ),
             )
         )
-        event_queue.enqueue(event)
 
 
 def main() -> None:
