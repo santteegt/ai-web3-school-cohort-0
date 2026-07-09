@@ -29,17 +29,36 @@ from a2a.server.routes.jsonrpc_routes import create_jsonrpc_routes
 from a2a.server.routes.rest_routes import create_rest_routes
 from a2a.server.tasks.inmemory_task_store import InMemoryTaskStore
 from a2a.types import a2a_pb2
+from a2a.utils.constants import DEFAULT_RPC_URL, PROTOCOL_VERSION_1_0, TransportProtocol
 
 from src.shared.a2a import _log_message
 
 logger = logging.getLogger(__name__)
 
 SPECIALIST_PORT = int(os.getenv("SPECIALIST_A2A_PORT", "10001"))
+SPECIALIST_BASE_URL = f"http://localhost:{SPECIALIST_PORT}"
 
+# Declared per what add_a2a_routes_to_fastapi() actually mounts below (both
+# JSON-RPC and REST, per specs/10-technical-design.md §12) — without this,
+# a2a.client.client_factory.ClientFactory.create() raises "no compatible
+# transports found" because it has nothing in supported_interfaces to match
+# against, regardless of message content.
 AGENT_CARD = a2a_pb2.AgentCard(
     name="GuildOS Specialist Agent",
     description="Executes coding and analysis tasks via GLM-5.1 long-horizon planning",
     version="0.1.0",
+    supported_interfaces=[
+        a2a_pb2.AgentInterface(
+            url=f"{SPECIALIST_BASE_URL}{DEFAULT_RPC_URL}",
+            protocol_binding=TransportProtocol.JSONRPC,
+            protocol_version=PROTOCOL_VERSION_1_0,
+        ),
+        a2a_pb2.AgentInterface(
+            url=SPECIALIST_BASE_URL,
+            protocol_binding=TransportProtocol.HTTP_JSON,
+            protocol_version=PROTOCOL_VERSION_1_0,
+        ),
+    ],
     capabilities=a2a_pb2.AgentCapabilities(
         streaming=False,
         push_notifications=False,
@@ -239,7 +258,7 @@ def main() -> None:
     add_a2a_routes_to_fastapi(
         app,
         agent_card_routes=create_agent_card_routes(AGENT_CARD),
-        jsonrpc_routes=create_jsonrpc_routes(handler, rpc_url="/"),
+        jsonrpc_routes=create_jsonrpc_routes(handler, rpc_url=DEFAULT_RPC_URL),
         rest_routes=create_rest_routes(handler),
     )
 
