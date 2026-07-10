@@ -143,9 +143,18 @@ After any file change in the repo:
 ```bash
 git status --short
 git add .
-git commit -m "<brief description of what was added/updated>"
+git commit -m "<type>(<scope>): <brief description of what was added/updated>"
 git push
 ```
+
+**Use [Conventional Commits](https://www.conventionalcommits.org/)** —
+`<type>(<scope>): <description>`, e.g. `feat(guild-os): add non-blocking
+task/send`, `fix: correct WCB check-in link`, `chore: add daily notes`,
+`docs(guild-os): update AGENTS.md phase gates`. Common types: `feat`,
+`fix`, `docs`, `chore`, `refactor`, `test`. Scope is optional but use
+`guild-os` for anything under `hackathon/guild-os/` — it's already the
+de facto pattern in this repo's history, this just makes it consistent
+rather than intermittent.
 
 Never create empty commits. Always describe what learning record or file was updated.
 

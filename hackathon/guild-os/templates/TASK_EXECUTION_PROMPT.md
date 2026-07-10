@@ -239,9 +239,10 @@ DELIVERY — PULL REQUEST
 
 Branch:  feat/issue-<N>-<short-slug>
 Target:  main
-Commits: small, descriptive, present-tense; end each with the
-         Co-Authored-By: trailer for whichever agent identity is executing
-         this run.
+Commits: Conventional Commits format (`type(scope): description` — see
+         root `AGENTS.md` §7, not restated here), small, present-tense; end
+         each with the Co-Authored-By: trailer for whichever agent identity
+         is executing this run.
 PR title: same as the ticket/issue title.
 
 PR body must contain, in this order:
