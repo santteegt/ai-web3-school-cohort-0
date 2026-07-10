@@ -269,7 +269,7 @@ class TestOrchestratorTools:
 
 class TestA2AClient:
     @pytest.mark.asyncio
-    async def test_send_invite_builds_correct_message(self, tmp_trace_dir):
+    async def test_send_invite_returns_full_response_dict(self, tmp_trace_dir):
         from src.shared.a2a import send_invite
 
         mock_response = {
@@ -280,32 +280,79 @@ class TestA2AClient:
 
         with patch("src.shared.a2a._send_to_agent", new_callable=AsyncMock) as mock_send:
             mock_send.return_value = mock_response
-            msg_id = await send_invite("http://localhost:10001", {"task": "test"})
+            result = await send_invite("http://localhost:10001", {"task": "test"})
 
-            assert msg_id  # non-empty message ID
+            assert isinstance(result, dict)
+            assert result["type"] == "task/quote"
+            assert result["scope"] == "test"
+            assert result["estimated_cost_wei"] == 1000
             mock_send.assert_called_once()
 
-            # Verify trace was logged
             trace_file = tmp_trace_dir / f"a2a_trace_{date.today().isoformat()}.json"
             entries = json.loads(trace_file.read_text())
             assert any(e["type"] == "task/invite" for e in entries)
             assert any(e["type"] == "task/quote" for e in entries)
 
     @pytest.mark.asyncio
-    async def test_send_task_builds_correct_message(self, tmp_trace_dir):
+    async def test_send_task_nonblocking_returns_task_id(self, tmp_trace_dir):
         from src.shared.a2a import send_task
 
         mock_response = {
-            "type": "task/delivered",
-            "deliverable_hash": "sha256:abc123",
+            "task_id": "task-working-1",
+            "task_state": "TASK_STATE_WORKING",
+        }
+
+        task_with_endpoint = {
+            "task_description": "test",
+            "orchestrator_endpoint": "http://localhost:10000",
         }
 
         with patch("src.shared.a2a._send_to_agent", new_callable=AsyncMock) as mock_send:
             mock_send.return_value = mock_response
-            msg_id = await send_task("http://localhost:10001", {"task_description": "test"})
+            result = await send_task("http://localhost:10001", task_with_endpoint)
 
-            assert msg_id
+            assert result == "task-working-1"
             mock_send.assert_called_once()
+
+            agent_url, message, configuration = mock_send.call_args[0]
+            assert agent_url == "http://localhost:10001"
+            assert configuration.return_immediately is True
+
+    @pytest.mark.asyncio
+    async def test_send_task_rejects_missing_orchestrator_endpoint(self):
+        from src.shared.a2a import send_task
+
+        with pytest.raises(ValueError, match="orchestrator_endpoint"):
+            await send_task("http://localhost:10001", {"task_description": "test"})
+
+    @pytest.mark.asyncio
+    async def test_poll_task_returns_state(self, tmp_trace_dir):
+        from src.shared.a2a import poll_task
+
+        mock_task = type("MockTask", (), {
+            "id": "task-poll-1",
+            "status": type("MockStatus", (), {
+                "state": 3,
+                "HasField": lambda self, field: field == "message",
+                "message": type("MockMsg", (), {
+                    "parts": [type("MockPart", (), {"text": '{"type": "task/delivered", "deliverable_hash": "sha256:abc"}'})()],
+                }),
+            })(),
+        })()
+
+        with patch("src.shared.a2a.ClientFactory") as mock_factory_cls:
+            mock_client = AsyncMock()
+            mock_client.get_task = AsyncMock(return_value=mock_task)
+            mock_client.close = lambda: None
+            mock_factory = AsyncMock()
+            mock_factory.create_from_url = AsyncMock(return_value=mock_client)
+            mock_factory_cls.return_value = mock_factory
+
+            result = await poll_task("http://localhost:10001", "task-poll-1")
+
+            assert result["task_id"] == "task-poll-1"
+            assert result["task_state"] == "TASK_STATE_COMPLETED"
+            assert result["deliverable_hash"] == "sha256:abc"
 
     @pytest.mark.asyncio
     async def test_send_accepted_sends_message(self, tmp_trace_dir):

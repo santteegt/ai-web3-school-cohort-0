@@ -54,6 +54,7 @@ def well_formed_task() -> dict:
         "deliverable_format": "github_commit",
         "deadline": "2026-07-08T00:00:00+00:00",
         "budget_wei": "1000000000000000",
+        "orchestrator_endpoint": "http://localhost:10000",
     }
 
 
@@ -178,7 +179,7 @@ class TestTextBodyFallback:
 
         captured_messages = []
 
-        async def fake_send_to_agent(agent_url, message):
+        async def fake_send_to_agent(agent_url, message, configuration=None):
             captured_messages.append(message)
             return {"type": "task/delivered"}
 
