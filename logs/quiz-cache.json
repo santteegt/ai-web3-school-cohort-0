@@ -137,7 +137,14 @@
     "supervised-fine-tuning",
     "remix-ide",
     "encrypted-data",
-    "contract-upgrade"
+    "contract-upgrade",
+    "erc-8183",
+    "information-governance",
+    "mcp-server",
+    "citations",
+    "wallet-permission-safe-execution",
+    "prompt-workflow-agent-boundary",
+    "knowledge-base"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
