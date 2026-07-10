@@ -80,7 +80,9 @@ Resolver: `0x0000000000000000000000000000000000000000` (none for MVP) · Revocab
 
 ## 3. A2A Message Contracts
 
-Six message types. `A2AClient` (`src/shared/a2a.py`) sends/receives; every message is
+Six message types. `A2AClient` (`src/shared/a2a.py`) handles **sync** messages
+(Orchestrator as A2A client); `SpecialistA2AClient` (`src/specialist/a2a_client.py`)
+handles **proactive** messages (Specialist as A2A client). Every message is
 logged to `hackathon/notes/a2a_trace_{date}.json`. Messages marked **sync** are
 responses within the same `message/send` request-response cycle (Orchestrator is the
 A2A client). Messages marked **proactive** are separate `message/send` requests

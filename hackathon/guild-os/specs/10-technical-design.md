@@ -31,7 +31,7 @@ Use these canonical names exactly — never invent parallel modules.
 | `OrchestratorTools` | `src/orchestrator/tools.py` | The MCP tools (see §6) |
 | `SpecialistAgent` | `src/specialist/agent.py` | A2A server (port 10001); receives task messages; delegates `task/send` to the harness work engine; returns WORKING immediately |
 | `SpecialistA2AClient` | `src/specialist/a2a_client.py` | Outbound A2A client; sends proactive `task/delivered` and `feedback/request` to the Orchestrator's A2A server after harness work completes |
-| `A2AClient` | `src/shared/a2a.py` | Sends/receives A2A messages (invite, quote, send, delivered, accepted); shared client logic used by both agents |
+| `A2AClient` | `src/shared/a2a.py` | Orchestrator's outbound A2A client; sends `task/invite`, `task/send`, `task/accepted`; receives `task/quote`. Shared utilities (`_build_message`, `_extract_response`) reused by `SpecialistA2AClient` |
 | `EASClient` | `src/shared/eas.py` | `attest()` and `get_attestation()` — Specialist creates EAS delivery attestation |
 | `ERC8004` | `src/shared/erc8004.py` | `register()` and `give_feedback()` — caller constraint: NOT the agent's own wallet |
 | `AgentFightClub` | `src/shared/agentfightclub.py` | `launch`, `commit`, `propose`, `vote`, `settle` — wraps Moloch v3 (ClawBank API or DAOhaus SDK) |

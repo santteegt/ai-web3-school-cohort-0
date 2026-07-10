@@ -24,7 +24,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `OrchestratorTools` | `src/orchestrator/tools.py` | 9 tools: `guild_launch`, `talent_query`, `task_invite`, `task_delegate`, `deliverable_review`, `payment_propose`, `settle`, `reputation_propose`, `reputation_write` |
 | `SpecialistAgent` | `src/specialist/agent.py` | A2A server (port 10001); receives task messages; delegates `task/send` to the harness work engine; returns WORKING immediately |
 | `SpecialistA2AClient` | `src/specialist/a2a_client.py` | Outbound A2A client; sends proactive `task/delivered` and `feedback/request` to the Orchestrator's A2A server after harness work completes |
-| `A2AClient` | `src/shared/a2a.py` | Sends/receives A2A messages (invite, quote, send, delivered, accepted, feedback/request) |
+| `A2AClient` | `src/shared/a2a.py` | Orchestrator's outbound A2A client; sends `task/invite`, `task/send`, `task/accepted`; receives `task/quote`. Shared utilities (`_build_message`, `_extract_response`) reused by `SpecialistA2AClient` |
 | `EASClient` | `src/shared/eas.py` | `attest()` and `get_attestation()` — Specialist creates EAS delivery attestation; UID embedded in A2A `task/delivered` |
 | `ERC8004` | `src/shared/erc8004.py` | `register()` and `giveFeedback()` — caller constraint: NOT the agent's own wallet (guild contract via proposal execution) |
 | `AgentFightClub` | `src/shared/agentfightclub.py` | `launch`, `commit`, `propose`, `vote`, `settle` — ClawBank API or DAOhaus SDK fallback |
@@ -163,7 +163,6 @@ not skipped because the diff looked reasonable at a glance.
 - **Which wallet provider / how is signing scoped?** → Use the `WalletProvider` abstraction (`src/shared/wallet.py`); CAW is the default, ZeroDev/Turnkey swappable via `WALLET_PROVIDER`. The Pact allowlists the DAO `propose`/`vote`/`process` calls, the ERC-8004 `register()` call, and caps tribute. **Never** fall back to raw EOA signing — halt instead. See `specs/scenarios/12_scoped_spending.feature`.
 - **Need a contract address, RPC URL, or explorer link?** → Never read it from `os.environ` or hardcode it. Call `src/shared/network_config.py` (`get_contract_address`, `get_rpc_url`, `get_explorer_tx_url`, `get_easscan_attestation_url`, `get_delivery_schema_uid`) — it resolves the value from `config/networks.json` for the active `CHAIN_ID`. Only `CHAIN_ID` itself and secrets (`ALCHEMY_API_KEY`, private keys) live in `.env`. See `specs/20-api-contracts.md` §2/§6.
 - **EAS schema not found on `attest()`?** → Check `network_config.get_delivery_schema_uid()`; register the schema and write the UID into `config/networks.json` (not `.env`) if missing (see `specs/10-technical-design.md` §8 F7)
-- **New A2A message type needed?** → Check `src/shared/a2a.py` for the established pattern; don't invent new types without adding a scenario to the relevant `specs/scenarios/*.feature` file and updating `specs/20-api-contracts.md` §3
 - **Is this feature in scope?** → Check `specs/10-technical-design.md` §2 and §10 (Constraints & Guardrails); if it doesn't map to a step in the loop or a scenario file, it's out of scope
 
 ## Don't
