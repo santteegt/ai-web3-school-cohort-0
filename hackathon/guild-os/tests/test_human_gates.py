@@ -283,15 +283,19 @@ class TestCoordinationRunner:
             # y at Gate 0, n at Gate 0.5
             with patch("builtins.input", side_effect=["y", "n"]), \
                  patch("src.cli.runner.tools") as mock_tools, \
-                 patch("src.cli.runner.handle_task_invite", new_callable=AsyncMock) as mock_hti:
+                 patch("src.cli.runner.send_invite", new_callable=AsyncMock) as mock_si, \
+                 patch("src.cli.runner.send_task", new_callable=AsyncMock) as mock_st:
                 mock_tools.talent_query = AsyncMock(return_value=[{"name": "Agent"}])
-                mock_tools.task_invite = AsyncMock(return_value="msg-1")
-                mock_hti.return_value = {"scope": "test", "estimated_cost_wei": 0, "deadline_iso": "N/A"}
+                mock_si.return_value = {
+                    "scope": "test",
+                    "estimated_cost_wei": 0,
+                    "deadline_iso": "N/A",
+                }
 
                 await run_coordination_loop("test task")
 
-                # task_delegate should NOT have been called
-                mock_tools.task_delegate.assert_not_called()
+                # send_task should NOT have been called
+                mock_st.assert_not_called()
         finally:
             guild_context.CONTEXT_PATH = original_path
 
@@ -318,14 +322,13 @@ class TestCoordinationRunner:
             # y at Gate 0, y at Gate 0.5, y at Gate 1, n at Gate 2
             with patch("builtins.input", side_effect=["y", "y", "y", "n"]), \
                  patch("src.cli.runner.tools") as mock_tools, \
-                 patch("src.cli.runner.handle_task_invite", new_callable=AsyncMock) as mock_hti, \
-                 patch("src.cli.runner.handle_task_send", new_callable=AsyncMock) as mock_hts, \
+                 patch("src.cli.runner.send_invite", new_callable=AsyncMock) as mock_si, \
+                 patch("src.cli.runner.send_task", new_callable=AsyncMock) as mock_st, \
                  patch("src.cli.runner.send_accepted", new_callable=AsyncMock), \
+                 patch("src.cli.runner.poll_task", new_callable=AsyncMock) as mock_pt, \
                  patch("src.cli.runner.Path") as mock_path_cls:
 
                 mock_tools.talent_query = AsyncMock(return_value=[{"name": "Agent"}])
-                mock_tools.task_invite = AsyncMock(return_value="msg-1")
-                mock_tools.task_delegate = AsyncMock(return_value="msg-2")
                 mock_tools.deliverable_review = AsyncMock(return_value={
                     "hash_match": False, "format_valid": False,
                     "size_check": False, "evaluator_verdict": "FAIL",
@@ -336,11 +339,17 @@ class TestCoordinationRunner:
                 mock_tools.membership_vote = AsyncMock(return_value={
                     "vote_tx": "0xvote", "approved": True,
                 })
-                mock_hti.return_value = {"scope": "test", "estimated_cost_wei": 0, "deadline_iso": "N/A"}
-                mock_hts.return_value = {
+                mock_si.return_value = {
+                    "scope": "test",
+                    "estimated_cost_wei": 0,
+                    "deadline_iso": "N/A",
+                }
+                mock_st.return_value = "task-delivered-1"
+                mock_pt.return_value = {
+                    "task_id": "task-delivered-1",
+                    "task_state": "TASK_STATE_COMPLETED",
                     "deliverable_reference": "output/test.json",
                     "deliverable_hash": "sha256:abc",
-                    "task_id": "msg-2",
                 }
 
                 # Mock profile path
