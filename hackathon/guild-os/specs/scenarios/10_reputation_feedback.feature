@@ -58,3 +58,17 @@ Feature: DAO-governed reputation feedback
     When giveFeedback has executed
     Then the after-state is captured to ./logs/erc8004_specialist_after.json
     And the before and after delivery counts differ by one
+
+  Scenario: Orchestrator's A2A server receives the proactive feedback/request
+    Given the Specialist completed settlement for the delivered work
+    When SpecialistA2AClient sends a proactive feedback/request to the orchestrator_endpoint
+    Then OrchestratorA2AServer receives it as an inbound message/send on port 10000
+    And its executor triggers reputation_propose with the delivery record
+    And the message is logged to hackathon/notes/a2a_trace_{date}.json
+
+  Scenario: Proactive feedback/request push fails closed on an unreachable endpoint
+    Given the orchestrator_endpoint is unreachable
+    When SpecialistA2AClient attempts to send the proactive feedback/request
+    Then the send fails with a logged, surfaced error
+    And no reputation_propose is triggered
+    And the Specialist retains the pending feedback/request for retry

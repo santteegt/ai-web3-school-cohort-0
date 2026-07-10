@@ -47,3 +47,17 @@ Feature: Deliverable EAS attestation
     When the Specialist attempts to attest
     Then it falls back to a raw eth_sendTransaction emitting DeliverableCommitted(bytes32 hash)
     And the fallback tx hash is saved to submissions/tx_hashes.md
+
+  Scenario: Orchestrator's A2A server receives the proactive task/delivered
+    Given an attestation UID was returned
+    When SpecialistA2AClient sends a proactive task/delivered to the orchestrator_endpoint
+    Then OrchestratorA2AServer receives it as an inbound message/send on port 10000
+    And its executor triggers the deliverable pre-check for Gate 2
+    And the message is logged to hackathon/notes/a2a_trace_{date}.json
+
+  Scenario: Proactive push to an unreachable orchestrator_endpoint fails closed
+    Given the orchestrator_endpoint in the task carries an unreachable or malformed URL
+    When SpecialistA2AClient attempts to send the proactive task/delivered
+    Then the send fails with a logged, surfaced error
+    And the task is not silently treated as delivered
+    And the Specialist does not silently drop the deliverable

@@ -260,6 +260,59 @@
   the raw markdown file pays the full token cost regardless, so keeping
   confirmed-obsolete content there provided zero actual context savings.
   Moved here instead, where it's read on demand rather than every session.
+- **2026-07-10** — **A2A harness-model canonicalization reconciled across
+  the backlog.** Three same-day spec commits made the Orchestrator a full
+  bidirectional A2A peer (new `OrchestratorA2AServer`/`SpecialistA2AClient`,
+  `.well-known/agent.json` → `agent-card.json`, non-blocking `task/send`,
+  new `orchestrator_endpoint` field) and five new issues (#36–#40) were
+  filed to build it — but none followed `templates/ISSUE_TICKET_TEMPLATE.md`,
+  and their prerequisite BDD scenarios didn't exist yet. Fixed in order:
+  (1) added 8 new Given/When/Then scenarios (4 positive + 4 negative) across
+  `05_task_delegation.feature`, `06_specialist_execution.feature`,
+  `07_deliverable_attestation.feature`, `10_reputation_feedback.feature`,
+  with your sign-off, before touching any ticket; (2) rewrote #36–#40 to
+  the full template (Intent, BDD references, `EXACT | IN_ORDER` trajectory
+  mode, file/component scope, Security Guardrails — including a new
+  inbound-trust-boundary guardrail for `OrchestratorA2AServer` — AgBOM,
+  Definition of Ready); (3) fixed 4 stale references in #5 (3×
+  `agent.json` → `agent-card.json`, 1× `docs/RISKS.md` → `specs/`);
+  (4) reconciled #10's file scope off `src/specialist/agent.py` →
+  `handle_task_send()` onto the new `src/specialist/work_engine.py` module
+  #40 introduces (they were about to both claim the same responsibility in
+  different files), updated #28's scope from the now-narrowed
+  `src/shared/a2a.py` to `src/specialist/a2a_client.py` (#37) where
+  `task/delivered` is actually constructed now, and closed #6's own
+  self-flagged gap ("don't let the agent infer the trigger mechanics") by
+  linking it to the new scenarios and `Depends on #36, #37`; (5) assigned
+  #36–#40 to milestone "Phase 1 — Coordination MVP" and updated the Phase 1
+  row above to drop closed #32 and add an explicit **1a (plumbing) → 1b
+  (dogfooding)** sub-order — build the transport/coordination cluster
+  (#36–#39) end-to-end before wiring in real GLM-5.1 execution (#40, #10),
+  per this project's own priority of proving coordination before delegating
+  real work.
+- **2026-07-10** — **#28 (EAS attestation) fully retrofitted to the ticket
+  template**, closing the last of the informal, pre-SDD-template issues
+  found during the reconciliation above. Beyond the file-scope fix already
+  logged, added: §2 BDD scenario references (all 6 scenarios in
+  `07_deliverable_attestation.feature`, including the F7 negative case),
+  `EXACT | IN_ORDER` trajectory mode, a proper §5/§7 split, and a security
+  guardrail clarifying EAS self-attestation is *not* subject to F2's
+  guild-contract-only caller constraint (that's `giveFeedback()`-specific).
+  Also caught and fixed: the EAS/SchemaRegistry contract addresses were
+  hardcoded inline in the ticket text — corrected to route through
+  `network_config.get_contract_address()`, matching every other
+  contract-address rule in the project; and `EASClient.attest()`'s call
+  site moves from the old `src/specialist/agent.py` to
+  `src/specialist/work_engine.py`, the same #40-driven relocation #10
+  already got, since the attestation call sits right next to the hash it
+  attests.
+- **2026-07-10** — **Closed a gap in #39: nothing actually set
+  `orchestrator_endpoint`.** The field was referenced across #36–#39 as
+  something the Specialist reads and validates, but no ticket had an
+  explicit AC to construct it. Traced it to `run_coordination_loop()`'s
+  `full_task` dict (`src/cli/runner.py` ~L190–229), which already builds
+  every other `task/send` field — added the missing AC to #39, its natural
+  owner, since that's the exact function and dict already in its scope.
 
 ---
 

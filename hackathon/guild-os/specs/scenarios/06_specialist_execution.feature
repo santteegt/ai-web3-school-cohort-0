@@ -58,3 +58,18 @@ Feature: Specialist long-horizon execution
     When the Specialist applies the F3 fallback
     Then it switches to the deterministic fallback prompt
     And it still produces a hashable, structured deliverable
+
+  Scenario: Harness work engine executes outside the A2A thread and completes asynchronously
+    Given the Specialist's executor returned WORKING immediately for the task/send
+    When the harness work engine runs the GLM-5.1 plan-execute loop outside the A2A request thread
+    And the work engine produces the structured code deliverable and its hash
+    Then the task in InMemoryTaskStore transitions to COMPLETED
+    And SpecialistA2AClient sends a proactive task/delivered to the Orchestrator's A2A server
+    And the task/delivered message carries deliverable_hash, attestation_uid, and attestation_url
+
+  Scenario: Harness execution failure does not complete the task or notify the Orchestrator
+    Given the harness work engine is running the delegated task
+    When the harness execution raises an unrecoverable error
+    Then the task does not transition to COMPLETED
+    And no task/delivered message is sent to the Orchestrator
+    And the failure is logged to hackathon/notes/glm_trace_{date}.json

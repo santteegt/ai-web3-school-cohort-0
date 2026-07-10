@@ -41,3 +41,15 @@ Feature: Task delegation over A2A
     When the Orchestrator sends the task
     Then the GuildOS task fields are carried as a JSON string in the message text body
     And the Specialist parses them successfully
+
+  Scenario: Send task/send non-blocking and receive an immediate WORKING response
+    When the Orchestrator sends an A2A task/send with return_immediately set to true
+    Then the Specialist's executor enqueues a WORKING status and returns immediately
+    And the response carries a task_id
+    And no deliverable is returned in this response
+    And the task remains pollable via tasks/get until the harness completes it
+
+  Scenario: Reject a task/send missing the orchestrator_endpoint
+    When the Orchestrator attempts an A2A task/send without an orchestrator_endpoint field
+    Then the task is rejected as under-specified
+    And no execution is started by the Specialist
