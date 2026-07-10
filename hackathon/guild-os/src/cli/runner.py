@@ -28,10 +28,15 @@ from pathlib import Path
 from src.cli import gates
 from src.orchestrator import tools
 from src.shared import guild_context
-from src.shared.a2a import send_accepted
-from src.specialist.agent import handle_task_invite, handle_task_send
+from src.shared.a2a import poll_task, send_accepted, send_invite, send_task
 
 logger = logging.getLogger(__name__)
+
+ORCHESTRATOR_A2A_PORT = os.getenv("ORCHESTRATOR_A2A_PORT", "10000")
+ORCHESTRATOR_ENDPOINT = f"http://localhost:{ORCHESTRATOR_A2A_PORT}"
+
+POLL_TIMEOUT_SECONDS = 300
+POLL_INTERVAL_SECONDS = 2
 
 # Dogfood delegation target — the real, open ticket this delegation unblocks
 # (see issue #32: "this ticket is what gives that one (#10) something real to read").
@@ -53,6 +58,37 @@ PINNED_LIBRARY_VERSIONS = [
     "pytest-asyncio==1.4.0",
     "ruff==0.15.16",
 ]
+
+
+async def _wait_for_deliverable(
+    specialist_endpoint: str,
+    task_id: str,
+    timeout: int | None = None,
+    interval: int | None = None,
+) -> dict:
+    """Poll the Specialist's task store until the task is COMPLETED.
+
+    Uses poll_task() from src/shared/a2a.py — the polling channel.
+    The proactive push (task/delivered via OrchestratorA2AServer) is
+    validated independently by #36/#37 integration tests.
+
+    Returns the deliverable data extracted from the COMPLETED task's
+    status.message payload.
+    """
+    if timeout is None:
+        timeout = POLL_TIMEOUT_SECONDS
+    if interval is None:
+        interval = POLL_INTERVAL_SECONDS
+    deadline = datetime.now(timezone.utc) + timedelta(seconds=timeout)
+    while datetime.now(timezone.utc) < deadline:
+        result = await poll_task(specialist_endpoint, task_id)
+        state = result.get("task_state", "")
+        if state == "TASK_STATE_COMPLETED":
+            return result
+        await asyncio.sleep(interval)
+    raise TimeoutError(
+        f"Task {task_id} did not complete within {timeout}s"
+    )
 
 
 async def run_coordination_loop(
@@ -104,24 +140,16 @@ async def run_coordination_loop(
         return
 
     # ---------------------------------------------------------------
-    # Step 4: Send task/invite, receive task/quote
+    # Step 4: Send task/invite, receive task/quote via A2A
     # ---------------------------------------------------------------
-    print("\n  ▶ Step 4: Sending task/invite to Specialist...")
+    print("\n  ▶ Step 4: Sending task/invite to Specialist via A2A...")
     task_spec = {
         "task_description": task_description,
         "task_type": "code-generation",
     }
 
-    # Get the quote back from the Specialist
-    invite_msg_id = await tools.task_invite(
-        specialist_endpoint=specialist_endpoint,
-        task_spec=task_spec,
-    )
-    print(f"  ✅ Invite sent (msg: {invite_msg_id})")
-
-    # For the MVP flow, we simulate receiving the quote directly
-    # In production, the quote comes back via A2A response
-    quote = await handle_task_invite({"type": "task/invite", "task_spec": task_spec})
+    quote = await send_invite(specialist_endpoint, task_spec)
+    print(f"  ✅ Invite sent (msg: {quote.get('message_id', 'N/A')})")
     print("  📋 Quote received:")
     print(f"     Scope: {quote.get('scope', 'N/A')}")
     cost_eth = int(quote.get('estimated_cost_wei', 0)) / 1e18
@@ -226,23 +254,21 @@ async def run_coordination_loop(
         "deliverable_format": "github_commit",
         "deadline": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
         "budget_wei": "1000000000000000",
+        "orchestrator_endpoint": ORCHESTRATOR_ENDPOINT,
     }
-    delegate_msg_id = await tools.task_delegate(
-        specialist_endpoint=specialist_endpoint,
-        full_task=full_task,
-    )
-    print(f"  ✅ Task delegated (msg: {delegate_msg_id})")
+    task_id = await send_task(specialist_endpoint, full_task)
+    try:
+        guild_context.update(a2a_task_id=task_id)
+    except Exception:
+        logger.warning("Could not update guild_context with a2a_task_id")
+    print(f"  ✅ Task delegated (task_id: {task_id})")
 
     # ---------------------------------------------------------------
-    # Step 9: Receive task/delivered from Specialist
+    # Steps 8-9: Wait for Specialist deliverable via A2A polling
     # ---------------------------------------------------------------
     print("\n  ▶ Step 8-9: Waiting for Specialist deliverable...")
-    # Simulate Specialist execution for MVP (in production, wait for A2A response)
-    delivered = await handle_task_send({
-        "type": "task/send",
-        "task_id": delegate_msg_id,
-        "task": full_task,
-    })
+    print(f"     Polling {specialist_endpoint} for task {task_id}...")
+    delivered = await _wait_for_deliverable(specialist_endpoint, task_id)
     print("  ✅ Deliverable received:")
     print(f"     Reference: {delivered.get('deliverable_reference', 'N/A')}")
     print(f"     Hash: {delivered.get('deliverable_hash', 'N/A')}")
@@ -253,18 +279,6 @@ async def run_coordination_loop(
     print("\n  ▶ Step 10: Running automated pre-check...")
     deliverable_path = delivered.get("deliverable_reference", "")
     deliverable_hash = delivered.get("deliverable_hash", "")
-
-    # For MVP, write the deliverable to a temp location if it doesn't exist
-    if deliverable_path and not Path(deliverable_path).exists():
-        # Write simulated deliverable to disk for pre-check
-        deliv_dir = Path("output")
-        deliv_dir.mkdir(exist_ok=True)
-        actual_path = deliv_dir / f"{delegate_msg_id}.json"
-        actual_path.write_text(json.dumps({
-            "task_id": delegate_msg_id,
-            "output": "Task executed successfully via GLM-5.1",
-        }, indent=2))
-        deliverable_path = str(actual_path)
 
     pre_check = await tools.deliverable_review(
         deliverable_reference=deliverable_path,
@@ -297,7 +311,7 @@ async def run_coordination_loop(
     # Step 11: Send task/accepted to Specialist
     # ---------------------------------------------------------------
     print("\n  ▶ Step 11: Sending task/accepted to Specialist...")
-    await send_accepted(specialist_endpoint, delegate_msg_id)
+    await send_accepted(specialist_endpoint, task_id)
     print("  ✅ task/accepted sent.")
 
     # ---------------------------------------------------------------
@@ -328,7 +342,7 @@ async def run_coordination_loop(
         "acceptance_timestamp": 0,
         "payment_wei": "1000000000000000",
         "guild_address": guild_address,
-        "a2a_task_id": delegate_msg_id,
+        "a2a_task_id": task_id,
     }
     try:
         rep_tx = await tools.reputation_write(delivery_record=delivery_record)
