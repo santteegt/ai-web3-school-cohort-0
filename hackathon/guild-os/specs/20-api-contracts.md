@@ -81,21 +81,27 @@ Resolver: `0x0000000000000000000000000000000000000000` (none for MVP) · Revocab
 ## 3. A2A Message Contracts
 
 Six message types. `A2AClient` (`src/shared/a2a.py`) sends/receives; every message is
-logged to `hackathon/notes/a2a_trace_{date}.json`.
+logged to `hackathon/notes/a2a_trace_{date}.json`. Messages marked **sync** are
+responses within the same `message/send` request-response cycle (Orchestrator is the
+A2A client). Messages marked **proactive** are separate `message/send` requests
+initiated by the Specialist as A2A client → Orchestrator A2A server (port 10000).
 
-| Message | Direction | Fields |
-|---------|-----------|--------|
-| `task/invite` | Orchestrator → Specialist | `task_spec: object` |
-| `task/quote` | Specialist → Orchestrator | `scope: string`, `estimated_cost_wei: int`, `deadline_iso: string` |
-| `task/send` | Orchestrator → Specialist | `task: object` (see below) |
-| `task/delivered` | Specialist → Orchestrator | `deliverable_reference: string`, `deliverable_hash: string`, `attestation_uid: string`, `attestation_url: string` |
-| `task/accepted` | Orchestrator → Specialist | `task_id: string`, `payment_proposal_id: string`, `payment_proposal_url: string` |
-| `feedback/request` | Specialist → Orchestrator | `task_id: string`, `deliverable_hash: string` — Specialist asks the guild to record reputation for completed work |
+| Message | Direction | Timing | Fields |
+|---------|-----------|--------|--------|
+| `task/invite` | Orchestrator → Specialist | sync | `task_spec: object` |
+| `task/quote` | Specialist → Orchestrator | sync (response) | `scope: string`, `estimated_cost_wei: int`, `deadline_iso: string` |
+| `task/send` | Orchestrator → Specialist | sync (non-blocking, `return_immediately: true`) | `task: object` (see below) |
+| `task/delivered` | Specialist → Orchestrator | **proactive** (after harness completes) | `deliverable_reference: string`, `deliverable_hash: string`, `attestation_uid: string`, `attestation_url: string` |
+| `task/accepted` | Orchestrator → Specialist | sync | `task_id: string`, `payment_proposal_id: string`, `payment_proposal_url: string` |
+| `feedback/request` | Specialist → Orchestrator | **proactive** (after settlement) | `task_id: string`, `deliverable_hash: string` — Specialist asks the guild to record reputation for completed work |
 
-> The `task/delivered` message carries **`attestation_uid` + `attestation_url`** — **never**
-> an `on_chain_tx` field. EAS is the deliverable-commitment mechanism in the target design.
-> `task/accepted` carries the **payment proposal** id+url (raised before it is sent); the
-> Specialist later triggers reputation with **`feedback/request`**.
+> The `task/delivered` message is a **proactive A2A push** — the Specialist sends it as
+> a new `message/send` to the Orchestrator's A2A server (port 10000) after the harness
+> completes the work, not as a response to the original `task/send`. It carries
+> **`attestation_uid` + `attestation_url`** — **never** an `on_chain_tx` field. EAS is the
+> deliverable-commitment mechanism in the target design. `task/accepted` is a sync response
+> carrying the **payment proposal** id+url (raised before it is sent); the Specialist later
+> triggers reputation with a **proactive `feedback/request`** message.
 
 ### `task/send` payload (nests > 3 levels → YAML)
 
@@ -117,6 +123,7 @@ task:
   deliverable_format: string      # "zip+hash" | "github_commit"
   deadline: string               # ISO-8601
   budget_wei: string             # numeric string (wei)
+  orchestrator_endpoint: string   # URL of the Orchestrator's A2A server (e.g. http://localhost:10000) — where the Specialist sends proactive task/delivered and feedback/request
 ```
 
 ---
@@ -196,9 +203,21 @@ delivery_record:
   allowlist + cap semantics (selected by `WALLET_PROVIDER`).
 
 ### `SpecialistAgent` handlers — `src/specialist/agent.py`
-- `handle_task_invite(message) -> task/quote`
-- `handle_task_send(message) -> task/delivered` (reads the GitHub issue, executes GLM-5.1, attests, returns UID)
-- `request_feedback(task_id, deliverable_hash) -> feedback/request` (triggers the reputation stage after settlement)
+- `handle_task_invite(message) -> task/quote` — synchronous; returns quote in COMPLETED task
+- `handle_task_send(message) -> WORKING` — non-blocking; delegates to the harness work engine and returns WORKING immediately. The harness later produces the deliverable, updates the task store to COMPLETED, and uses `SpecialistA2AClient` to send `task/delivered` proactively
+- `request_feedback(task_id, deliverable_hash) -> feedback/request` — called by the harness after settlement to trigger the reputation stage; sends proactively via `SpecialistA2AClient` to the Orchestrator's A2A server
+
+### `SpecialistA2AClient` — `src/specialist/a2a_client.py`
+- `send_delivered(orchestrator_endpoint, task_id, deliverable_hash, attestation_uid, attestation_url) -> dict` — proactive `message/send` to the Orchestrator's A2A server after harness work completes
+- `send_feedback_request(orchestrator_endpoint, task_id, deliverable_hash) -> dict` — proactive `message/send` after settlement to trigger the reputation proposal (Gate 4)
+- Uses `a2a.client.client_factory.ClientFactory` to resolve the Orchestrator's Agent Card and send messages — same transport pattern as `A2AClient`
+
+### `OrchestratorA2AServer` — `src/orchestrator/a2a_server.py`
+- A2A HTTP server on `ORCHESTRATOR_A2A_PORT` (default 10000), running alongside the MCP stdio server
+- Publishes an Agent Card at `/.well-known/agent-card.json`
+- Receives inbound `task/delivered` → triggers deliverable pre-check (Gate 2)
+- Receives inbound `feedback/request` → triggers reputation proposal (Gate 4)
+- Built with the same `a2a-sdk` server components as the Specialist (`AgentExecutor`, `LegacyRequestHandler`, `InMemoryTaskStore`)
 
 ---
 

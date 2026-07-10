@@ -27,9 +27,11 @@ Use these canonical names exactly — never invent parallel modules.
 | Component | Location | Responsibility |
 |-----------|----------|----------------|
 | `OrchestratorServer` | `src/orchestrator/server.py` | MCP server entry point; registers all tools |
+| `OrchestratorA2AServer` | `src/orchestrator/a2a_server.py` | A2A HTTP server (port 10000); receives proactive `task/delivered` and `feedback/request` from the Specialist |
 | `OrchestratorTools` | `src/orchestrator/tools.py` | The MCP tools (see §6) |
-| `SpecialistAgent` | `src/specialist/agent.py` | A2A server; runs GLM-5.1 long-horizon tasks; responds to task messages |
-| `A2AClient` | `src/shared/a2a.py` | Sends/receives A2A messages (invite, quote, send, delivered, accepted) |
+| `SpecialistAgent` | `src/specialist/agent.py` | A2A server (port 10001); receives task messages; delegates `task/send` to the harness work engine; returns WORKING immediately |
+| `SpecialistA2AClient` | `src/specialist/a2a_client.py` | Outbound A2A client; sends proactive `task/delivered` and `feedback/request` to the Orchestrator's A2A server after harness work completes |
+| `A2AClient` | `src/shared/a2a.py` | Sends/receives A2A messages (invite, quote, send, delivered, accepted); shared client logic used by both agents |
 | `EASClient` | `src/shared/eas.py` | `attest()` and `get_attestation()` — Specialist creates EAS delivery attestation |
 | `ERC8004` | `src/shared/erc8004.py` | `register()` and `give_feedback()` — caller constraint: NOT the agent's own wallet |
 | `AgentFightClub` | `src/shared/agentfightclub.py` | `launch`, `commit`, `propose`, `vote`, `settle` — wraps Moloch v3 (ClawBank API or DAOhaus SDK) |
@@ -115,6 +117,19 @@ sequenceDiagram
     H->>AFC: GATE 4 vote → process
     AFC->>R: giveFeedback() (guild contract as caller)
 ```
+
+> **A2A directionality** (see §12 for full transport mechanics):
+> - `task/invite` → `task/quote` and `task/send` → `task/accepted` are
+>   **synchronous request-response** cycles (Orchestrator is the A2A client,
+>   Specialist is the A2A server).
+> - `task/send` uses **non-blocking** `return_immediately: true` — the
+>   Specialist returns WORKING immediately and the harness executes the work
+>   outside the A2A thread (lines 103–105).
+> - `task/delivered` (line 106) and `feedback/request` (line 113) are
+>   **proactive A2A messages** — the Specialist acts as A2A client and opens
+>   a new `message/send` to the Orchestrator's A2A server (port 10000).
+>   These are not task-state pushes within the original task; they are
+>   separate request-response cycles with reversed client/server roles.
 
 ---
 
@@ -337,7 +352,7 @@ the protobuf/JSON-RPC/REST/stdio/subprocess reality underneath, and one
 integration (AgentFightClub) is documented elsewhere as an API client when
 it is, today, a CLI subprocess wrapper.
 
-### A2A — protobuf over JSON-RPC/REST, not bare JSON
+### A2A — harness model with bidirectional peer messaging
 
 §3 and `specs/20-api-contracts.md` §3 describe A2A messages as JSON dicts
 with a `type` field (`{"type": "task/invite", ...}`). That's the
@@ -350,38 +365,66 @@ actual transport, built on the `a2a-sdk` (`a2a.types.a2a_pb2`), is:
   fallback described in `docs/RISKS.md` §F5 is, in the current
   implementation, **the only path that exists**, not a fallback from a
   metadata-extension-fields primary path.
+- Both agents are **A2A peers** — each runs an A2A server (to receive) and
+  uses an A2A client (to send). The Specialist acts as server for
+  `task/invite` and `task/send` (Orchestrator is client); the Orchestrator
+  acts as server for `task/delivered` and `feedback/request` (Specialist is
+  client). Each interaction is a separate `message/send` request-response
+  cycle with the client/server roles alternating per message type.
 - The Specialist's A2A server is built from `a2a.server.agent_execution.AgentExecutor`
   (`SpecialistExecutor.execute(context, event_queue)`), a `LegacyRequestHandler`,
   and an `InMemoryTaskStore`, mounted onto a `FastAPI` app via
   `add_a2a_routes_to_fastapi()` — which registers **both** JSON-RPC routes
   (`create_jsonrpc_routes`) and REST routes (`create_rest_routes`)
   simultaneously. A client can address either transport.
-- The executor uses the **async Task lifecycle** (A2A spec §3.1.1): on entry
-  it enqueues a `TaskStatusUpdateEvent(WORKING)`, performs the work, then
-  enqueues a `TaskStatusUpdateEvent(COMPLETED)` whose `status.message`
-  carries the GuildOS response payload (the same JSON dict, still inside a
-  `Part.text`). This makes the `InMemoryTaskStore` functional — tasks are
-  persisted and queryable via `tasks/get` / `tasks/list` — whereas the
-  earlier immediate-`Message`-only path left the store empty. The client
-  side (`_send_to_agent`) extracts the payload from either a bare `message`
-  oneof (backward compat) or a `task` oneof (`task.status.message`).
+- **Task lifecycle per message type:**
+  - `task/invite` → synchronous: executor enqueues `TaskStatusUpdateEvent(WORKING)`,
+    calls `handle_task_invite()`, enqueues `TaskStatusUpdateEvent(COMPLETED)` with
+    the quote in `status.message`. The blocking `message/send` returns COMPLETED.
+  - `task/send` → **non-blocking** (`return_immediately: true`): executor enqueues
+    `WORKING`, delegates the task to the harness work engine, and returns. The task
+    stays `WORKING` in the `InMemoryTaskStore`. The harness executes the work
+    outside the A2A thread (GLM-5.1 planning, coding, hashing). When the harness
+    finishes, it (a) updates the task store to `COMPLETED` (making it pollable via
+    `tasks/get`) and (b) uses `SpecialistA2AClient` to send a proactive
+    `task/delivered` message to the Orchestrator's A2A server.
+  - `task/accepted` → synchronous: executor returns an ack in a COMPLETED task.
+- The Orchestrator's A2A server (`OrchestratorA2AServer`, port 10000) receives
+  `task/delivered` and `feedback/request` as inbound `message/send` requests. Its
+  executor triggers the deliverable pre-check (Gate 2) or the reputation proposal
+  (Gate 4) in response. This server runs alongside the MCP stdio server — the MCP
+  server handles tool calls from Claude Code; the A2A server handles coordination
+  messages from the Specialist.
 - The client side (`src/shared/a2a.py`) uses `a2a.client.client_factory.ClientFactory`
   to resolve an agent's card and open a session — it does not construct raw
-  HTTP requests by hand.
+  HTTP requests by hand. `_extract_response()` handles both the `message` oneof
+  (immediate response) and the `task` oneof (async lifecycle, payload in
+  `task.status.message`).
 
 > ASSUMPTION: the dual JSON-RPC + REST mounting is the `a2a-sdk` v1.1.0
 > default (`LegacyRequestHandler`); if a future SDK version changes this,
 > update this section rather than letting it silently drift from the code.
 
-### Agent discovery — the `.well-known/agent-card.json` convention
+### Agent discovery — both agents publish `.well-known/agent-card.json`
 
-The Specialist publishes its Agent Card via `create_agent_card_routes(AGENT_CARD)`,
-which serves a well-known-URI route (`/.well-known/agent-card.json`) — the
-standard A2A discovery mechanism. The Orchestrator does **not** implement
-this route (see §1's `OrchestratorServer` entry and the closed decision in
-issue #29): its `agentURI`, registered on ERC-8004, points to a **static**
-JSON file (GitHub raw URL or IPFS), not a live discovery endpoint, because
-the Orchestrator never receives inbound A2A messages.
+Both agents publish their Agent Card via `create_agent_card_routes()`, which
+serves a well-known-URI route (`/.well-known/agent-card.json`) — the standard
+A2A discovery mechanism:
+
+- **Specialist** (port 10001): publishes its card at
+  `http://localhost:10001/.well-known/agent-card.json`.
+- **Orchestrator** (port 10000): publishes its card at
+  `http://localhost:10000/.well-known/agent-card.json`. This supersedes the
+  earlier decision (issue #29, closed) that the Orchestrator would not run an
+  A2A server — the harness model requires the Orchestrator to receive
+  proactive `task/delivered` and `feedback/request` messages from the
+  Specialist. The Orchestrator's `agentURI` registered on ERC-8004 points to
+  this live endpoint (or a static card file mirroring it).
+
+The Specialist discovers the Orchestrator's endpoint via the
+`orchestrator_endpoint` field in the `task/send` payload (see
+`specs/20-api-contracts.md` §3) — it does not need to resolve the
+Orchestrator's card independently for MVP.
 
 ### MCP — stdio, not HTTP
 
@@ -392,7 +435,9 @@ no HTTP server for the Orchestrator's MCP interface; "MCP server" in §1's
 component table means a process Claude Code spawns and talks to over its
 own stdin/stdout, not a network service. This matters for anyone trying to
 reach the Orchestrator's tools from outside the harness that spawned it —
-there is currently no such path.
+there is currently no such path. The Orchestrator's **A2A server** (port
+10000, see above) is a separate HTTP process that handles Specialist
+coordination messages; it does not expose MCP tools.
 
 ### AgentFightClub — a CLI subprocess wrapper, not an API client
 
