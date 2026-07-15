@@ -419,7 +419,9 @@ A2A discovery mechanism:
   A2A server — the harness model requires the Orchestrator to receive
   proactive `task/delivered` and `feedback/request` messages from the
   Specialist. The Orchestrator's `agentURI` registered on ERC-8004 points to
-  this live endpoint (or a static card file mirroring it).
+  this **live endpoint by default** — a static card file mirroring it is a
+  documented fallback only (same demo-day-fallback philosophy as F6), not a
+  coin-flip primary option.
 
 The Specialist discovers the Orchestrator's endpoint via the
 `orchestrator_endpoint` field in the `task/send` payload (see

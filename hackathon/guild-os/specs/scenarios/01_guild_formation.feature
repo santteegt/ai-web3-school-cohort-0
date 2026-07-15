@@ -35,7 +35,7 @@ Feature: Guild formation
     Given the guild is ACTIVE
     When the Orchestrator registers its profile via the ERC-8004 protocol
     Then an agentId is minted for the Orchestrator on Base
-    And the Orchestrator agentURI points to its static Agent Card
+    And the Orchestrator agentURI points to its live A2A Agent Card at /.well-known/agent-card.json
 
   Scenario: Reject a launch with a zero treasury tribute
     Given no guild exists in the guild context

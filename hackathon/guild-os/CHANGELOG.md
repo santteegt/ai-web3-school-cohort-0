@@ -152,6 +152,22 @@
   stylebook reference moved to `skills/stylebook/SKILL.md`; "SevenD"
   dropped from the example-skills list (see
   [Removed artifacts](#removed-artifacts)).
+- **2026-07-10** — **Fixed the Orchestrator "static agent card"
+  contradiction.** Issue #29 (closed) originally decided the Orchestrator
+  registers a static ERC-8004 agent card and never runs an A2A server —
+  but the same-day harness-model canonicalization (§12) supersedes that a
+  second time: `OrchestratorA2AServer` (#36) now runs regardless, to
+  receive proactive `task/delivered`/`feedback/request`, and as a side
+  effect serves a live `.well-known/agent-card.json` just like the
+  Specialist. `specs/20-api-contracts.md` already reflected this, but
+  `specs/scenarios/01_guild_formation.feature`'s registration scenario and
+  issue #5 (4 spots) still asserted the superseded static-card model —
+  fixed both, and tightened §12's "(or a static card file mirroring it)"
+  hedge to make explicit that live is the primary design and the static
+  mirror is a documented fallback only, not a coin-flip. Confirmed no
+  backward Phase 0.5 → Phase 1 dependency was introduced: ERC-8004
+  registration is just an on-chain URI write, and none of #5's ACs require
+  the endpoint to resolve at registration time.
 
 ---
 
