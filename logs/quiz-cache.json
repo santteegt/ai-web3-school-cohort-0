@@ -144,7 +144,9 @@
     "citations",
     "wallet-permission-safe-execution",
     "prompt-workflow-agent-boundary",
-    "knowledge-base"
+    "knowledge-base",
+    "oracle",
+    "solidity"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
