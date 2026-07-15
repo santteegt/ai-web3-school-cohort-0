@@ -55,19 +55,32 @@ live in `.env` — see §6.
 | Block explorer | `https://basescan.org/tx/...` (Sepolia: `https://sepolia.basescan.org/tx/...`) | `network_config.get_explorer_tx_url(tx_hash)` |
 | EAS explorer | `https://base.easscan.org/attestation/{uid}` | `network_config.get_easscan_attestation_url(uid)` |
 | RPC | `https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}` (Sepolia: `base-sepolia` subdomain); `ALCHEMY_API_KEY` substituted from env at load time | `network_config.get_rpc_url()` |
-| ERC-8004 IdentityRegistry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` (same on both networks — CREATE2 vanity deploy) | `network_config.get_contract_address("erc8004_identity_registry")` |
-| ERC-8004 ReputationRegistry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` (same on both networks) | `network_config.get_contract_address("erc8004_reputation_registry")` |
+| ERC-8004 IdentityRegistry | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` (chain `8453`, canonical) | `network_config.get_contract_address("erc8004_identity_registry")` |
+| ERC-8004 ReputationRegistry | `0x8004BAa17C55a88189AE136b182e5fdA19dE9b63` (chain `8453`, canonical) | `network_config.get_contract_address("erc8004_reputation_registry")` |
 | EAS contract | `0x4200000000000000000000000000000000000021` (OP-stack predeploy — identical on every OP-stack chain) | `network_config.get_contract_address("eas")` |
 | EAS SchemaRegistry | `0x4200000000000000000000000000000000000020` (OP-stack predeploy) | `network_config.get_contract_address("eas_schema_registry")` |
 | WETH | `0x4200000000000000000000000000000000000006` (OP-stack predeploy; used by AgentFightClub `commit()`) | `network_config.get_contract_address("weth")` |
 | `delivery_schema_uid` | Registered once per network before Step 8; written into `config/networks.json`, not `.env` | `network_config.get_delivery_schema_uid()` |
 
-> ASSUMPTION: ERC-8004 registry addresses are listed identically for both
-> networks because every source doc to date only ever cites one set of
-> values (consistent with a CREATE2 vanity deploy at a fixed address per
-> chain). If the two networks are later confirmed to use different
-> addresses, update both entries in `config/networks.json` — the schema
-> already supports per-network divergence.
+> **Correction (2026-07-15):** the ERC-8004 addresses above were fixed on
+> chain `8453` (canonical) by an earlier commit (`bf69d81`) — the values
+> previously listed here (`0x8004A818...`/`0x8004B663...`) were a real,
+> deployed-but-not-the-ecosystem-standard registry pair (verified on
+> Basescan, but not the address 8004scan.io and most third-party
+> tools/explorers index by default — see
+> `hackathon/research/ERC8004_RESOURCE_REVIEW.md`). That fix was never
+> propagated to this table until now.
+>
+> **Known drift, not yet fixed:** `config/networks.json`'s `84532` (Base
+> Sepolia) block still has the *old* addresses — the original ASSUMPTION
+> below ("registry addresses are listed identically for both networks") is
+> now literally false in config. Non-blocking (Sepolia is isolated-test
+> only, never submission evidence) but worth a follow-up fix.
+>
+> ASSUMPTION: ERC-8004 registry addresses were originally assumed identical
+> on both networks (consistent with a CREATE2 vanity deploy at a fixed
+> address per chain) — no longer true for `84532` per the drift noted
+> above; the schema already supports per-network divergence.
 
 ### EAS delivery schema
 
@@ -182,9 +195,77 @@ delivery_record:
 - `get_attestation(uid) -> { deliverableHash, taskType, guildContract, paymentAmount }`.
 
 ### `ERC8004` — `src/shared/erc8004.py`
-- `register(agent_uri, signer_private_key) -> tx_hash` — mints the agentId on
-  `network_config.get_contract_address("erc8004_identity_registry")`.
-- `give_feedback(caller, <6 fields>) -> tx_hash` — emits `DeliveryRecorded` on
+
+Registration metadata is stored fully on-chain as a base64-encoded
+`data:application/json;base64,...` URI (RFC 2397) — no IPFS pin or HTTPS
+host needs to stay alive for the registration to remain resolvable.
+Capabilities/skills live on the relevant `services[]` entry, never as a
+top-level field, per [erc-8004/best-practices](https://github.com/erc-8004/best-practices)
+and [best-practices.8004scan.io](https://best-practices.8004scan.io/docs/01-agent-metadata-standard.html):
+
+```jsonc
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "...", "description": "...",
+  "services": [
+    {"name": "A2A", "endpoint": "...", "version": "0.3.0", "a2aSkills": ["..."]},
+    {"name": "OASF", "endpoint": "", "version": "0.8", "skills": ["..."], "domains": ["..."]}
+  ],
+  "active": true,                      // optional, defaults true
+  "image": "...",                      // optional
+  "x402Support": false,                // optional
+  "registrations": [{"agentId": 1, "agentRegistry": "eip155:8453:0x..."}],  // optional; see register_agent()
+  "supportedTrust": ["reputation"]     // optional
+}
+```
+
+- `build_a2a_service(endpoint, version="0.3.0", a2a_skills=None) -> dict`,
+  `build_mcp_service(endpoint, version="2025-06-18", tools=None,
+  prompts=None, resources=None, capabilities=None) -> dict`,
+  `build_oasf_service(skills=None, domains=None, endpoint="", version="0.8")
+  -> dict` — convenience `services[]` entry builders (optional to use —
+  `services` accepts any well-formed dict).
+- `build_registration_uri(name, description, services, image=None,
+  x402_support=None, active=True, registrations=None, supported_trust=None)
+  -> str` — only `name`/`description`/`services` required; returns the
+  base64 `data:` URI above.
+- `build_registrations_entry(agent_id) -> dict` — `{"agentId":
+  agent_id, "agentRegistry": "eip155:{chain_id}:{identity_registry_address}"}`
+  (CAIP-10-style).
+- `register(agent_uri, wallet_address) -> {"agent_id", "tx_hash",
+  "agent_uri", "minted": bool}` — mints the agentId on
+  `network_config.get_contract_address("erc8004_identity_registry")`
+  through `WalletProvider` (no private key ever passed or read). Idempotent:
+  if `wallet_address` already owns an agentId (`balanceOf() > 0`), no
+  transaction is broadcast — the cached (`logs/erc8004_registrations.json`)
+  or on-chain-recovered (`Registered` event scan) registration is returned
+  instead, with `minted=False`.
+- `update_registration_uri(agent_id, new_uri) -> tx_hash` — calls
+  `setAgentURI(agentId, newURI)` through `WalletProvider`; the update path
+  for any registration content change, never a second `register()`.
+- `register_agent(name, description, services, wallet_address, image=None,
+  x402_support=None, active=True, registrations=None, supported_trust=None)
+  -> {"agent_id", "agent_uri" (final), "register_tx_hash",
+  "update_tx_hash": str | None, "minted": bool}` — **the recommended entry
+  point.** Composes the above: `build_registration_uri()` → `register()` →
+  if `minted`, immediately backfills the `registrations[]` self-reference
+  via `build_registrations_entry()` + `update_registration_uri()`, since
+  `agentId` can't be known until `register()` succeeds. **Every fresh
+  registration is therefore two on-chain transactions** (`Registered`, then
+  `URIUpdated`) — the idempotent no-op path stays a single balance check,
+  no transaction either way.
+- `read_profile(agent_id) -> {"agent_id", "name", "capabilities",
+  "domains", "delivery_count", "a2a_endpoint", "agent_uri"}` — decodes
+  `tokenURI(agent_id)` (the `data:` URI locally, or an `https://`/`ipfs://`
+  fallback for forward-compatibility, tolerating unresolvable URIs rather
+  than raising); `capabilities`/`domains` are scanned across `services[]`
+  (`a2aSkills` from A2A, `capabilities` from MCP, `skills`/`domains` from
+  OASF — merged, deduplicated); `delivery_count` via
+  `getSummary(agentId, [], "", "")` (correct by construction for a
+  before-state/freshly-registered agent — full `clientAddresses`
+  aggregation is deferred, see `hackathon/research/ERC8004_ERC8183_ANALYSIS.md` Gap 2).
+- `give_feedback(caller, <6 fields>) -> tx_hash` — **still a stub**
+  (issues #6/#7). Emits `DeliveryRecorded` on
   `network_config.get_contract_address("erc8004_reputation_registry")`.
   **Caller MUST be the guild contract (via DAO proposal execution) — never an
   agent EOA, never the Specialist wallet (F2).**
@@ -199,10 +280,27 @@ delivery_record:
 ### `WalletProvider` — `src/shared/wallet.py`
 - Provider-agnostic signing + Pact-scoping interface; **no raw-EOA fallback**.
 - `sign(tx) -> signed_tx` — refuses any call outside the Pact allowlist or above the tribute cap.
-- Allowlist scopes the DAO contract's `propose` / `vote` / `process` functions; the tribute
-  call carries the only value cap.
+- Allowlist scopes the DAO contract's `propose` / `vote` / `process` functions and the
+  ERC-8004 IdentityRegistry's `register` / `setAgentURI` functions (both uncapped — neither
+  moves funds out of the agent wallet); the tribute call carries the only value cap.
 - Default implementation: Cobo CAW (TSS). Swappable to ZeroDev / Turnkey with the same
   allowlist + cap semantics (selected by `WALLET_PROVIDER`).
+
+### `GuildToolsServer` — `src/guild/server.py` + `src/guild/tools.py`
+- Shared MCP server (stdio) — any guild agent runs its own local instance
+  with its own `AGENT_WALLET_*` env; not bound to the Orchestrator (see
+  `10-technical-design.md` §12).
+- Tool `guildtools_identity_register(name, description, services, image=None,
+  x402_support=None, active=True, registrations=None, supported_trust=None)`
+  — reads `AGENT_WALLET_ADDRESS` from its own process env, delegates to
+  `erc8004.register_agent(...)`. Returns the same shape as
+  `register_agent()`.
+- Tool `guildtools_identity_read_profile(agent_id)` — delegates to
+  `erc8004.read_profile(agent_id)`.
+- `src/guild/tools.py::identity_register()` / `identity_read_profile()` take
+  `wallet_address` as an explicit parameter and never read env vars
+  themselves — `server.py`'s tool handler is the only place
+  `AGENT_WALLET_ADDRESS` is read from the environment.
 
 ### `SpecialistAgent` handlers — `src/specialist/agent.py`
 - `handle_task_invite(message) -> task/quote` — synchronous; returns quote in COMPLETED task
@@ -244,6 +342,9 @@ address or RPC URL as an env var is wrong; it should cite
 | `WALLET_PROVIDER` | Scoped signing provider for `WalletProvider` (`caw` \| `zerodev` \| `turnkey`) | `caw` |
 | `ORCHESTRATOR_A2A_PORT` | Orchestrator A2A port | `10000` |
 | `SPECIALIST_A2A_PORT` | Specialist A2A port | `10001` |
+| `AGENT_WALLET_ADDRESS` | The calling agent's own CAW wallet address — **per-process**: each agent's own environment, never a single global value shared across the Orchestrator and Specialist. Read only by `WalletProvider` (signing) and `GuildToolsServer`'s tool handler (ERC-8004 registration's idempotency/cache key) | — (required) |
+| `AGENT_WALLET_API_KEY` | CAW API key for the calling agent's wallet (`caw wallet current --show-api-key`) — per-process, same scoping as `AGENT_WALLET_ADDRESS` | — (required) |
+| `AGENT_WALLET_WALLET_ID` | CAW wallet ID for the calling agent — per-process, same scoping as `AGENT_WALLET_ADDRESS` | — (required) |
 
 ### `config/networks.json` (per `CHAIN_ID`, not an env var)
 

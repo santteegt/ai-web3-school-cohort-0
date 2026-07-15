@@ -33,7 +33,8 @@ Use these canonical names exactly — never invent parallel modules.
 | `SpecialistA2AClient` | `src/specialist/a2a_client.py` | Outbound A2A client; sends proactive `task/delivered` and `feedback/request` to the Orchestrator's A2A server after harness work completes |
 | `A2AClient` | `src/shared/a2a.py` | Orchestrator's outbound A2A client; sends `task/invite`, `task/send`, `task/accepted`; receives `task/quote`. Shared utilities (`_build_message`, `_extract_response`) reused by `SpecialistA2AClient` |
 | `EASClient` | `src/shared/eas.py` | `attest()` and `get_attestation()` — Specialist creates EAS delivery attestation |
-| `ERC8004` | `src/shared/erc8004.py` | `register()` and `give_feedback()` — caller constraint: NOT the agent's own wallet |
+| `ERC8004` | `src/shared/erc8004.py` | `register_agent()` (recommended entry point — registers, then immediately backfills the `registrations[]` self-reference via `setAgentURI()`), `register()`, `read_profile()`, `build_registration_uri()`, `update_registration_uri()`, `build_registrations_entry()`, and `give_feedback()` — caller constraint on the latter: NOT the agent's own wallet. Full signatures in [`20-api-contracts.md`](20-api-contracts.md) §5 |
+| `GuildToolsServer` | `src/guild/server.py` + `src/guild/tools.py` | Shared MCP server (stdio) exposing `guildtools_identity_register` / `guildtools_identity_read_profile` — any guild agent runs its own local instance with its own wallet env; not bound to the Orchestrator (see §12) |
 | `AgentFightClub` | `src/shared/agentfightclub.py` | `launch`, `commit`, `propose`, `vote`, `settle` — wraps Moloch v3 (ClawBank API or DAOhaus SDK) |
 | `WalletProvider` | `src/shared/wallet.py` | Provider-agnostic signing + Pact-scoping interface; Cobo CAW is the default implementation, swappable to ZeroDev / Turnkey (see §8 F4 and `scenarios/12_scoped_spending.feature`) |
 | `NetworkConfig` | `src/shared/network_config.py` | Loads `config/networks.json` for the active `CHAIN_ID`; the only path to a contract address, RPC URL, or explorer link — no component reads these from `os.environ` or a literal |
@@ -64,8 +65,8 @@ and processes.
 
 | Steps | What happens | Scenario file |
 |-------|-------------|---------------|
-| 1–2 | Orchestrator collects founder inputs and launches the guild (summon + tribute); registers its own ERC-8004 profile | [01_guild_formation](scenarios/01_guild_formation.feature) |
-| 2 (Specialist) | Specialist registers its own ERC-8004 profile — once, independent of any guild, before it is discoverable | [02_talent_discovery](scenarios/02_talent_discovery.feature) |
+| 1–2 | Orchestrator collects founder inputs and launches the guild (summon + tribute); registers its own ERC-8004 profile via its own local `GuildToolsServer` instance | [01_guild_formation](scenarios/01_guild_formation.feature) |
+| 2 (Specialist) | Specialist registers its own ERC-8004 profile via its own local `GuildToolsServer` instance — once, independent of any guild, before it is discoverable | [02_talent_discovery](scenarios/02_talent_discovery.feature) |
 | 3 · **Gate 0** | Orchestrator hunts for talent; human selects candidate | [02_talent_discovery](scenarios/02_talent_discovery.feature) |
 | 4 · **Gate 0.5** | Orchestrator invites Specialist; Specialist quotes; human accepts | [03_quoting_and_terms](scenarios/03_quoting_and_terms.feature) |
 | 5 · **Gate 1** | Specialist submits membership proposal; human votes to approve | [04_membership](scenarios/04_membership.feature) |
@@ -90,10 +91,10 @@ sequenceDiagram
     participant EAS as EAS
     participant R as ERC-8004
 
-    S->>R: register(agentURI) — once, independent of any guild
+    S->>R: register_agent() via own GuildToolsServer — register() then setAgentURI() backfill, once, independent of any guild
     H->>O: launch a guild (name, mandate, governance, members+shares, tribute)
     O->>AFC: summon(guild) + tribute(treasury)
-    O->>R: register(agentURI)
+    O->>R: register_agent() via own GuildToolsServer — register() then setAgentURI() backfill
     O->>O: talent_query()
     H-->>O: GATE 0 approve candidate
     O->>S: A2A task/invite
@@ -441,6 +442,30 @@ there is currently no such path. The Orchestrator's **A2A server** (port
 10000, see above) is a separate HTTP process that handles Specialist
 coordination messages; it does not expose MCP tools.
 
+### `GuildToolsServer` — a shared MCP server, not an Orchestrator-only tool
+
+`OrchestratorServer` is a single, fixed-env MCP process — whichever
+`AGENT_WALLET_*` env it's launched with is the only wallet it ever signs
+with for its own tool calls. ERC-8004 registration needed a different
+pattern: **any** guild agent registers **its own** identity
+(`specs/scenarios/12_scoped_spending.feature`'s "an agent only ever
+registers its own identity" guardrail), so a single fixed-env process
+can't serve every agent — using the Orchestrator's own MCP server to
+register the Specialist would make the Orchestrator's wallet the on-chain
+`owner` of the Specialist's `agentId`.
+
+`GuildToolsServer` (`src/guild/server.py`) solves this by being a
+*reusable module*, not a *shared running process*: each agent's own
+harness spawns its **own local instance** (`uv run python -m
+src.guild.server`, same stdio/FastMCP pattern as `OrchestratorServer`),
+configured with **its own** `AGENT_WALLET_*` env. `src/shared/erc8004.py`
+and `src/guild/tools.py` never read `AGENT_WALLET_ADDRESS` (or any other
+env var) themselves — `src/guild/server.py`'s tool handler is the one
+place that resolves it from the process environment and passes it down as
+an explicit `wallet_address` parameter, keeping the lower layers plain,
+testable functions of their inputs. There is no cross-agent credential
+handling anywhere in this path.
+
 ### AgentFightClub — a CLI subprocess wrapper, not an API client
 
 §6's "ClawBank API (primary) / DAOhaus SDK (fallback)" framing describes the
@@ -458,12 +483,16 @@ switching between two that already coexist.
 ### `web3.py`'s actual role today
 
 §1 lists `web3.py` `7.16.0` as the universal RPC/ABI layer for ERC-8004 and
-EAS. As of this writing, neither `erc8004.py` nor `eas.py` (the latter does
-not exist yet — tracked in issue #28) imports `web3` — every ERC-8004
-function is a `raise NotImplementedError` stub. The documented role is the
-**target**, not the current state; treat any spec language that implies
-`web3.py` calls are already working for these two integrations as
-forward-looking, not descriptive.
+EAS. As of issue #5, this is now accurate for **ERC-8004**: `erc8004.py`
+builds a minimal local ABI fragment (register/setAgentURI/balanceOf/
+tokenURI/the `Registered` event) and uses `web3.py` purely for
+calldata-encoding and read/decode calls (`contract.encode_abi(...)`,
+`contract.functions.X(...).call()`, `contract.events.Registered().process_receipt(...)`)
+— it never signs or broadcasts; that stays entirely inside `WalletProvider`.
+`give_feedback()` remains a `raise NotImplementedError` stub (Gate-4
+reputation write, issues #6/#7). `eas.py` still does not exist (issue #28)
+— treat any spec language implying `web3.py` calls are already working for
+**EAS** specifically as forward-looking, not descriptive.
 
 ### `NetworkConfig` — the seam between all of the above and `CHAIN_ID`
 
