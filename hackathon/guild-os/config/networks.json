@@ -8,8 +8,8 @@
     "explorer_tx_url": "https://basescan.org/tx/",
     "easscan_attestation_url": "https://base.easscan.org/attestation/",
     "contracts": {
-      "erc8004_identity_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
-      "erc8004_reputation_registry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "erc8004_identity_registry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "erc8004_reputation_registry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
       "eas": "0x4200000000000000000000000000000000000021",
       "eas_schema_registry": "0x4200000000000000000000000000000000000020",
       "weth": "0x4200000000000000000000000000000000000006",
