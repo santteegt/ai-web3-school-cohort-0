@@ -3,7 +3,7 @@
 Every on-chain call an agent makes goes through this layer. The Pact
 allowlist scopes exactly:
   - DAO contract: sponsor, propose, vote, process (Moloch v3 governance)
-  - ERC-8004 IdentityRegistry: register (agent identity)
+  - ERC-8004 IdentityRegistry: register, setAgentURI (agent identity)
   - Tribute: the only call with a value cap
 
 The default implementation wraps Cobo Agentic Wallet (CAW). The CAW
@@ -383,7 +383,8 @@ def _load_moloch_selectors() -> set[str]:
 
 
 def _load_erc8004_selectors() -> set[str]:
-    return {_load_pact_config()["selectors"]["erc8004"]["register"]}
+    erc8004 = _load_pact_config()["selectors"]["erc8004"]
+    return {erc8004["register"], erc8004["setAgentURI"]}
 
 
 def _build_default_allowlist() -> PactAllowlist:

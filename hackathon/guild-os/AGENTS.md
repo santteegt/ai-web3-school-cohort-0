@@ -26,7 +26,8 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `SpecialistA2AClient` | `src/specialist/a2a_client.py` | Outbound A2A client; sends proactive `task/delivered` and `feedback/request` to the Orchestrator's A2A server after harness work completes |
 | `A2AClient` | `src/shared/a2a.py` | Orchestrator's outbound A2A client; sends `task/invite`, `task/send`, `task/accepted`; receives `task/quote`. Shared utilities (`_build_message`, `_extract_response`) reused by `SpecialistA2AClient` |
 | `EASClient` | `src/shared/eas.py` | `attest()` and `get_attestation()` — Specialist creates EAS delivery attestation; UID embedded in A2A `task/delivered` |
-| `ERC8004` | `src/shared/erc8004.py` | `register()` and `giveFeedback()` — caller constraint: NOT the agent's own wallet (guild contract via proposal execution) |
+| `ERC8004` | `src/shared/erc8004.py` | `register()`, `read_profile()`, `build_registration_uri()`, `update_registration_uri()`, and `giveFeedback()` — caller constraint: NOT the agent's own wallet (guild contract via proposal execution) |
+| `GuildToolsServer` | `src/guild/server.py` | Shared MCP server (stdio); tools `guildtools_identity_register` / `guildtools_identity_read_profile` — any guild agent runs its own local instance with its own `AGENT_WALLET_*` env, never a shared process |
 | `AgentFightClub` | `src/shared/agentfightclub.py` | `launch`, `commit`, `propose`, `vote`, `settle` — ClawBank API or DAOhaus SDK fallback |
 | `WalletProvider` | `src/shared/wallet.py` | Provider-agnostic signing + Pact scoping (CAW default; ZeroDev/Turnkey swappable); scopes DAO calls + caps tribute; no EOA fallback |
 | `NetworkConfig` | `src/shared/network_config.py` | Loads `config/networks.json` for the active `CHAIN_ID`; the only path to a contract address, RPC URL, or explorer link |

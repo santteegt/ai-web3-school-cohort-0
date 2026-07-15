@@ -17,7 +17,8 @@
         "process": "0x706a6e93"
       },
       "erc8004": {
-        "register": "0xf2c298be"
+        "register": "0xf2c298be",
+        "setAgentURI": "0x0af28bd3"
       }
     }
   },
@@ -38,7 +39,8 @@
         "process": "0x706a6e93"
       },
       "erc8004": {
-        "register": "0xf2c298be"
+        "register": "0xf2c298be",
+        "setAgentURI": "0x0af28bd3"
       }
     }
   }
