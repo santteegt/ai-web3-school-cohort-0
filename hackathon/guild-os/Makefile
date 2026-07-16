@@ -9,6 +9,12 @@ lint:
 inspect:
 	npx @modelcontextprotocol/inspector uv run python -m src.orchestrator.server
 
+# Run with the calling agent's own AGENT_WALLET_* env loaded — this is the
+# one-time invocation mechanism for both the Specialist's and the
+# Orchestrator's ERC-8004 registration (see src/guild/server.py).
+inspect-guild:
+	npx @modelcontextprotocol/inspector uv run python -m src.guild.server
+
 # Phase 4 evaluation — requires ZAI_API_KEY (or OPENAI_API_KEY) in the environment.
 # Uses GLM-4.7 via Z.AI by default. Override with --model and --base-url.
 # Spawns the MCP server as a subprocess and runs 10 QA pairs through the LLM.

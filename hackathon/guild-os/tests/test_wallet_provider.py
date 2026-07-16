@@ -29,7 +29,7 @@ from src.shared.wallet import (
 )
 
 DAO_ADDR = "0x0123456789abcdef0123456789abcdef01234567"
-ERC8004_ADDR = "0x8004a818bfb912233c491871b3d84c89a494bd9e"
+ERC8004_ADDR = "0x8004a169fb4a3325136eb29fa0ceb6d2e539a432"
 AFC_SUMMONER = "0x97aaa5be8b38795245f1c38a883b44cccdfb3e11"
 RANDOM_ADDR = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
 
@@ -39,6 +39,7 @@ SEL_PROCESS = "0x13b9f691"
 SEL_SPONSOR = "0x0a796e19"
 SEL_SUMMON = "0x1f1bb0ef"
 SEL_REGISTER = "0xf2c298be"
+SEL_SET_AGENT_URI = "0x0af28bd3"
 SEL_UNKNOWN = "0xffffffff"
 
 TRIBUTE_CAP = "0.01"
@@ -56,7 +57,7 @@ def _clear_caches():
 def _make_allowlist() -> PactAllowlist:
     al = PactAllowlist()
     al.add_contract(DAO_ADDR, {SEL_PROPOSE, SEL_VOTE, SEL_PROCESS, SEL_SPONSOR})
-    al.add_contract(ERC8004_ADDR, {SEL_REGISTER})
+    al.add_contract(ERC8004_ADDR, {SEL_REGISTER, SEL_SET_AGENT_URI})
     al.add_contract(AFC_SUMMONER, {SEL_SUMMON})
     al.set_tribute_cap(TRIBUTE_CAP)
     return al
@@ -74,6 +75,18 @@ class TestAllowlistedCalls:
     def test_erc8004_register_call_passes(self):
         al = _make_allowlist()
         al.check(ERC8004_ADDR, SEL_REGISTER)
+
+    def test_erc8004_set_agent_uri_call_passes(self):
+        al = _make_allowlist()
+        al.check(ERC8004_ADDR, SEL_SET_AGENT_URI)
+
+    def test_load_erc8004_selectors_includes_both(self):
+        """_load_erc8004_selectors() reads both register and setAgentURI from
+        config/pact.json — the update_registration_uri() path (issue #5)
+        requires setAgentURI to be allowlisted, not just register()."""
+        selectors = wallet._load_erc8004_selectors()
+        assert SEL_REGISTER in selectors
+        assert SEL_SET_AGENT_URI in selectors
 
     def test_tribute_within_cap_passes(self):
         al = _make_allowlist()

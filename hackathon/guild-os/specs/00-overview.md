@@ -173,6 +173,11 @@ and does not re-litigate them.
 | 2026-06-09 | GLM-5.1 / Hermes | Specialist stack locked; long-horizon prompt locked |
 | 2026-06-11 | Deliverable commitment | **EAS attestation replaces raw `eth_sendTransaction`** — signed by Specialist, stable UID cross-referencing A2A ↔ ERC-8004, easscan-queryable, same gas |
 | 2026-06-17 | Reputation write | Routed through an **executable `submitFeedback` DAO proposal** — passing vote triggers `giveFeedback()` with the guild contract as caller |
+| 2026-07-15 | ERC-8004 registration library | Hand-rolled `web3.py` calls through `WalletProvider`, not a third-party SDK — `agent0-py`/`chaoschain-sdk` assume raw-EOA signing, incompatible with the no-EOA-fallback rule (F4) |
+| 2026-07-15 | Registration metadata storage | On-chain `data:application/json;base64,...` URI (RFC 2397), not IPFS/HTTPS — no external host needs to stay alive for the registration to remain resolvable |
+| 2026-07-15 | Capabilities/skills schema location | Live on the relevant `services[]` entry (A2A `a2aSkills`, MCP `capabilities`, OASF `skills`/`domains`), never top-level fields — per [erc-8004/best-practices](https://github.com/erc-8004/best-practices) |
+| 2026-07-15 | Registration call-site | New shared `GuildToolsServer` (`src/guild/`) — any guild agent runs its own local instance with its own wallet env, not an Orchestrator-only MCP tool; avoids the Orchestrator's wallet becoming the on-chain owner of another agent's identity |
+| 2026-07-15 | Registration completeness | Every fresh mint is immediately followed by a `setAgentURI()` call backfilling the `registrations[]` self-reference — two on-chain txs per registration, not one |
 
 > ASSUMPTION: the proposal/TECH_STACK Decision Logs predate the EAS and DAO-feedback
 > decisions; the two final rows reflect the current target design and supersede any earlier

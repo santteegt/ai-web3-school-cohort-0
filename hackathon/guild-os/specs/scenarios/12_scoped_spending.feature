@@ -16,7 +16,7 @@ Feature: Scoped agent authority (CAW Pacts over DAO and identity-registry calls)
     And the treasury is held by the DAO contract, not by any agent wallet
     And each agent signs through a provider-agnostic wallet layer (Cobo CAW by default)
     And a Pact allowlists the DAO contract and its propose, vote, and process functions
-    And the Pact allowlists the ERC-8004 IdentityRegistry contract and its register function
+    And the Pact allowlists the ERC-8004 IdentityRegistry contract and its register and setAgentURI functions
     And the Pact sets a value cap only on tribute (the sole call that moves funds out of an agent wallet)
 
   Scenario: An allowlisted governance call is authorized
@@ -32,6 +32,14 @@ Feature: Scoped agent authority (CAW Pacts over DAO and identity-registry calls)
     And the transaction is submitted on Base
     And this is the first on-chain call either agent is permitted to make — before it exists, no guild
       formation, registration, or membership vote may be signed
+
+  Scenario: An ERC-8004 setAgentURI call is authorized
+    Given an agent has just minted its own agentId via a register() call
+    When it signs an immediate setAgentURI() call through its own wallet layer to backfill the
+      registrations[] self-reference
+    Then the Pact authorizes the signature because setAgentURI is on the allowlist
+    And the transaction is submitted on Base
+    And no value cap applies, since setAgentURI never moves funds out of the agent wallet
 
   Scenario: A tribute within the cap is authorized
     Given a tribute amount within the Pact tribute cap

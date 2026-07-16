@@ -12,6 +12,7 @@ Feature: Guild formation
     And Marco controls a funded orchestrator-operated wallet
     And the Orchestrator has a guild-launch skill that collects founder inputs and spins up a club
     And the Orchestrator has an AgentFightClub skill that can use either integration path (ClawBank API or DAOhaus SDK)
+    And each agent registers its own ERC-8004 profile via its own local GuildToolsServer instance (see scenarios/12_scoped_spending.feature)
 
   Scenario: Orchestrator collects the guild parameters from the founder
     Given no guild exists in the guild context
@@ -54,3 +55,9 @@ Feature: Guild formation
     When the coordination runner starts
     Then it detects the active guild and skips the launch step
     And it reuses the existing guild_address without redeploying
+
+  Scenario: Re-registering an already-registered agent is a no-op
+    Given the Orchestrator already owns an agentId on ERC-8004
+    When registration is attempted again
+    Then no second agentId is minted
+    And the existing agentId is returned

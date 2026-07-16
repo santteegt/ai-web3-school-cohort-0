@@ -16,6 +16,7 @@ Feature: Talent discovery and candidate selection
     And the Orchestrator has a talent-pool skill whose script calls talent_query against ERC-8004 / A2A cards
     And the mandate task type is "agentic-ai-web3-engineering"
     And each agent signs through a scoped WalletProvider (see scenarios/12_scoped_spending.feature)
+    And each agent registers its own ERC-8004 profile via its own local GuildToolsServer instance
 
   Scenario: Specialist registers its own profile on ERC-8004
     Given the Specialist is not yet registered on ERC-8004
@@ -50,3 +51,9 @@ Feature: Talent discovery and candidate selection
     Given talent_query returns no candidates
     Then the runner reports an empty shortlist
     And GATE 0 is not presented
+
+  Scenario: Re-registering an already-registered agent is a no-op
+    Given the Specialist already owns an agentId on ERC-8004
+    When registration is attempted again
+    Then no second agentId is minted
+    And the existing agentId is returned
