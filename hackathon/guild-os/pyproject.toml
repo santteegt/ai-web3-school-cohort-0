@@ -45,8 +45,15 @@ asyncio_mode = "strict"
 # web3 v7.x and uvicorn v0.49 import from websockets.legacy (deprecated since
 # websockets 14.0). We can't fix this — it's upstream code. Suppress only this
 # specific origin so other deprecation warnings stay visible.
+#
+# a2a-sdk 1.1.0's proto_utils.py reads the deprecated protobuf
+# FieldDescriptor.label instead of is_required()/is_repeated() (tracked
+# upstream: https://github.com/a2aproject/a2a-python/issues/1011). Not
+# fixable in this repo — every frame is inside the SDK. Suppress only this
+# origin so other deprecation warnings stay visible.
 filterwarnings = [
     "ignore::DeprecationWarning:websockets.legacy",
+    "ignore::DeprecationWarning:a2a.utils.proto_utils",
 ]
 
 [tool.ruff]
