@@ -133,7 +133,7 @@ something that used to be in `docs/`, this table says where it went.
 | `docs/TECH_STACK.md` | [`20-api-contracts.md`](20-api-contracts.md) + [`10-technical-design.md`](10-technical-design.md) §1/§5 | Pinned versions, addresses, env contract, component map, naming conventions |
 | `docs/RISKS.md` | [`10-technical-design.md`](10-technical-design.md) §8/§10 + [`00-overview.md`](00-overview.md) §9 | Fallback requirements (F1–F7), Tier B, scope-creep signals, decision log |
 | `docs/TRACK.md` | [`00-overview.md`](00-overview.md) §7 + this file's Hackathon Reference table | Track alignment, evaluation scorecard, hackathon links |
-| `docs/VALIDATION_PLAN.md` §1–10 | [`scenarios/*.feature`](scenarios/) Then-clauses | Per-integration definition-of-done, now expressed as executable Gherkin assertions |
+| `docs/VALIDATION_PLAN.md` §1–10 | [`scenarios/*.feature`](scenarios/) Then-clauses | Per-integration definition-of-done, expressed as Gherkin assertions and — since 2026-07-16 — literally executed via pytest-bdd for scenarios with a `tests/step_defs/` counterpart; see `AGENTS.md`'s "Files — Read Before Coding" |
 | `docs/VALIDATION_PLAN.md` §11 | **Not superseded — still authoritative** | The hackathon platform's submission-requirements checklist is operational tracking, not a spec; it stays in `docs/VALIDATION_PLAN.md` and issue [#17](https://github.com/santteegt/ai-web3-school-cohort-0/issues/17) still points at it directly |
 
 ---

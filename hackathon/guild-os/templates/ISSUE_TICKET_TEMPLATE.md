@@ -38,6 +38,13 @@ Link to the exact scenario(s) in `specs/scenarios/*.feature` this ticket
 implements. **Name the exact harness tools** the agent will call at each
 step — not a paraphrase of what should happen.
 
+**This ticket's first coding action is writing or extending the linked
+scenario's `tests/step_defs/` file** — expected to fail red against the
+current, incomplete implementation — and only then writing the `src/` code
+that turns it green. If a step-def file for this feature already exists
+(check `tests/step_defs/`), extend it; don't hand-write a parallel assertion
+in a `test_*.py` file instead.
+
 ```gherkin
 Scenario: Processing a refund for a duplicate charge
   Given a customer was charged twice for order #4521
@@ -162,7 +169,12 @@ distinct purposes:
 - [ ] **Execution:** tool calls + expected outputs verified against at least
       one representative input.
 - [ ] **Regression:** this change keeps a 100% pass rate on existing
-      scenarios in the same feature file.
+      scenarios in the same feature file — verified by running the feature
+      file's `tests/step_defs/` file under `make test`, not by manual
+      inspection.
+- [ ] **BDD test-first:** the linked scenario's `tests/step_defs/` file
+      exists (red is fine pre-implementation) — this ticket is not done
+      until it's green under `make test`.
 - [ ] **Token budget:** ticket + linked scenario stay bounded — rule of thumb,
       under ~5,000 tokens — to avoid context rot in the executing agent.
 - [ ] **Authorization tier set:** Read-Only / Draft-Only / Action-Allowed —

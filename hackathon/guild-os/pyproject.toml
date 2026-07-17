@@ -37,11 +37,15 @@ dev = [
     "pytest-asyncio>=0.23.0",
     "ruff>=0.4.0",
     "openai>=1.0.0",
+    "pytest-bdd>=8.1.0",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "strict"
+# .feature files stay in specs/scenarios/ — the canonical SDD source — and
+# load directly from there via pytest-bdd; never copied/duplicated into tests/.
+bdd_features_base_dir = "specs/scenarios/"
 # web3 v7.x and uvicorn v0.49 import from websockets.legacy (deprecated since
 # websockets 14.0). We can't fix this — it's upstream code. Suppress only this
 # specific origin so other deprecation warnings stay visible.

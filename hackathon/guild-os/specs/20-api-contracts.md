@@ -31,6 +31,7 @@ Exact versions from `uv.lock`. Pin these — do not let an agent default to trai
 | `python-dotenv` | `1.2.2` | `.env` loading |
 | `pytest` | `9.0.3` | Tests |
 | `pytest-asyncio` | `1.4.0` | Async test support (`asyncio_mode = strict`) |
+| `pytest-bdd` | `8.1.0` | Executes `specs/scenarios/*.feature` directly via `tests/step_defs/` — `bdd_features_base_dir` points at `specs/scenarios/`, no copy |
 | `ruff` | `0.15.16` | Lint |
 
 > Source of truth is `uv.lock`. If a version here drifts from the lock file, the lock file
