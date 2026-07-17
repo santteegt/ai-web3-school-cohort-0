@@ -9,7 +9,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `specs/00-overview.md` | Before any new feature — understand what we're solving, the North Star scenario, track alignment |
 | `specs/20-api-contracts.md` | Before adding imports, calling external services, or touching pinned versions/addresses |
 | `specs/10-technical-design.md` | Before any change to agent coordination logic, fallbacks, or component boundaries — includes §12 Transport & Integration Mechanics (what the code actually does at the wire level, not just the contract) |
-| `specs/scenarios/*.feature` | Before implementing or changing any behavior — these are the executable definition of done; find the file covering your change before writing code |
+| `specs/scenarios/*.feature` | Before implementing or changing any behavior — these are the executable definition of done; find the file covering your change before writing code. Literally executable via pytest-bdd — see `tests/step_defs/` for the ones already automated (not every scenario has a step-def file yet; a missing one means the underlying `src/` behavior isn't built, not that the test was skipped) |
 | `skills/stylebook/SKILL.md` | Before writing a docstring, error message, log line, or comment — the judgment-level stylebook `ruff` can't check |
 | `config/networks.json` | Before touching any contract address, RPC URL, or explorer link — these are network-specific, not env vars |
 | `guild_context.json` | Current guild state (mock store — one JSON file per session) |
@@ -146,7 +146,9 @@ not skipped because the diff looked reasonable at a glance.
 
 ## After Building
 
-- Run `make test` — all tests must pass
+- Run `make test` — all tests must pass. This covers both the hand-written
+  unit tests and the pytest-bdd scenario tests in `tests/step_defs/` in one
+  command; no separate invocation needed
 - Run `make lint` — no lint errors
 - Log any new on-chain tx hashes to `./logs/tx_hashes.md`
 - If you hit a new failure pattern, add it as a fallback to `specs/10-technical-design.md` §8 (a new F-number) or as a new negative scenario in the relevant `specs/scenarios/*.feature` file — the spec is where recurring risks get recorded now, not `docs/VALIDATION_PLAN.md`
@@ -165,6 +167,7 @@ not skipped because the diff looked reasonable at a glance.
 - **Need a contract address, RPC URL, or explorer link?** → Never read it from `os.environ` or hardcode it. Call `src/shared/network_config.py` (`get_contract_address`, `get_rpc_url`, `get_explorer_tx_url`, `get_easscan_attestation_url`, `get_delivery_schema_uid`) — it resolves the value from `config/networks.json` for the active `CHAIN_ID`. Only `CHAIN_ID` itself and secrets (`ALCHEMY_API_KEY`, private keys) live in `.env`. See `specs/20-api-contracts.md` §2/§6.
 - **EAS schema not found on `attest()`?** → Check `network_config.get_delivery_schema_uid()`; register the schema and write the UID into `config/networks.json` (not `.env`) if missing (see `specs/10-technical-design.md` §8 F7)
 - **Is this feature in scope?** → Check `specs/10-technical-design.md` §2 and §10 (Constraints & Guardrails); if it doesn't map to a step in the loop or a scenario file, it's out of scope
+- **Does my change need a test?** → If it implements or changes behavior described in a `.feature` file, write or extend the corresponding `tests/step_defs/` file — confirmed red before the `src/` change, green after — not a new hand-written assert in a `test_*.py` file. See `templates/ISSUE_TICKET_TEMPLATE.md` §2
 
 ## Don't
 

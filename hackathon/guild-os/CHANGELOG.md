@@ -57,6 +57,11 @@
   already fixed once. ~1.9KB removed from a file read at the start of
   nearly every session. See
   [`templates/TASK_EXECUTION_PROMPT.md`](#templatestask_execution_promptmd).
+- **2026-07-16** — "Files — Read Before Coding" and "After Building" note
+  `specs/scenarios/*.feature` is now literally executed via pytest-bdd for
+  scenarios with a `tests/step_defs/` counterpart; new "When Unsure" entry
+  on when a change needs a step-def file. See
+  [`tests/` — pytest-bdd integration](#tests--pytest-bdd-integration).
 
 ---
 
@@ -95,6 +100,11 @@
   graph, for onboarding onto medium/large dependency codebases). Ticket
   authors were previously left to invent generic examples; now the template
   points at the tools actually available in this project.
+- **2026-07-16** — §2 and Definition of Ready now require writing/extending
+  the linked scenario's `tests/step_defs/` file as the ticket's first
+  coding action (red before the `src/` change, green after) — true BDD
+  order, not a follow-up. See
+  [`tests/` — pytest-bdd integration](#tests--pytest-bdd-integration).
 
 ---
 
@@ -131,6 +141,11 @@
   or port `HERMES_CODING.md`'s budget/model-switching operating rules —
   that content already lives in `AGENTS.md`/the PR template/the ticket's
   own §4/§6. See [Deprecated prompts](#deprecated-promptspromptshermes_codingmd-promptsissue_coding_sessionmd).
+- **2026-07-16** — EXECUTION CONTRACT gained a new step 2 (renumbering the
+  rest): write/extend the linked scenario's `tests/step_defs/` file before
+  any `src/` change, confirm it fails for the right reason, implement until
+  green. SELF-VERIFICATION gained a matching red→green checklist line. See
+  [`tests/` — pytest-bdd integration](#tests--pytest-bdd-integration).
 
 ---
 
@@ -168,6 +183,80 @@
   backward Phase 0.5 → Phase 1 dependency was introduced: ERC-8004
   registration is just an on-chain URI write, and none of #5's ACs require
   the endpoint to resolve at registration time.
+- **2026-07-16** — `specs/README.md`'s docs-migration-map note for
+  `docs/VALIDATION_PLAN.md` §1–10 updated: scenario Then-clauses are now
+  literally executed via pytest-bdd, not just expressed as Gherkin.
+  `specs/20-api-contracts.md` §1 gained a `pytest-bdd 8.1.0` pinned-
+  dependency row. See
+  [`tests/` — pytest-bdd integration](#tests--pytest-bdd-integration).
+
+---
+
+## `tests/` — pytest-bdd integration
+
+- **2026-07-16** — **`specs/scenarios/*.feature` became literally
+  executable, not just documentation.** Until now, 16 hand-written
+  `tests/test_*.py` files manually re-implemented the same Given/When/Then
+  logic as asserts + mocks (`test_erc8004.py`'s own docstring said it
+  "covers" specific scenarios, without anything actually running them) —
+  a parallel-maintenance risk with no way to catch drift between the spec
+  and the tests. Added `pytest-bdd` (`8.1.0`, pinned in
+  `specs/20-api-contracts.md` §1), configured `bdd_features_base_dir =
+  "specs/scenarios/"` in `pyproject.toml` so `.feature` files load directly
+  from the canonical `specs/` tree — no copy into `tests/`. New
+  `tests/conftest.py` holds shared fixtures (`ctx` — isolates
+  `guild_context.CONTEXT_PATH`, a hardcoded module constant with no
+  injectable seam, via `monkeypatch.setattr`, matching the pattern
+  `test_guild_formation.py` already used; `isolated_erc8004_cache` — same
+  idea for `erc8004.REGISTRATIONS_CACHE_PATH`) and shared steps
+  (`guild_context.task_state` assertions, the ERC-8004 no-op-reregistration
+  pair) reused across scenario files.
+- **2026-07-16** — **Spike: `tests/step_defs/test_guild_formation_steps.py`.**
+  Bound 4 of `01_guild_formation.feature`'s 7 scenarios — the ones
+  genuinely backed by `src/` code today, confirmed by reading `src/`
+  directly rather than trusting the milestone/issue title: "Launch and fund
+  a new guild," "Orchestrator registers its own profile on ERC-8004," "Do
+  not relaunch over an already-active guild," "Re-registering an
+  already-registered agent is a no-op." Proved the two open technical
+  risks from planning: `bdd_features_base_dir` resolves correctly, and the
+  async pattern (sync step functions calling `asyncio.run()` around
+  `async def` component methods, e.g. `AgentFightClub.launch`) works with
+  no friction — pytest-bdd docs had no explicit answer either way, so this
+  was verified empirically rather than assumed. `make test` (208 tests,
+  204 existing + 4 new) and `make lint` both green, zero regressions.
+- **2026-07-16** — **Found 3 scenarios in `01_guild_formation.feature` that
+  aren't backed by code yet — left unbound, not stubbed.** "Orchestrator
+  collects the guild parameters from the founder" and "Reject a launch with
+  a zero treasury tribute" both need parameter-collection/validation that
+  `guild_launch(mandate, treasury_address)` doesn't have (tracked by open
+  #31). "Either AgentFightClub path produces the same guild" describes a
+  ClawBank-API-vs-DAOhaus-SDK branch that was never built — the real
+  integration is always a single `moloch-agent` CLI subprocess path (see
+  `AGENTS.md`'s own "When Unsure" note) — a spec/code mismatch, not a
+  missing test, worth a scenario rewrite at some point but out of scope
+  for this ticket.
+- **2026-07-16** — **Standing process changed for every ticket going
+  forward, not just this catch-up sweep.** `templates/ISSUE_TICKET_TEMPLATE.md`
+  §2 and Definition of Ready, and `templates/TASK_EXECUTION_PROMPT.md`'s
+  EXECUTION CONTRACT (new step 2) and SELF-VERIFICATION, now require
+  writing/extending the linked scenario's `tests/step_defs/` file *before*
+  the `src/` change, confirmed red for the right reason, then implemented
+  to green — true BDD order (scenario → test → implementation), not
+  implement-then-backfill. No edits made to the 12 issues already open at
+  this date (`#40`, `#10`, `#28`, `#31`, `#4`, `#6`, `#7`, `#13`–`#17`) —
+  `TASK_EXECUTION_PROMPT.md` Mode A already requires fetching the issue
+  live and reading the current templates before any ticket is picked up,
+  so they inherit the new requirement automatically; editing 12 ticket
+  bodies to restate that would have been pure process overhead.
+- **2026-07-16** — Catch-up sweep tracked as
+  [#47](https://github.com/santteegt/ai-web3-school-cohort-0/issues/47)
+  (no milestone — cross-cutting test infrastructure, not tied to a single
+  Phase Gate). Retiring the hand-written tests this catch-up supersedes
+  (e.g. `test_erc8004.py`'s registration/idempotency cases) is deliberately
+  deferred to a follow-up PR, after the replacement has run green in CI at
+  least once — not the same commit, so a same-PR deletion can't silently
+  drop coverage the Gherkin Then-clauses don't fully capture (an exact
+  error message, an edge case never written into the scenario text).
 
 ---
 

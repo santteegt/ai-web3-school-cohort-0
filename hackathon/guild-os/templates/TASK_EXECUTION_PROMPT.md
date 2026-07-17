@@ -169,13 +169,20 @@ EXECUTION CONTRACT
        scenario's tool-call order exactly. No substitutions, no reordering.
      - ANY_ORDER (read-only) — sequence freely, but every required call must
        still happen before the Then-clause it satisfies.
-2. Create or edit ONLY the files/components listed in the ticket's §5 File/
+2. Write or extend the linked scenario's `tests/step_defs/` file **before
+   any `src/` change** (check `tests/step_defs/` for an existing file for
+   this feature; extend it if one exists). Run it and confirm it fails for
+   the right reason — missing/incomplete behavior, not a step-text typo or
+   an import error. This is the executable form of the spec; the
+   implementation work in steps 3+ is "make it green," not the other way
+   around.
+3. Create or edit ONLY the files/components listed in the ticket's §5 File/
    component scope. If the work requires touching a file not listed there,
    STOP and ask — do not improvise and do not silently expand scope. If §3's
    Acceptance Criteria already names that file, say so explicitly: that's a
    **ticket defect** (§5 out of sync with §3), not a genuine scope question —
    report it back for the ticket to be fixed.
-3. Track your actual external resource usage (models called, MCP
+4. Track your actual external resource usage (models called, MCP
    servers/tools/APIs/CLIs invoked, data sources consulted) against the
    ticket's declared AgBOM (§7) as you go. If you find yourself reaching for
    an external tool, library, or data source not in the AgBOM, treat that as
@@ -183,17 +190,17 @@ EXECUTION CONTRACT
    it as a ticket defect) or you've drifted from the ticket's actual scope
    (stop and reconsider before proceeding). This is about intent-drift
    detection and audit trail, not a second permission gate — the enforcement
-   already happened in step 2.
-4. Use the exact pinned versions from specs/20-api-contracts.md §1. Pull
+   already happened in step 3.
+5. Use the exact pinned versions from specs/20-api-contracts.md §1. Pull
    dependencies only from the project's vetted source (uv.lock / pyproject.toml).
    Any new package goes in pyproject.toml in the same PR. Never echo, log, or
    persist secrets; treat any JIT credentials as expiring at task end — don't
    cache them past this run.
-5. Implement against the spec, not your assumptions. Where the ticket or the
-   spec is silent on a decision that matters (a caller address, a gate
-   placement, a fallback path), follow the WHEN IN DOUBT decision tree above
-   rather than guess.
-6. If you notice something outside your §5 scope that needs attention — a
+6. Implement against the spec, not your assumptions, until step 2's step-def
+   file is green. Where the ticket or the spec is silent on a decision that
+   matters (a caller address, a gate placement, a fallback path), follow the
+   WHEN IN DOUBT decision tree above rather than guess.
+7. If you notice something outside your §5 scope that needs attention — a
    bug, a stale reference, a broken test, a spec/doc inconsistency, a
    security concern — you have exactly two options, never a third:
      a. NON-BLOCKING (doesn't stop you from finishing this ticket): do NOT
@@ -202,7 +209,7 @@ EXECUTION CONTRACT
         LGTM speed for one thing. Record it in the Out-of-Scope Findings
         output (below) and keep going.
      b. BLOCKING (you cannot satisfy this ticket's own ACs without touching
-        it): STOP and ask, the same as step 2's ticket-defect path — this
+        it): STOP and ask, the same as step 3's ticket-defect path — this
         is a real scope gap in the ticket, not something to route around
         by quietly expanding your file scope.
    Never silently drop a finding either way — the whole point of noticing
@@ -223,7 +230,10 @@ SELF-VERIFICATION (run before returning control)
       surprises for the reviewer.
 - [ ] Your actual external resource usage matches the §7 AgBOM — flag any
       gap between what was declared and what was actually called.
-- [ ] No regression to existing scenarios in the same .feature file — run them.
+- [ ] No regression to existing scenarios in the same .feature file — run
+      them via `make test` (the feature file's `tests/step_defs/` file).
+- [ ] This ticket's own linked scenario went red (step 2, before the `src/`
+      change) → green (now) — not green-only-because-it-was-never-run-first.
 - [ ] Negative scenarios still fail closed (the should-not-fire cases still
       don't fire).
 - [ ] All §6 Security Guardrails from the ticket are respected (correct
