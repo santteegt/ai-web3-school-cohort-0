@@ -30,13 +30,11 @@ Feature: Scoped agent authority (CAW Pacts over DAO and identity-registry calls)
     When it signs the call through its own wallet layer
     Then the Pact authorizes the signature because register is on the allowlist
     And the transaction is submitted on Base
-    And this is the first on-chain call either agent is permitted to make — before it exists, no guild
-      formation, registration, or membership vote may be signed
+    And this is the first on-chain call either agent is permitted to make — before it exists, no guild formation, registration, or membership vote may be signed
 
   Scenario: An ERC-8004 setAgentURI call is authorized
     Given an agent has just minted its own agentId via a register() call
-    When it signs an immediate setAgentURI() call through its own wallet layer to backfill the
-      registrations[] self-reference
+    When it signs an immediate setAgentURI() call through its own wallet layer to backfill the registrations[] self-reference
     Then the Pact authorizes the signature because setAgentURI is on the allowlist
     And the transaction is submitted on Base
     And no value cap applies, since setAgentURI never moves funds out of the agent wallet
