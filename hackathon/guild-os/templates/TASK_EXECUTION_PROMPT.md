@@ -190,7 +190,11 @@ EXECUTION CONTRACT
    it as a ticket defect) or you've drifted from the ticket's actual scope
    (stop and reconsider before proceeding). This is about intent-drift
    detection and audit trail, not a second permission gate — the enforcement
-   already happened in step 3.
+   already happened in step 3. Also note, for each distinct LLM you called
+   (the executing agent itself and any sub-agent it dispatched), the
+   provider/model name and total tokens used, if your runtime exposes that
+   figure — this is cost/usage audit trail, not a gate; report "not exposed
+   by runtime" rather than guessing when the figure isn't available.
 5. Use the exact pinned versions from specs/20-api-contracts.md §1. Pull
    dependencies only from the project's vetted source (uv.lock / pyproject.toml).
    Any new package goes in pyproject.toml in the same PR. Never echo, log, or
@@ -321,7 +325,9 @@ PR body must contain, in this order:
   Every external model/MCP-server/tool/data-source actually used, compared
   against the ticket's declared §7 AgBOM — this is the audit trail, not a
   formality. Flag any gap between what was declared and what was actually
-  called, in either direction.
+  called, in either direction. Include a one-line-per-model summary of
+  provider/model name + total tokens used (step 4) — "not exposed by
+  runtime" if your session doesn't surface a token count.
 
   ## Blockers / open questions (omit if none)
   Any doc gaps, spec ambiguities, or integration questions that were NOT
