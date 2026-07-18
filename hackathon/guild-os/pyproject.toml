@@ -38,6 +38,7 @@ dev = [
     "ruff>=0.4.0",
     "openai>=1.0.0",
     "pytest-bdd>=8.1.0",
+    "pytest-cov>=7.1.0",
 ]
 
 [tool.pytest.ini_options]
@@ -59,6 +60,12 @@ filterwarnings = [
     "ignore::DeprecationWarning:websockets.legacy",
     "ignore::DeprecationWarning:a2a.utils.proto_utils",
 ]
+
+[tool.coverage.run]
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
 
 [tool.ruff]
 target-version = "py311"

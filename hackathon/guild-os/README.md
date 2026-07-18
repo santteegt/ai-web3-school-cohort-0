@@ -206,8 +206,9 @@ Each gate halts at a `[y/N]` prompt; the loop stops if any gate is rejected.
 ### Tests & Lint
 
 ```bash
-make test   # uv run pytest tests/
-make lint   # uv run ruff check src/ tests/
+make test       # uv run pytest tests/ --cov=src --cov-report=term-missing
+make lint       # uv run ruff check src/ tests/
+make coverage   # same as make test, plus an HTML report at htmlcov/index.html
 ```
 
 `make test` runs both the hand-written unit tests and the pytest-bdd
@@ -215,7 +216,9 @@ scenario tests in `tests/step_defs/`, which execute `specs/scenarios/*.feature`
 directly (no copy — `bdd_features_base_dir` in `pyproject.toml` points at
 `specs/scenarios/`) — the spec is literally executable, not just
 documentation. Not every scenario has a step-def file yet; see
-`AGENTS.md`'s "Files — Read Before Coding" table.
+`AGENTS.md`'s "Files — Read Before Coding" table. `make test` also prints
+a `src/` coverage table (file-by-file %, missing line numbers) — reported,
+not gated; there's no `--cov-fail-under` threshold.
 
 ---
 
