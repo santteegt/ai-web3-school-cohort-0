@@ -1,10 +1,24 @@
-.PHONY: test lint inspect eval
+.PHONY: test test-no-cov lint coverage inspect eval
 
 test:
+	uv run pytest tests/ --cov=src --cov-report=term-missing
+
+# Same suite, no coverage instrumentation/report — used by CI when a PR
+# doesn't touch src/, so the coverage table (which wouldn't have changed)
+# doesn't clutter the log. Also handy locally for a quicker pass/fail check.
+test-no-cov:
 	uv run pytest tests/
 
 lint:
 	uv run ruff check src/ tests/
+
+# Same as `test`, plus an HTML report for local drill-down. No
+# --cov-fail-under — coverage is reported, not gated (several src/ files,
+# e.g. still-stubbed orchestrator tools, are expected to be under-covered
+# right now; a hard threshold would be noise, not signal, at this stage).
+coverage:
+	uv run pytest tests/ --cov=src --cov-report=term-missing --cov-report=html
+	@echo "HTML report: htmlcov/index.html"
 
 inspect:
 	npx @modelcontextprotocol/inspector uv run python -m src.orchestrator.server

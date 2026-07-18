@@ -191,5 +191,6 @@ __all__ = [
 ]
 
 
+# Component entrypoint — one-time setup, per agent (README.md "Run", Step 0): uv run python -m src.guild.server
 if __name__ == "__main__":
     main()

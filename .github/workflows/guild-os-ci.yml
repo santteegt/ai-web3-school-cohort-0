@@ -15,6 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Detect src/ changes
+        uses: dorny/paths-filter@v3
+        id: src-changed
+        with:
+          filters: |
+            src:
+              - 'hackathon/guild-os/src/**'
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -26,5 +34,16 @@ jobs:
       - name: Lint
         run: make lint
 
-      - name: Test
+      - name: Test (with coverage)
+        if: steps.src-changed.outputs.src == 'true'
         run: make test
+
+      - name: Coverage summary
+        if: steps.src-changed.outputs.src == 'true' && !cancelled()
+        run: |
+          echo "### Coverage — \`src/\`" >> "$GITHUB_STEP_SUMMARY"
+          uv run coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Test (no coverage)
+        if: steps.src-changed.outputs.src != 'true'
+        run: make test-no-cov

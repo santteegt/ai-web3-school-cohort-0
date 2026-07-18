@@ -146,6 +146,14 @@
   any `src/` change, confirm it fails for the right reason, implement until
   green. SELF-VERIFICATION gained a matching red→green checklist line. See
   [`tests/` — pytest-bdd integration](#tests--pytest-bdd-integration).
+- **2026-07-16** — Step 6 extended: once the linked scenario's step-def
+  file is green, write/extend hand-written unit test(s) for the specific
+  functions/branches this ticket touched — the more-granular layer the
+  Phase C audit just proved every existing BDD scenario still needs
+  underneath it. New SELF-VERIFICATION line (check the coverage table for
+  touched files, not a 100% mandate) and a DELIVERY verification-steps
+  clarification (cite coverage numbers, not just pass/fail). See
+  [`tests/` — pytest-bdd integration](#tests--pytest-bdd-integration).
 
 ---
 
@@ -257,6 +265,63 @@
   least once — not the same commit, so a same-PR deletion can't silently
   drop coverage the Gherkin Then-clauses don't fully capture (an exact
   error message, an edge case never written into the scenario text).
+- **2026-07-16** — **Phase B landed** ([#49](https://github.com/santteegt/ai-web3-school-cohort-0/pull/49),
+  merged): 30 more scenarios bound across `02_talent_discovery`,
+  `03_quoting_and_terms`, `04_membership`, `05_task_delegation`,
+  `07_deliverable_attestation` (transport layer only), `08_deliverable_review`,
+  `12_scoped_spending`. Also fixed a real Gherkin-syntax bug found along the
+  way: `12_scoped_spending.feature` had two step lines soft-wrapped across
+  physical lines — not valid Gherkin, `gherkin-official` failed to parse the
+  *entire file* before the fix. Confirmed `09_settlement`,
+  `10_reputation_feedback`, `11_dispute_path` have zero code backing
+  (`payment_propose`/`reputation_propose` don't exist anywhere in `src/`, no
+  Gate 3/4, no EAS) — correctly left unbound, tracked by #4/#6/#13.
+- **2026-07-16** — **Phase C resolved as "no deletions," not a retirement
+  PR.** Three independent audits (one per file cluster) did an assertion-
+  by-assertion comparison — not scenario-level "looks covered" — of every
+  hand-written `tests/test_*.py` class/method (~90 total) against the
+  merged step defs. Finding: no file and no test class is a clean,
+  whole-unit RETIRE. Step defs validate the coarse, boolean-ish outcomes
+  the Gherkin Then-clauses require; the hand-written suite pins exact
+  values (tx hashes, call counts, full dict equality, exception message
+  text) and covers error/edge paths no scenario ever wrote down (invalid
+  state, missing wallet, cache-miss recovery, empty-input gate behavior,
+  HTTP/JSON-RPC transport plumbing, structural `PactSpec` shape checks).
+  Only 17 of ~90 methods were even individually retire-safe, and those are
+  the same code path at a different precision layer, not truly redundant.
+  Decision: **keep every hand-written test** as the permanent unit-test
+  layer underneath the BDD/spec layer — 238 tests run in well under a
+  second, so the ongoing "is this actually safe" judgment call per method
+  wasn't worth it for 17 near-duplicates.
+- **2026-07-16** — **Added `pytest-cov` for coverage visibility**, since
+  Phase C's finding was that coverage *depth* (not test count) was the
+  open question. `make test` now runs with `--cov=src --cov-report=term-missing`
+  by default (prints a per-file coverage table after every run, in CI too,
+  with zero `guild-os-ci.yml` changes needed since it already just calls
+  `make test`); new `make coverage` target additionally writes an HTML
+  report to `htmlcov/index.html` for local drill-down. Deliberately no
+  `--cov-fail-under` — reported, not gated; several `src/` files (e.g.
+  still-stubbed orchestrator tools) are expected to be under-covered right
+  now, and a hard threshold would be noise, not signal, at this stage.
+- **2026-07-16** — **`guild-os-ci.yml` correction: coverage is now
+  conditional on `src/` actually changing.** The entry above assumed
+  `make test` always printing coverage was fine for CI too since it costs
+  nothing extra — true for compute, but a coverage table for `src/` is
+  noise on a PR that only touches `specs/`, `tests/`, or docs (the numbers
+  didn't change; there's nothing new to read). Added a
+  `dorny/paths-filter@v3` step (`hackathon/guild-os/src/**`) and split the
+  single `Test` step into two conditional ones: `make test` (with
+  coverage) when `src/` changed, new `make test-no-cov` target (plain
+  `pytest tests/`, no `--cov` flags) otherwise — same 238-test gate either
+  way, only the coverage table's presence differs.
+- **2026-07-16** — **Coverage surfaced on the PR page, not just the raw
+  Actions log.** The step above only put the table where a reviewer had to
+  click into the Checks tab and open the job log to find it. Added a
+  `Coverage summary` step (same `src/`-changed condition) that runs
+  `coverage report --format=markdown` against the `.coverage` data file
+  `make test` already produced, and appends it to `$GITHUB_STEP_SUMMARY` —
+  renders as a proper markdown table one click from the PR's Checks tab
+  (GitHub's Job Summary page), no third-party PR-comment bot needed.
 
 ---
 

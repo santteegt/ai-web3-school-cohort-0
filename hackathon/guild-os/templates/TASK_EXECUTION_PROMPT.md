@@ -199,7 +199,15 @@ EXECUTION CONTRACT
 6. Implement against the spec, not your assumptions, until step 2's step-def
    file is green. Where the ticket or the spec is silent on a decision that
    matters (a caller address, a gate placement, a fallback path), follow the
-   WHEN IN DOUBT decision tree above rather than guess.
+   WHEN IN DOUBT decision tree above rather than guess. Once green, write or
+   extend hand-written unit test(s) in `tests/test_*.py` covering the
+   specific functions/branches this ticket added or changed — error paths,
+   edge cases, and exact-value assertions the linked scenario's Then-clauses
+   don't require (they're deliberately coarse: boolean outcomes, field
+   presence). This is the same more-granular layer already underneath every
+   existing BDD scenario in this project (see `test_erc8004.py`,
+   `test_wallet_provider.py`, etc.) — new work should arrive with that layer
+   already in place, not bolted on later by a future audit.
 7. If you notice something outside your §5 scope that needs attention — a
    bug, a stale reference, a broken test, a spec/doc inconsistency, a
    security concern — you have exactly two options, never a third:
@@ -236,6 +244,11 @@ SELF-VERIFICATION (run before returning control)
       change) → green (now) — not green-only-because-it-was-never-run-first.
 - [ ] Negative scenarios still fail closed (the should-not-fire cases still
       don't fire).
+- [ ] New/changed `src/` code has unit-test coverage — check `make test`'s
+      coverage table for the touched file(s) and note any real gap (not a
+      100% mandate — `--cov-fail-under` is deliberately not set project-wide
+      — but an unreviewed gap in code this ticket just wrote is a flag, not
+      a shrug).
 - [ ] All §6 Security Guardrails from the ticket are respected (correct
       caller/signer, correct gate halts, no scope/spending boundary crossed).
 - [ ] make test — all green. make lint — zero errors.
@@ -293,7 +306,8 @@ PR body must contain, in this order:
   - Setup: uv sync, required env var NAMES (not values), any pre-conditions
   - How to run the component
   - Expected output; Basescan link(s) for any on-chain tx
-  - make test and make lint output
+  - make test and make lint output (now includes a per-file coverage table
+    — cite the touched files' numbers, not just pass/fail)
 
   ## Acceptance criteria
   Copy the ticket's checklist with each box checked and a one-line note on
