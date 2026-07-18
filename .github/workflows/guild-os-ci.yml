@@ -38,6 +38,12 @@ jobs:
         if: steps.src-changed.outputs.src == 'true'
         run: make test
 
+      - name: Coverage summary
+        if: steps.src-changed.outputs.src == 'true' && !cancelled()
+        run: |
+          echo "### Coverage — \`src/\`" >> "$GITHUB_STEP_SUMMARY"
+          uv run coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
       - name: Test (no coverage)
         if: steps.src-changed.outputs.src != 'true'
         run: make test-no-cov

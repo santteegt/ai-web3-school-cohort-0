@@ -314,6 +314,14 @@
   coverage) when `src/` changed, new `make test-no-cov` target (plain
   `pytest tests/`, no `--cov` flags) otherwise — same 238-test gate either
   way, only the coverage table's presence differs.
+- **2026-07-16** — **Coverage surfaced on the PR page, not just the raw
+  Actions log.** The step above only put the table where a reviewer had to
+  click into the Checks tab and open the job log to find it. Added a
+  `Coverage summary` step (same `src/`-changed condition) that runs
+  `coverage report --format=markdown` against the `.coverage` data file
+  `make test` already produced, and appends it to `$GITHUB_STEP_SUMMARY` —
+  renders as a proper markdown table one click from the PR's Checks tab
+  (GitHub's Job Summary page), no third-party PR-comment bot needed.
 
 ---
 
