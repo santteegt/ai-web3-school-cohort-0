@@ -376,5 +376,6 @@ def main() -> None:
     asyncio.run(run_coordination_loop(task_description=task))
 
 
+# Component entrypoint — Terminal 4 (README.md "Run"): uv run python -m src.cli.runner
 if __name__ == "__main__":
     main()

@@ -288,6 +288,7 @@ def main() -> None:
     uvicorn.run(app, host="0.0.0.0", port=SPECIALIST_PORT)
 
 
+# Component entrypoint — Terminal 3 (README.md "Run"): uv run python -m src.specialist.agent
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     main()

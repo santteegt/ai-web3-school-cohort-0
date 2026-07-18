@@ -435,5 +435,6 @@ __all__ = [
 ]
 
 
+# Component entrypoint — Terminal 1 (README.md "Run"): uv run python -m src.orchestrator.server
 if __name__ == "__main__":
     main()

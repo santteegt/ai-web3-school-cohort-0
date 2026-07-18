@@ -277,6 +277,7 @@ def main() -> None:
     uvicorn.run(app, host="0.0.0.0", port=ORCHESTRATOR_PORT)
 
 
+# Component entrypoint — Terminal 2 (README.md "Run"): uv run python -m src.orchestrator.a2a_server
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     main()
