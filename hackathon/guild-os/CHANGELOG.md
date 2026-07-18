@@ -303,6 +303,17 @@
   `--cov-fail-under` — reported, not gated; several `src/` files (e.g.
   still-stubbed orchestrator tools) are expected to be under-covered right
   now, and a hard threshold would be noise, not signal, at this stage.
+- **2026-07-16** — **`guild-os-ci.yml` correction: coverage is now
+  conditional on `src/` actually changing.** The entry above assumed
+  `make test` always printing coverage was fine for CI too since it costs
+  nothing extra — true for compute, but a coverage table for `src/` is
+  noise on a PR that only touches `specs/`, `tests/`, or docs (the numbers
+  didn't change; there's nothing new to read). Added a
+  `dorny/paths-filter@v3` step (`hackathon/guild-os/src/**`) and split the
+  single `Test` step into two conditional ones: `make test` (with
+  coverage) when `src/` changed, new `make test-no-cov` target (plain
+  `pytest tests/`, no `--cov` flags) otherwise — same 238-test gate either
+  way, only the coverage table's presence differs.
 
 ---
 
