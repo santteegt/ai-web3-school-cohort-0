@@ -150,7 +150,15 @@
     "paymaster",
     "block-explorer",
     "proof-of-stake",
-    "zk"
+    "zk",
+    "tee",
+    "aixweb3-agent-architecture",
+    "four-control-layers",
+    "receipt",
+    "agent-reflection",
+    "censorship-resistance",
+    "eoa",
+    "inference"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
