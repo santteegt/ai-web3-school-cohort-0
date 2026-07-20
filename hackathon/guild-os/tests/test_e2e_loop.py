@@ -2,14 +2,24 @@
 
 Exercises the real A2A transport (JSON-RPC over httpx ASGITransport)
 against both the Specialist and Orchestrator servers — no port binding,
-no mocked _send_to_agent. This is the definitive proof that issues
-#36-#39 work together end-to-end.
+no mocked _send_to_agent. This is the definitive proof that the #36-#39
+transport plumbing (real JSON-RPC wire format, both agent cards, both
+servers) works end-to-end.
 
 Loop validated:
   1. send_invite (JSON-RPC) → Specialist returns quote (sync)
   2. send_task (JSON-RPC, return_immediately) → Specialist returns WORKING
   3. poll_task (JSON-RPC tasks/get) → returns COMPLETED with deliverable
   4. proactive push: SpecialistA2AClient → OrchestratorA2AServer (JSON-RPC)
+
+Caveat: SpecialistExecutor.execute() (src/specialist/agent.py) still
+completes every task synchronously in one call — WORKING then COMPLETED
+before the JSON-RPC response even returns. So step 3's poll exercises the
+real GetTask retrieval path, not a genuine in-progress-then-complete race;
+there's no window where the harness is still working when the poll fires.
+That gap is the harness work engine itself (open #40/#10), not yet built —
+see tests/step_defs/test_task_delegation_steps.py's docstring for the same
+caveat on the matching 05_task_delegation.feature scenario.
 """
 
 from __future__ import annotations
@@ -91,7 +101,12 @@ class TestE2ECoordinationLoop:
 
     @pytest.mark.asyncio
     async def test_full_invite_send_poll_loop(self, tmp_trace_dir, tmp_path):
-        """Steps 4-9 of the 15-step loop via real JSON-RPC transport."""
+        """Steps 4-9 of the 15-step loop via real JSON-RPC transport.
+
+        The poll (step 8-9) retrieves an already-COMPLETED task — see the
+        module docstring's caveat, the harness that would make this a real
+        in-progress race doesn't exist yet (#40/#10).
+        """
         app, task_store = _build_specialist_app()
 
         invite_json = json.dumps({"type": "task/invite", "task_spec": {"task_description": "E2E test"}})
