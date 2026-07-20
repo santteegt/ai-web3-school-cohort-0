@@ -146,7 +146,11 @@
     "prompt-workflow-agent-boundary",
     "knowledge-base",
     "oracle",
-    "solidity"
+    "solidity",
+    "paymaster",
+    "block-explorer",
+    "proof-of-stake",
+    "zk"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
