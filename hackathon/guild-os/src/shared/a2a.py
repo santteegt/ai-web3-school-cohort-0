@@ -24,7 +24,7 @@ from a2a.types import a2a_pb2
 
 logger = logging.getLogger(__name__)
 
-TRACE_DIR = Path(__file__).parent.parent.parent.parent / "logs"
+TRACE_DIR = Path(__file__).parent.parent.parent / "logs"
 
 
 def _log_message(direction: str, msg_type: str, payload: dict) -> None:
