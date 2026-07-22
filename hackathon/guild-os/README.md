@@ -203,6 +203,64 @@ Each gate halts at a `[y/N]` prompt; the loop stops if any gate is rejected.
 > default (`8453`) for full integration on Base. Tx hashes submitted as evidence must
 > be on Base.
 
+### Bootstrap a Clean Agent Instance (`scripts/setup-agent-profile.sh`)
+
+The steps above assume you're running everything from inside this checkout.
+To spin up a genuinely separate Orchestrator or Specialist instance — its
+own working directory, its own `.venv`, wired into whichever AI coding
+harness (**Claude Code**, **Hermes Agent**, or **OpenClaw**) is already
+running there — use the bootstrap script instead. This is what makes the
+"two heterogeneous stacks communicating via A2A" architecture testable for
+real, including across separate machines.
+
+```bash
+./scripts/setup-agent-profile.sh
+# Interactively asks: agent profile (orchestrator/specialist) → target
+# harness (claude-code/hermes/openclaw) → base working directory.
+
+# Or non-interactively:
+./scripts/setup-agent-profile.sh --profile orchestrator --harness claude-code \
+  --workdir ~/guildos-instances/orchestrator-claude
+
+# Preview every command it would run without executing anything:
+./scripts/setup-agent-profile.sh --dry-run
+```
+
+What it does, per the chosen profile:
+- Copies the curated module subset from this repo into the working directory
+  (never the whole tree — see `scripts/agent-manifest.json`)
+- Copies `.env.example` → `.env` (never auto-fills secrets, and never
+  silently overwrites an existing `.env` — asks first, separately from the
+  module-overwrite confirmation)
+- Runs `uv sync` in the working directory
+- Registers the profile's MCP servers (`GuildToolsServer`, shared by both
+  profiles; `OrchestratorServer` for the Orchestrator) with the chosen
+  harness via that harness's own CLI (`claude mcp add` / `hermes mcp add` /
+  `openclaw mcp add`) — never by hand-editing the harness's config file
+- Installs onboarding skills via [`npx skills`](https://github.com/vercel-labs/skills)
+  (`cobo-agentic-wallet` for both profiles, plus `moloch-skills` for the
+  Orchestrator) — these skills carry their own instructions for installing
+  `caw` / `moloch-agent`, so the script itself never runs a `curl | bash`
+  installer
+- Re-running against an existing working directory asks whether to
+  overwrite/reinstall modules — useful in dev/test mode after this repo's
+  `src/` changes
+
+Add, remove, or retarget an MCP server, skill, or CLI dependency by editing
+`scripts/agent-manifest.json` — the script's own logic is harness-agnostic
+and doesn't hardcode the component list.
+
+**Support maturity:** the Claude Code path has been exercised end-to-end
+(real `.mcp.json` registration and real skill installs). The Hermes and
+OpenClaw adapters are implemented against those harnesses' own documented
+CLI syntax but haven't been smoke-tested against a live install of either —
+see the inline `UNVERIFIED` comments in `scripts/lib/harness-hermes.sh` /
+`harness-openclaw.sh` before relying on them unattended.
+
+**Known limitation:** `guild_context.json` is per-directory mock state — an
+Orchestrator and a Specialist bootstrapped into separate working
+directories will *not* share guild state automatically.
+
 ### Tests & Lint
 
 ```bash

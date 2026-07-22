@@ -13,6 +13,7 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `skills/stylebook/SKILL.md` | Before writing a docstring, error message, log line, or comment — the judgment-level stylebook `ruff` can't check |
 | `config/networks.json` | Before touching any contract address, RPC URL, or explorer link — these are network-specific, not env vars |
 | `guild_context.json` | Current guild state (mock store — one JSON file per session) |
+| `scripts/agent-manifest.json` | Before adding, removing, or retargeting an MCP server, skill, or CLI dependency for the Orchestrator/Specialist bootstrap script (`scripts/setup-agent-profile.sh`) |
 | `docs/*.md` | **Deprecated, historical only** — kept for provenance; do not treat as current. Exception: `docs/VALIDATION_PLAN.md` §11 (hackathon submission requirements) is still live — see [#17](https://github.com/santteegt/ai-web3-school-cohort-0/issues/17) |
 
 ## Component Map — Use These Names, Never Invent New Ones
@@ -33,6 +34,18 @@ You are building **GuildOS**, a Python multi-service application that coordinate
 | `NetworkConfig` | `src/shared/network_config.py` | Loads `config/networks.json` for the active `CHAIN_ID`; the only path to a contract address, RPC URL, or explorer link |
 | `GuildContext` | `src/shared/guild_context.py` | Read/write `guild_context.json`; the mock guild state store |
 | `HumanGates` | `src/cli/gates.py` | Gate 0, 0.5, 1, 2, 3, 4 — CLI `y/N` prompts; always halt execution and wait |
+
+## Multi-Harness Bootstrap Script
+
+`scripts/setup-agent-profile.sh` bootstraps an Orchestrator or Specialist
+instance into a clean working directory, wired into whichever harness
+(Claude Code, Hermes Agent, or OpenClaw) is already running there — MCP
+server registration, skill installs, and dependency setup, driven entirely
+by `scripts/agent-manifest.json`. Full usage: [`README.md`](README.md)
+"Bootstrap a Clean Agent Instance". It installs what's already built
+(MCP + A2A servers) — it does **not** build the harness work engine (Phase
+1b, issues #40/#10). When adding a new MCP server, skill, or profile file,
+edit the manifest — never hardcode a new component into the script itself.
 
 ## Spec-Driven Development — Issue Templates
 

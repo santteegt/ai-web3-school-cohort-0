@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "_comment": "GuildOS harness-bootstrap manifest. Consumed by setup-agent-profile.sh. Add/remove a component (module path, MCP server, skill, or known CLI dependency) by editing this file only — no script changes needed.",
+
+  "supported_harnesses": ["claude-code", "hermes", "openclaw"],
+
+  "harness_agent_ids": {
+    "_comment": "Maps our harness names to the --agent identifiers accepted by `npx skills` (vercel-labs/skills AgentType union).",
+    "claude-code": "claude-code",
+    "hermes": "hermes-agent",
+    "openclaw": "openclaw"
+  },
+
+  "shared": {
+    "files": [
+      "src/__init__.py",
+      "src/shared",
+      "src/guild",
+      "config/networks.json",
+      "templates",
+      ".env.example",
+      "pyproject.toml",
+      "uv.lock",
+      "Makefile",
+      "guild_context.json",
+      "README.md"
+    ],
+    "mcp_servers": [
+      {
+        "name": "guildtools",
+        "kind": "mcp_stdio_local",
+        "command": "uv",
+        "args": ["run", "python", "-m", "src.guild.server"],
+        "env": ["AGENT_WALLET_API_URL", "AGENT_WALLET_API_KEY", "AGENT_WALLET_WALLET_ID", "AGENT_WALLET_ADDRESS"],
+        "description": "GuildToolsServer (stdio) — guildtools_identity_register / guildtools_identity_read_profile. Each profile MUST get its own instance — never share a running process across profiles."
+      }
+    ],
+    "skills": [
+      {
+        "name": "cobo-agentic-wallet",
+        "kind": "skill_external",
+        "source": "CoboGlobal/cobo-agentic-wallet",
+        "skill_filter": "cobo-agentic-wallet",
+        "description": "Both profiles register their own CAW wallet/identity — this skill's onboarding flow installs and configures the caw CLI."
+      }
+    ],
+    "known_cli_dependencies": [
+      {
+        "name": "caw",
+        "kind": "cli_tool",
+        "check_command": "caw --version",
+        "covered_by_skill": "cobo-agentic-wallet"
+      }
+    ]
+  },
+
+  "profiles": {
+    "orchestrator": {
+      "files": [
+        "src/orchestrator",
+        "src/cli",
+        "assets/erc8004_specialist_profile.json"
+      ],
+      "mcp_servers": [
+        {
+          "name": "guildos",
+          "kind": "mcp_stdio_local",
+          "command": "uv",
+          "args": ["run", "python", "-m", "src.orchestrator.server"],
+          "env": [],
+          "description": "OrchestratorServer — guild_launch/talent_query/task_invite/task_delegate/deliverable_review/payment_propose/settle/reputation_propose/reputation_write."
+        }
+      ],
+      "a2a_services": [
+        {
+          "name": "orchestrator-a2a",
+          "kind": "a2a_http_service",
+          "command": "uv",
+          "args": ["run", "python", "-m", "src.orchestrator.a2a_server"],
+          "port_env": "ORCHESTRATOR_A2A_PORT",
+          "default_port": 10000,
+          "agent_card_path": "/.well-known/agent-card.json",
+          "description": "Receives proactive task/delivered + feedback/request from the Specialist. Not harness-registered as an MCP tool — a plain background HTTP process; see the 'Next steps' output for the run command."
+        }
+      ],
+      "skills": [
+        {
+          "name": "moloch-skills",
+          "kind": "skill_external",
+          "source": "santteegt/moloch-skills#feat/refactor",
+          "description": "Installs three skills covering moloch-agent CLI setup — needed for AgentFightClub launch/settle (src/shared/agentfightclub.py), Orchestrator-side only."
+        }
+      ],
+      "known_cli_dependencies": [
+        {
+          "name": "moloch-agent",
+          "kind": "cli_tool",
+          "check_command": "moloch-agent --help",
+          "covered_by_skill": "moloch-skills"
+        }
+      ]
+    },
+
+    "specialist": {
+      "files": [
+        "src/specialist"
+      ],
+      "mcp_servers": [],
+      "a2a_services": [
+        {
+          "name": "specialist-agent",
+          "kind": "a2a_http_service",
+          "command": "uv",
+          "args": ["run", "python", "-m", "src.specialist.agent"],
+          "port_env": "SPECIALIST_A2A_PORT",
+          "default_port": 10001,
+          "agent_card_path": "/.well-known/agent-card.json",
+          "description": "Receives task/invite + task/send from the Orchestrator; sends proactive task/delivered + feedback/request back."
+        }
+      ],
+      "skills": [],
+      "known_cli_dependencies": []
+    }
+  },
+
+  "_example_external_mcp_server_NOT_A_REAL_COMPONENT": {
+    "name": "playwright",
+    "kind": "mcp_stdio_npx",
+    "command": "npx",
+    "args": ["-y", "@playwright/mcp@latest"],
+    "env": [],
+    "description": "Illustrates a third-party npx-installed stdio MCP server — no guild-os files to copy for this kind. Slots directly into a profile's or shared's mcp_servers[] array."
+  },
+  "_example_local_skill_NOT_A_REAL_COMPONENT": {
+    "name": "stylebook",
+    "kind": "skill_local",
+    "source_path": "skills/stylebook",
+    "description": "Illustrates a guild-os-authored local skill (e.g. skills/stylebook/SKILL.md), installed via install_skill_via_npx() with --copy since there's no remote to clone."
+  }
+}
