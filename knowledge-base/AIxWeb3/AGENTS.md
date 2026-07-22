@@ -4,6 +4,8 @@ A pattern for building personal knowledge bases using LLMs.
 
 This is an idea file, it is designed to be copy pasted to your own LLM Agent (e.g. OpenAI Codex, Claude Code, OpenCode / Pi, or etc.). Its goal is to communicate the high level idea, but your agent will build out the specifics in collaboration with you.
 
+> **This vault's concrete schema-of-record is [`.claude/skills/wiki-builder/SKILL.md`](../../.claude/skills/wiki-builder/SKILL.md)** — frontmatter fields, tag taxonomy, slug rules, and the exact ingest/index/log procedure for the AIxWeb3 wiki live there, aligned to the [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) v0.1. This file remains the generic, project-agnostic idea doc the pattern is based on.
+
 ## The core idea
 
 Most people's experience with LLMs and documents looks like RAG: you upload a collection of files, the LLM retrieves relevant chunks at query time, and generates an answer. This works, but the LLM is rediscovering knowledge from scratch on every question. There's no accumulation. Ask a subtle question that requires synthesizing five documents, and the LLM has to find and piece together the relevant fragments every time. Nothing is built up. NotebookLM, ChatGPT file uploads, and most RAG systems work this way.

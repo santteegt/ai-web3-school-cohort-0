@@ -1,1 +1,1 @@
-knowledge-base/AIxWeb3/AGENTS.md
+AGENTS.md

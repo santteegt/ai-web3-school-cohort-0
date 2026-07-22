@@ -29,12 +29,12 @@ A prior rule said "If `reset_at` is in the past, reset `covered` to `[]` and set
 
 ### Step 2 — Select topic
 
-1. Read `knowledge-base/AIxWeb3/wiki/index.md`. Collect all entries under `## Concepts` sections — lines matching `- [[slug]] — description`. Extract the slug from each.
+1. Read `knowledge-base/AIxWeb3/wiki/index.md`. Collect all entries under `## Concepts` sections — lines matching **either** `- [[slug]] — description` (older Obsidian-wikilink bullets) **or** `- [title](slug.md) — description` (current OKF-style path-link bullets, e.g. `- [AI Agent](ai-agent.md) — ...`). Extract the slug from whichever form matched: for `[[slug]]` it's the bracketed text; for `[title](slug.md)` it's the parenthesized path with the `.md` suffix stripped. Both forms may appear in the same file — treat this as normal, not an error.
 2. Exclude from the pool:
    - Any slug already in `covered`
    - Slugs ending in `-overview`
    - `index`, `log`
-   - Anything starting with `sources/`
+   - Anything starting with `sources/` (a source-page link, whether written `[[sources/slug]]` or `[title](sources/slug.md)`)
 3. Pick one slug **at random** from the remaining pool.
 4. If the pool is empty (all covered), reset `covered` to `[]` in the cache (log: "Cache reset — all concepts covered, starting fresh"), then pick freely.
 
