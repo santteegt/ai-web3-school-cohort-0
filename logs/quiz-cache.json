@@ -158,7 +158,9 @@
     "agent-reflection",
     "censorship-resistance",
     "eoa",
-    "inference"
+    "inference",
+    "access-control",
+    "proposal-summary"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
