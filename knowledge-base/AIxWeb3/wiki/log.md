@@ -193,3 +193,13 @@ _Append-only chronological record of ingests, queries, and lint passes._
 - Hash: `sha256:1c8089e72c91794d0a719e01237e3da995b75fcdbf0286175bf79c5e08a7c4f8`
 - Pages created/updated: 2 (1 source page updated + 1 concept page updated)
 - Updated: sources/fine-tuning (added AI×Web3 use cases section), fine-tuning (added aixweb3-bridge tag, AI×Web3 use cases)
+
+---
+
+## [2026-07-23] ingest | AIxWeb3 - Problem Space & Direction Map (updated)
+
+- **Ingest**: AIxWeb3 - Problem Space & Direction Map re-processed from `raw/AIxWeb3 - Problem Space & Direction Map.md`
+- Source: `raw/AIxWeb3 - Problem Space & Direction Map.md`
+- Hash: `sha256:94eccd214af11124bdecd9c30831c17a873fcc63a1ef9012528c1b4fa288df5c`
+- Pages created/updated: 1 (source page updated)
+- Changes: Updated source_hash, migrated frontmatter to OKF field names (resource, timestamp), added description field, removed stale unified-evaluation-framework reference (content moved to its own raw file), added identity counterexample to Notable Points, updated Key Concepts to use path-links

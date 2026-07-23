@@ -160,7 +160,10 @@
     "eoa",
     "inference",
     "access-control",
-    "proposal-summary"
+    "proposal-summary",
+    "service-endpoint",
+    "web3-transaction",
+    "agent-handoff"
   ],
   "reset_at": "2026-06-01T23:05:03.000Z"
 }
